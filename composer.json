@@ -1,0 +1,22 @@
+{
+    "name": "thapp/jitimage",
+    "description": "Just in time image manipulation",
+    "require-dev": {
+        "mockery/mockery": "dev-master"
+    },
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Thomas Appel",
+            "email": "mail@thomas-appel.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {
+
+    },
+    "autoload": {
+        "psr-0":{"Thapp":"src/"},
+        "classmap":["tests/","src/controller"]
+    }
+}
