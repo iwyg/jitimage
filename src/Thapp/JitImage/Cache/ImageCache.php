@@ -11,6 +11,7 @@
 
 namespace Thapp\JitImage\Cache;
 
+use Thapp\JitImage\ImageInterface;
 use Illuminate\Filesystem\Filesystem;
 
 /**
@@ -40,14 +41,22 @@ class ImageCache implements CacheInterface
     protected $path;
 
     /**
+     * image
+     *
+     * @var mixed
+     */
+    protected $image;
+
+    /**
      * __construct
      *
      * @param mixed $path
      * @access public
      * @return mixed
      */
-    public function __construct(Filesystem $files, $path, $permission = 0777)
+    public function __construct(ImageInterface $image, Filesystem $files, $path, $permission = 0777)
     {
+        $this->image = $image;
         $this->files = $files;
         $this->setPath($path, $permission);
     }
@@ -71,14 +80,19 @@ class ImageCache implements CacheInterface
     /**
      * get
      *
-     * @param mixed $id
+     * @param string $id  cached id
+     * @param bool   $raw whather to return the contents or an image object
      * @access public
      * @return mixed
      */
-    public function get($id)
+    public function get($id, $raw = false)
     {
         if ($this->has($id)) {
-            return file_get_contents($this->pool[$id]);
+
+            $this->image->clean();
+            $this->image->load($this->pool[$id]);
+
+            return $raw ? $this->image->getImageBlob() : $this->image;
         }
     }
 

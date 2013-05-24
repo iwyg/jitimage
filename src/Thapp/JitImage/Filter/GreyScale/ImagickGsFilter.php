@@ -27,7 +27,7 @@ class ImagickGsFilter extends ImagickFilter
      */
     public function run()
     {
-        $this->driver->getImageResource()->modulateImage((int)$this->getOption('b', 100), (int)$this->getOption('s', 0), (int)$this->getOption('h', 100));
-        $this->driver->getImageresource()->contrastImage((bool)$this->getOption('c', 1));
+        $this->driver->getResource()->modulateImage((int)$this->getOption('b', 100), (int)$this->getOption('s', 0), (int)$this->getOption('h', 100));
+        $this->driver->getResource()->contrastImage((bool)$this->getOption('c', 1));
     }
 }

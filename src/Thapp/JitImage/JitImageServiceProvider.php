@@ -50,7 +50,11 @@ class JitImageServiceProvider extends ServiceProvider
         $this->app->bind('Thapp\JitImage\Cache\CacheInterface', function ()
             {
                 $path = storage_path() . '/jit';
-                $cache = new \Thapp\JitImage\Cache\ImageCache($this->app['files'], $path);
+                $cache = new \Thapp\JitImage\Cache\ImageCache(
+                    $this->app['Thapp\JitImage\ImageInterface'],
+                    $this->app['files'],
+                    $path
+                );
                 return $cache;
             }
         );
@@ -126,11 +130,14 @@ class JitImageServiceProvider extends ServiceProvider
     protected function registerRecepies(array $recepies, $route)
     {
         foreach ($recepies as $aliasRoute => $formular) {
-            //$this->app['router']->get($route . '/' . $aliasRoute, [
-            $this->app['router']->get('thumbs', [
-                'uses' => 'Thapp\JitImage\Controller\JitController@getImage',
-                'with' => ['foo', 'bar']
-                    ]);
+          //$this->app['router']->get($route . '/' . $aliasRoute, [
+            $this->app['router']
+                ->get($route . '/' . $aliasRoute . '/{source}', [
+                  'uses' => 'Thapp\JitImage\Controller\JitController@getResource'
+                  ])
+                ->where('source', '(([^0-9A-Fa-f]{3}|[^0-9A-Fa-f]{6}).*?(?=\/filter:.*)?)')
+                ->defaults('parameter', $formular);
+          //$this->app['jitimage::recepies'] = [$aliasRoute => $formular];
         }
     }
 

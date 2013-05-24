@@ -425,6 +425,11 @@ class JitImageResolver implements ResolverInterface
         if (preg_match('#^(https?://|spdy://|file://)#', $source, $matches)) {
             return $source;
         }
-        return realpath($this->base . '/' . $source);
+
+        if (is_file($file = $this->base . '/' . $source)) {
+            return realpath($file);
+        }
+
+        return false;
     }
 }
