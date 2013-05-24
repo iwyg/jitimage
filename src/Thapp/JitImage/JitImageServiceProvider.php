@@ -35,7 +35,6 @@ class JitImageServiceProvider extends ServiceProvider
     {
         $this->package('thapp/jitimage');
         $this->registerDriver();
-        $this->registerController();
 
     }
 
@@ -47,17 +46,139 @@ class JitImageServiceProvider extends ServiceProvider
      */
     protected function registerDriver()
     {
-        $driver = sprintf('\Thapp\JitImage\Driver\%sDriver', ucfirst($this->app['config']->get('jitimage:driver', 'gd')));
-        $this->app->register('Thapp\JitImage\Driver\DriverInterface', $driver);
+        $driver = sprintf('\Thapp\JitImage\Driver\%sDriver', $driverName = ucfirst($this->app['config']->get('jitimage::driver', 'gd')));
+        $this->app->bind('Thapp\JitImage\Cache\CacheInterface', function ()
+            {
+                $path = storage_path() . '/jit';
+                $cache = new \Thapp\JitImage\Cache\ImageCache($this->app['files'], $path);
+                return $cache;
+            }
+        );
+
+        $this->app->bind('Thapp\JitImage\ResolverInterface', function ()
+            {
+                $resolver = $this->app->make('Thapp\JitImage\JitImageResolver');
+                $resolver->setResolveBase(public_path());
+
+                if (false === $this->app['config']->get('jitimage::cache', true)) {
+                    $resolver->disableCache();
+                }
+
+                return $resolver;
+            }
+        );
+
+        $this->app->bind('Thapp\JitImage\Driver\BinLocatorInterface', 'Thapp\JitImage\Driver\ImBinLocator');
+        $this->app->bind('Thapp\JitImage\Driver\SourceLoaderInterface', 'Thapp\JitImage\Driver\ImageSourceLoader');
+
+        $this->app->extend('Thapp\JitImage\Driver\BinLocatorInterface', function ($locator)
+            {
+                extract($this->app['config']->get('jitimage::imagemagick', ['path' => '/usr/local/bin', 'bin' => 'convert']));
+
+                $locator->setConverterPath(sprintf('%s%s%s', rtrim($path, DIRECTORY_SEPARATOR), DIRECTORY_SEPARATOR, $bin));
+
+                return $locator;
+            }
+        );
+
+        $this->app->bind('Thapp\JitImage\ImageInterface', 'Thapp\JitImage\Image');
+        $this->app->bind('Thapp\JitImage\Driver\DriverInterface', $driver);
+
+        $this->app->extend('Thapp\JitImage\ImageInterface', function ($image)
+            {
+                $image->setQuality($this->app['config']->get('jitimage::quality', 80));
+                return $image;
+            }
+        );
+
+        $this->registerFilter($driverName, $this->getFilters());
     }
     /**
      * registerController
      *
      * @access protected
-     * @return mixed
+     * @return void;
      */
     protected function registerController()
     {
-        $this->app['router']->controller('image/{$mode}/{$height}/{$width}/{$gravity}', 'Thapp\JitImage\Controller\JitController');
+        $recepies = $this->app['config']->get('jitimage::recepies', []);
+        $route    = $this->app['config']->get('jitimage::route', 'image');
+
+        if (!empty($recepies)) {
+            return $this->registerRecepies($recepies, $route);
+        }
+
+
+        $this->app['router']
+            ->get($route . '/{params}/{source}/{filter?}', 'Thapp\JitImage\Controller\JitController@getImage')
+            ->where('params', '(\d+\/?){1,4}([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})?')
+            ->where('source', '(([^0-9A-Fa-f]{3}|[^0-9A-Fa-f]{6}).*?(?=\/filter:.*)?)')
+            ->where('filter', '(filter:.*)');
+    }
+
+    /**
+     * registerRecepies
+     *
+     * @param array $recepies
+     * @access protected
+     * @return void
+     */
+    protected function registerRecepies(array $recepies, $route)
+    {
+        foreach ($recepies as $aliasRoute => $formular) {
+            //$this->app['router']->get($route . '/' . $aliasRoute, [
+            $this->app['router']->get('thumbs', [
+                'uses' => 'Thapp\JitImage\Controller\JitController@getImage',
+                'with' => ['foo', 'bar']
+                    ]);
+        }
+    }
+
+    protected function getParamsRegexp()
+    {
+
+    }
+
+
+    /**
+     * registerFilter
+     *
+     * @param mixed $driverName
+     * @access protected
+     * @return mixed
+     */
+    protected function registerFilter($driverName, $filters)
+    {
+        $this->app->extend('Thapp\JitImage\Driver\DriverInterface', function ($driver) use ($driverName, $filters){
+            foreach ($filters as $name => $filter) {
+                $driver->registerFilter(
+                    $filter,
+                    sprintf('Thapp\JitImage\Filter\%s\%s%sFilter', $name, $driverName, ucfirst($filter))
+                );
+            }
+            return $driver;
+        });
+    }
+
+    /**
+     * getFilters
+     *
+     * @access protected
+     * @return array
+     */
+    protected function getFilters()
+    {
+        return $this->app['config']->get('jitimage::filter', []);
+    }
+
+    /**
+     * boot
+     *
+     * @access public
+     * @return void
+     */
+    public function boot()
+    {
+        $this->registerController();
     }
 }

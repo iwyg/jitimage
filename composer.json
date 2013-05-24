@@ -2,7 +2,8 @@
     "name": "thapp/jitimage",
     "description": "Just in time image manipulation",
     "require-dev": {
-        "mockery/mockery": "dev-master"
+        "mockery/mockery": "dev-master",
+        "mikey179/vfsStream":"dev-master"
     },
     "license": "MIT",
     "authors": [
@@ -13,7 +14,8 @@
     ],
     "minimum-stability": "dev",
     "require": {
-
+        "php":">=5.4.0",
+        "laravel/framework": "4.0.*"
     },
     "autoload": {
         "psr-0":{"Thapp":"src/"},

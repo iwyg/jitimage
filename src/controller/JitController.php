@@ -1,7 +1,7 @@
 <?php
 
 /**
- * This File is part of the vendor\thapp\jitimage\src\controller package
+ * This File is part of the Thapp\JitImage package
  *
  * (c) Thomas Appel <mail@thomas-appel.com>
  *
@@ -11,10 +11,18 @@
 
 namespace Thapp\JitImage\Controller;
 
-use Thapp\JitImage\ImageInterface;
+use Thapp\JitImage\ResolverInterface;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
- * @class JitController
+ * Class: JitController
+ *
+ * @uses \BaseController
+ *
+ * @package
+ * @version
+ * @author Thomas Appel <mail@thomas-appel.com>
+ * @license MIT
  */
 class JitController extends \BaseController
 {
@@ -25,56 +33,40 @@ class JitController extends \BaseController
      */
     protected $image;
 
-    protected $processCache;
-
     /**
      * __construct
      *
      * @param Image $image
      * @access public
      */
-    public function __construct(ImageInterface $image, CacheInterface $cache)
+    public function __construct(ResolverInterface $imageResolver)
     {
-        $this->image        = $image;
-        $this->processCache = $cache;
-    }
-
-    /**
-     * getIndex
-     *
-     * @access public
-     * @return mixed
-     */
-    public function getIndex()
-    {
-
+        $this->imageResolver = $imageResolver;
     }
 
     /**
      * getImage
      *
-     * @param mixed $mode
-     * @param mixed $height
-     * @param mixed $width
-     * @param mixed $gravity
-     * @param mixed $source
+     * @param string $mode
+     * @param string $height
+     * @param string $width
+     * @param string $gravity
+     * @param string $options
      * @access public
-     * @return mixed
-     */
-    public function getImage($mode, $height, $width, $gravity, $source)
-    {
-
-    }
-
-    /**
-     * process
      *
-     * @access protected
-     * @return mixed
+     * @return void
      */
-    protected function process()
+    public function getImage($parameter, $source, $filter = null)
     {
+        $this->imageResolver->setParameter($parameter);
+        $this->imageResolver->setSource($source);
+        $this->imageResolver->setFilter($filter);
 
+        if (!$image = $this->imageResolver->resolve()) {
+            throw new NotFoundHttpException;
+        }
+
+        return $this->render($image);
     }
 
     /**
@@ -83,8 +75,10 @@ class JitController extends \BaseController
      * @access protected
      * @return mixed
      */
-    protected function render()
+    protected function render($src)
     {
-
+        header('Content-type: ' .  $this->imageResolver->getImage()->getFileFormat());
+        echo $src;
+        exit(0);
     }
 }
