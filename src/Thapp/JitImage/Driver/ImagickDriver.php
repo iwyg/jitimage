@@ -1,7 +1,7 @@
 <?php
 
 /**
- * This File is part of the Thapp\JitImage\Driver package
+ * This File is part of the Thapp\JitImage package
  *
  * (c) Thomas Appel <mail@thomas-appel.com>
  *
@@ -19,7 +19,7 @@ use \ImagickPixel;
  *
  * @implements DriverInterface
  *
- * @package
+ * @package Thapp\JitImage
  * @version
  * @author Thomas Appel <mail@thomas-appel.com>
  * @license MIT
@@ -49,9 +49,10 @@ class ImagickDriver extends ImDriver
      * @param BinLocatorInterface $locator
      * @access public
      */
-    public function __construct()
+    public function __construct(SourceLoaderInterface $loader)
     {
         $this->tmp  = sys_get_temp_dir();
+        $this->loader = $loader;
     }
 
     /**
@@ -89,7 +90,7 @@ class ImagickDriver extends ImDriver
      */
     public function swapResource($resource)
     {
-        if (false === ($resource instanceof \Imagick)) {
+        if (false === ($resource instanceof Imagick)) {
             throw new \InvalidArgumentException('Wrong resource type');
         }
 
@@ -131,7 +132,7 @@ class ImagickDriver extends ImDriver
      */
     public function load($source)
     {
-        $this->source = $source;
+        $this->source = $this->loader->load($source);
         $this->resource = new Imagick($source);
     }
 
@@ -217,6 +218,18 @@ class ImagickDriver extends ImDriver
     }
 
     /**
+     * {@inheritDoc}
+     */
+    public function clean()
+    {
+        parent::clean();
+
+        if ($this->resource instanceof Imagick) {
+            $this->resource->destroy();
+        }
+    }
+
+    /**
      * filterResizeToFit
      *
      * @access protected
@@ -226,62 +239,6 @@ class ImagickDriver extends ImDriver
     {
         $this->resize($this->targetSize['width'], $this->targetSize['height'], static::FL_OSRK_LGR);
     }
-
-    /**
-     * createCanvas
-     *
-     * @param mixed $width
-     * @param mixed $height
-     * @param string $background
-     * @access protected
-     * @return \Imagick
-     */
-    protected function createCanvas($width, $height, $background = '#000')
-    {
-        $canvas = new \Imagick();
-
-        $canvas->newPseudoImage($width, $height, "canvas:$background");
-        $canvas->setImageFormat($this->resource->getImageFormat());
-
-        if (array_key_exists('icc', $this->resource->getImageProfiles())) {
-            $canvas->setImageProfile('icc', $this->resource->getImageProfile('icc'));
-        }
-
-        return $canvas;
-    }
-
-    /**
-     * isWithoutBounds
-     *
-     * @param mixed $width
-     * @param mixed $height
-     * @access protected
-     * @return boolean
-     */
-    protected function isWithoutBounds($width, $height)
-    {
-        return ($this->resource->getImageHeight() < $height) or ($this->resource->getImageWidth() < $width);
-    }
-
-    /**
-     * composite
-     *
-     * @param \Imagick $image
-     * @access protected
-     * @return void
-     */
-    protected function composite(Imagick $image, $x = 0, $y = 0, $copy = Imagick::COMPOSITE_ATOP, $flip = true)
-    {
-        $image->compositeImage($this->resource, $copy, $x, $y);
-
-        if (false !== $flip) {
-            $this->resource->destroy();
-            $this->resource = $image;
-        }
-
-        return $image;
-    }
-
 
     /**
      * gravity

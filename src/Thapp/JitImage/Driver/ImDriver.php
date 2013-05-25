@@ -1,7 +1,7 @@
 <?php
 
 /**
- * This File is part of the vendor\thapp\jitimage\src\Thapp\JitImage\Driver package
+ * This File is part of the Thapp\JitImage package
  *
  * (c) Thomas Appel <mail@thomas-appel.com>
  *
@@ -19,7 +19,7 @@ use Thapp\JitImage\Exception\ImageProcessException;
  *
  * @uses AbstractDriver
  *
- * @package
+ * @package Thapp\JitImage
  * @version
  * @author Thomas Appel <mail@thomas-appel.com>
  * @license MIT
@@ -43,6 +43,13 @@ class ImDriver extends AbstractDriver
      * @var string
      */
     protected $source;
+
+    /**
+     * loader
+     *
+     * @var mixed
+     */
+    protected $loader;
 
     /**
      * commands
@@ -87,11 +94,13 @@ class ImDriver extends AbstractDriver
      * @access public
      * @return mixed
      */
-    public function __construct(BinLocatorInterface $locator)
+    public function __construct(BinLocatorInterface $locator, SourceLoaderInterface $loader)
     {
         $this->tmp       = sys_get_temp_dir();
+        $this->loader    = $loader;
         $this->converter = $locator->getConverterPath();
     }
+
 
 
     /**
@@ -99,7 +108,7 @@ class ImDriver extends AbstractDriver
      */
     public function load($source)
     {
-        $this->source = $source;
+        $this->source = $this->loader->load($source);
     }
 
     /**
@@ -121,16 +130,14 @@ class ImDriver extends AbstractDriver
     }
 
     /**
-     * clean
-     *
-     * @access public
-     * @return void
+     * {@inheritDoc}
      */
     public function clean()
     {
         if (file_exists($this->tmpFile)) {
             @unlink($this->tmpFile);
         }
+        $this->loader->clean();
     }
 
     /**

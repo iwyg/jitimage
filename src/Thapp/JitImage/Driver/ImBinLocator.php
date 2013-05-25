@@ -1,7 +1,7 @@
 <?php
 
 /**
- * This File is part of the Thapp\JitImage\Driver package
+ * This File is part of the Thapp\JitImage package
  *
  * (c) Thomas Appel <mail@thomas-appel.com>
  *
@@ -16,7 +16,7 @@ namespace Thapp\JitImage\Driver;
  *
  * @implements BinLocatorInterface
  *
- * @package
+ * @package Thapp\JitImage
  * @version
  * @author Thomas Appel <mail@thomas-appel.com>
  * @license MIT

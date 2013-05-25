@@ -36,13 +36,7 @@ class JitImageGdDriverTest extends JitImageDriverTest
     protected function setUp()
     {
         parent::setUp();
-
-        $loader = m::mock('Thapp\JitImage\Driver\SourceLoaderInterface');
-        $loader->shouldReceive('load')->andReturnUsing(function ($url) {
-            return $url;
-        });
-
-        $this->driver = new GdDriver($loader);
+        $this->driver = new GdDriver($this->loaderMock);
     }
 
     /**

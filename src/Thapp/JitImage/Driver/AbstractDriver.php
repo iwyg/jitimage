@@ -1,7 +1,7 @@
 <?php
 
 /**
- * This File is part of the vendor\thapp\jitimage\src\Thapp\JitImage\Driver package
+ * This File is part of the Thapp\JitImage package
  *
  * (c) Thomas Appel <mail@thomas-appel.com>
  *
@@ -17,7 +17,7 @@ namespace Thapp\JitImage\Driver;
  * @implements DriverInterface
  * @abstract
  *
- * @package
+ * @package Thapp\JitImage
  * @version
  * @author Thomas Appel <mail@thomas-appel.com>
  * @license MIT

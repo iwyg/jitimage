@@ -19,7 +19,7 @@ use Thapp\JitImage\Exception\ImageResourceLoaderException;
  *
  * @implements SourceLoaderInterface
  *
- * @package
+ * @package Thapp\JitImage
  * @version
  * @author Thomas Appel <mail@thomas-appel.com>
  * @license MIT

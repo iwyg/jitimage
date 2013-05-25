@@ -12,9 +12,14 @@
 namespace Thapp\JitImage\Driver;
 
 /**
- * @class SourceLoaderInterface
+ * Interface SourceLoaderInterface
+ *
+ *
+ * @package Thapp\JitImage
+ * @version
+ * @author Thomas Appel <mail@thomas-appel.com>
+ * @license MIT
  */
-
 interface SourceLoaderInterface
 {
     public function load($url);

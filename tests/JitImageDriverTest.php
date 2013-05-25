@@ -11,6 +11,7 @@
 
 namespace Thapp\Tests\JitImage;
 
+use Mockery as m;
 use org\bovigo\vfs\vfsStream;
 use Thapp\JitImage\Driver\DriverInterface;
 
@@ -41,6 +42,8 @@ abstract class JitImageDriverTest extends TestCase
      */
     protected $testFile;
 
+    protected $loaderMock;
+
     /**
      * sourceFile
      *
@@ -63,6 +66,12 @@ abstract class JitImageDriverTest extends TestCase
     {
         $this->fileRoot = vfsStream::setup('images');
         $this->fileUrl  = vfsStream::url('images');
+
+        $this->loaderMock = m::mock('Thapp\JitImage\Driver\SourceLoaderInterface');
+        $this->loaderMock->shouldReceive('load')->andReturnUsing(function ($url) {
+            return $url;
+        });
+        $this->loaderMock->shouldReceive('clean')->andReturn(null);
     }
     /**
      * tearDown
