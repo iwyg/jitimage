@@ -2,10 +2,10 @@ language: php
 php:
   - 5.4
   - 5.5
+service:
+  - imagick
+  
 before_script:
-  - printf "\n" | pecl install imagick
-  - echo "extension=\"imagick.so\"" >> `php --ini | grep "Loaded Configuration" | sed -e "s|.*:\s*||"`
-  - phpenv rehash
   - composer --dev install 
 
 script: phpunit --configuration phpunit.xml.dist
