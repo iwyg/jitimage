@@ -11,6 +11,7 @@
 
 namespace Thapp\JitImage\Controller;
 
+use Illuminate\Http\Response;
 use Illuminate\Routing\Router;
 use Illuminate\Container\Container;
 use Thapp\JitImage\ResolverInterface;
@@ -41,6 +42,13 @@ class JitController extends \BaseController
      * @var mixed
      */
     protected $defaults;
+
+    /**
+     * defaults
+     *
+     * @var mixed
+     */
+    protected $response;
 
     /**
      * __construct
@@ -75,7 +83,7 @@ class JitController extends \BaseController
             throw new NotFoundHttpException;
         }
 
-        return $this->render($this->imageResolver->getImage());
+        $this->render($this->imageResolver->getImage());
     }
 
     /**
@@ -93,7 +101,6 @@ class JitController extends \BaseController
             $params = list($parameters, $filter) = array_pad(explode(',', $parameter), 2, null);
             return $this->getImage($parameters, $source, $filter);
         }
-        die;
     }
 
     /**
@@ -104,31 +111,20 @@ class JitController extends \BaseController
      */
     protected function render($image)
     {
-        header('Content-type: ' .  $image->getMimeType());
-        echo $image->getContents();
-        $image->close();
-        exit(0);
+        $response = new Response($image->getContents(), 200);
+        $response->header('Content-type', $image->getMimeType());
+        $response->send();
     }
 
     /**
      * callAction
      *
      * @access public
-     * @return mixed
+     * @return void
      */
     public function callAction(Container $container, Router $router, $method, $parameters)
     {
-
         $this->defaults = $router->getCurrentRoute()->getDefaults();
-        //extract($defaults);
-        //var_dump($alias);
-        //var_dump($defaults); die;
-
-
-        //if (true !== in_array($alias, array_keys($defaults['alias']))) {
-            //return $this->handleMissing();
-        //}
-
         parent::callAction($container, $router, $method, $parameters);
     }
 }

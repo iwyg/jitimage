@@ -171,7 +171,8 @@ class GdDriver extends AbstractDriver
 
         $fn = sprintf('imagecreatefrom%s', $type = substr($type['mime'], strpos($type['mime'], '/') + 1));
         $this->outputType = $type;
-        return $fn($this->source);
+
+        return call_user_func($fn, $this->source);
     }
 
     /**

@@ -236,19 +236,7 @@ abstract class AbstractDriver implements DriverInterface
      */
     public function getOutputMimeType()
     {
-        return $this->getMimeFromFormatString($this->getOutputType());
-    }
-
-    /**
-     * getMimeFromFormatString
-     *
-     * @param mixed $format
-     * @access private
-     * @return mixed
-     */
-    private function getMimeFromFormatString($format)
-    {
-        return sprintf('image/%s', strtolower($format));
+        return image_type_to_mime_type($this->getImageTypeConstant($this->getOutputType()));
     }
 
     /**
@@ -404,5 +392,34 @@ abstract class AbstractDriver implements DriverInterface
             'size'     => filesize($this->source),
             'type'     => $info['mime']
         ];
+    }
+
+    /**
+     * getImageTypeConstant
+     *
+     * @param mixed $type
+     * @access private
+     * @return int
+     */
+    private function getImageTypeConstant($type) {
+        switch ($type) {
+        case 'jpg':
+        case 'jpeg':
+            return IMAGETYPE_JPEG;
+        case 'gif':
+            return IMAGETYPE_GIF;
+        case 'png':
+            return IMAGETYPE_PNG;
+        case 'webp':
+            return IMAGETYPE_WBMP;
+        case 'webp':
+            return IMAGETYPE_WBMP;
+        case 'ico':
+            return IMAGETYPE_ICO;
+        case 'bmp':
+            return IMAGETYPE_BMP;
+        default:
+            return IMAGETYPE_JPC;
+        }
     }
 }

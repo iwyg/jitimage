@@ -46,7 +46,9 @@ class JitImageServiceProvider extends ServiceProvider
      */
     protected function registerDriver()
     {
-        $driver = sprintf('\Thapp\JitImage\Driver\%sDriver', $driverName = ucfirst($this->app['config']->get('jitimage::driver', 'gd')));
+        $config = $this->app['config'];
+
+        $driver = sprintf('\Thapp\JitImage\Driver\%sDriver', $driverName = ucfirst($config->get('jitimage::driver', 'gd')));
         $this->app->bind('Thapp\JitImage\Cache\CacheInterface', function ()
             {
                 $path = storage_path() . '/jit';
@@ -59,25 +61,25 @@ class JitImageServiceProvider extends ServiceProvider
             }
         );
 
-        $this->app->bind('Thapp\JitImage\ResolverInterface', function ()
-            {
-                $resolver = $this->app->make('Thapp\JitImage\JitImageResolver');
-                $resolver->setResolveBase(public_path());
+        $this->app->bind('Thapp\JitImage\ResolverInterface', 'Thapp\JitImage\JitImageResolver');
+        $this->app->bind(
+            'Thapp\JitImage\ResolverConfigInterface', function () use ($config) {
 
-                if (false === $this->app['config']->get('jitimage::cache', true)) {
-                    $resolver->disableCache();
-                }
-
-                return $resolver;
-            }
-        );
+                $conf = [
+                    'recepies'      => $config->get('jitimage::recepies', []),
+                    'trusted-sites' => $config->get('jitimage::trusted-sites', []),
+                    'base'          => $config->get('jitimage::base-sites', public_path()),
+                    'cache'         => in_array($config->getEnvironment(), $config->get('jitimage::cache', []))
+                ];
+                return new \Thapp\JitImage\JitResolveConfiguration($conf);
+        });
 
         $this->app->bind('Thapp\JitImage\Driver\BinLocatorInterface', 'Thapp\JitImage\Driver\ImBinLocator');
         $this->app->bind('Thapp\JitImage\Driver\SourceLoaderInterface', 'Thapp\JitImage\Driver\ImageSourceLoader');
 
-        $this->app->extend('Thapp\JitImage\Driver\BinLocatorInterface', function ($locator)
+        $this->app->extend('Thapp\JitImage\Driver\BinLocatorInterface', function ($locator) use ($config)
             {
-                extract($this->app['config']->get('jitimage::imagemagick', ['path' => '/usr/local/bin', 'bin' => 'convert']));
+                extract($config->get('jitimage::imagemagick', ['path' => '/usr/local/bin', 'bin' => 'convert']));
 
                 $locator->setConverterPath(sprintf('%s%s%s', rtrim($path, DIRECTORY_SEPARATOR), DIRECTORY_SEPARATOR, $bin));
 
@@ -130,14 +132,12 @@ class JitImageServiceProvider extends ServiceProvider
     protected function registerRecepies(array $recepies, $route)
     {
         foreach ($recepies as $aliasRoute => $formular) {
-          //$this->app['router']->get($route . '/' . $aliasRoute, [
             $this->app['router']
                 ->get($route . '/' . $aliasRoute . '/{source}', [
                   'uses' => 'Thapp\JitImage\Controller\JitController@getResource'
                   ])
                 ->where('source', '(([^0-9A-Fa-f]{3}|[^0-9A-Fa-f]{6}).*?(?=\/filter:.*)?)')
                 ->defaults('parameter', $formular);
-          //$this->app['jitimage::recepies'] = [$aliasRoute => $formular];
         }
     }
 

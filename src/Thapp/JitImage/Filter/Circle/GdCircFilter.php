@@ -133,8 +133,10 @@ class GdCircFilter extends GdFilter
             $w = $h = min($w, $h);
         }
 
-        $xa         = ($w - 2) / 2;
-        $xb         = ($h - 2) / 2;
+        $offset = 2 * $this->getOption('o', 1);
+
+        $xa         = ($w - $offset) / 2;
+        $xb         = ($h - $offset) / 2;
         $thickness = 2.5 / min($xa, $xb);
 
         $color  = imagecolorallocatealpha($canvas, $r, $g, $b, $opc);

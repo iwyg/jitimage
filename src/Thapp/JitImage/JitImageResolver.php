@@ -54,13 +54,6 @@ class JitImageResolver implements ResolverInterface
     protected $processCache;
 
     /**
-     * cache
-     *
-     * @var mixed
-     */
-    protected $cache = true;
-
-    /**
      * __construct
      *
      * @param ImageInterface $image
@@ -68,9 +61,10 @@ class JitImageResolver implements ResolverInterface
      * @access public
      * @return mixed
      */
-    public function __construct(ImageInterface $image, CacheInterface $cache)
+    public function __construct(ResolverConfigInterface $config, ImageInterface $image, CacheInterface $cache)
     {
         $this->image        = $image;
+        $this->config       = $config;
         $this->processCache = $cache;
     }
 
@@ -84,7 +78,7 @@ class JitImageResolver implements ResolverInterface
     public function resolve()
     {
 
-        if ($this->cache and $this->processCache->has($id = $this->getImageRequestId($this->getInputQuery()))) {
+        if ($this->config->cache and $this->processCache->has($id = $this->getImageRequestId($this->getInputQuery()))) {
             $this->image = $this->processCache->get($id);
             return true;
         }
@@ -101,7 +95,7 @@ class JitImageResolver implements ResolverInterface
         $this->image->load($img);
         $this->image->process($this);
 
-        $this->cache and $this->processCache->put($id, $this->image->getContents());
+        $this->config->cache and $this->processCache->put($id, $this->image->getContents());
         return $this->image;
     }
 
@@ -114,7 +108,7 @@ class JitImageResolver implements ResolverInterface
      */
     public function disableCache()
     {
-        $this->cache = false;
+        $this->config->set('cache', false);
     }
 
     /**
@@ -137,7 +131,7 @@ class JitImageResolver implements ResolverInterface
      */
     public function setResolveBase($base = '/')
     {
-        return $this->base = $base;
+        return $this->config->set('base', $base);
     }
 
     /**
@@ -426,7 +420,7 @@ class JitImageResolver implements ResolverInterface
             return $source;
         }
 
-        if (is_file($file = $this->base . '/' . $source)) {
+        if (is_file($file = $this->config->base . '/' . $source)) {
             return realpath($file);
         }
 
