@@ -35,6 +35,11 @@ class JitImageImagickDriverTest extends JitImageDriverTest
      */
     protected function setUp()
     {
+
+        if (!class_exists('\Imagick')) {
+            $this->markTestSkipped();
+        }
+
         parent::setUp();
         $this->driver = new ImagickDriver($this->loaderMock);
     }

@@ -68,17 +68,17 @@ return [
      * allow mode 2 crop rescale, with a 200x200 px crop and a grey scale
      * filter:
      *
-     *  '2/200/200/5/{:source}/{:filter:gs}'
+     *  '2/200/200/5/,filter:gs'
      *
      * allow mode 1 resize, with a resize of 800px width
      * and any filter filter:
      *
-     *  '1/800/0/{:source}/{:filter:any}',
+     *  '1/400/0/,filter:circ',
      *
      * allow mode 5 best fit, with a resize of max 800px width
      * and 600px height, no filters:
      *
-     *  '5/800/600/{:source}'
+     *  '5/800/600'
      *
      * ------------------------------------------------
      */

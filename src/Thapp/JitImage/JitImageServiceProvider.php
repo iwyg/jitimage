@@ -35,7 +35,7 @@ class JitImageServiceProvider extends ServiceProvider
     {
         $this->package('thapp/jitimage');
         $this->registerDriver();
-
+        $this->registerResolver();
     }
 
     /**
@@ -61,18 +61,6 @@ class JitImageServiceProvider extends ServiceProvider
             }
         );
 
-        $this->app->bind('Thapp\JitImage\ResolverInterface', 'Thapp\JitImage\JitImageResolver');
-        $this->app->bind(
-            'Thapp\JitImage\ResolverConfigInterface', function () use ($config) {
-
-                $conf = [
-                    'recepies'      => $config->get('jitimage::recepies', []),
-                    'trusted-sites' => $config->get('jitimage::trusted-sites', []),
-                    'base'          => $config->get('jitimage::base-sites', public_path()),
-                    'cache'         => in_array($config->getEnvironment(), $config->get('jitimage::cache', []))
-                ];
-                return new \Thapp\JitImage\JitResolveConfiguration($conf);
-        });
 
         $this->app->bind('Thapp\JitImage\Driver\BinLocatorInterface', 'Thapp\JitImage\Driver\ImBinLocator');
         $this->app->bind('Thapp\JitImage\Driver\SourceLoaderInterface', 'Thapp\JitImage\Driver\ImageSourceLoader');
@@ -99,6 +87,30 @@ class JitImageServiceProvider extends ServiceProvider
 
         $this->registerFilter($driverName, $this->getFilters());
     }
+
+    /**
+     * registerResolver
+     *
+     * @access protected
+     * @return mixed
+     */
+    protected function registerResolver()
+    {
+        $config = $this->app['config'];
+
+        $this->app->bind('Thapp\JitImage\ResolverInterface', 'Thapp\JitImage\JitImageResolver');
+        $this->app->bind(
+            'Thapp\JitImage\ResolverConfigInterface', function () use ($config) {
+
+                $conf = [
+                    'trusted-sites' => $config->get('jitimage::trusted-sites', []),
+                    'base'          => $config->get('jitimage::base-sites', public_path()),
+                    'cache'         => in_array($config->getEnvironment(), $config->get('jitimage::cache', []))
+                ];
+                return new \Thapp\JitImage\JitResolveConfiguration($conf);
+        });
+    }
+
     /**
      * registerController
      *
@@ -107,8 +119,10 @@ class JitImageServiceProvider extends ServiceProvider
      */
     protected function registerController()
     {
-        $recepies = $this->app['config']->get('jitimage::recepies', []);
-        $route    = $this->app['config']->get('jitimage::route', 'image');
+        $config = $this->app['config'];
+
+        $recepies = $config->get('jitimage::recepies', []);
+        $route    = $config->get('jitimage::route', 'image');
 
         if (!empty($recepies)) {
             return $this->registerRecepies($recepies, $route);
