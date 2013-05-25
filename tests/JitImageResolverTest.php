@@ -15,6 +15,7 @@ use \Closure;
 use Mockery as m;
 use org\bovigo\vfs\vfsStream;
 use Thapp\JitImage\JitImageResolver;
+use Thapp\JitImage\JitResolveConfiguration;
 
 /**
  * Class: JitImageResolverTest
@@ -33,7 +34,7 @@ class JitImageResolverTest extends TestCase
      */
     public function testResolverGetImage()
     {
-        $resolver = new JitImageResolver($image = $this->getImageMock(), $this->getCacheMock());
+        $resolver = new JitImageResolver(new JitResolveConfiguration, $image = $this->getImageMock(), $this->getCacheMock());
         $this->assertSame($image, $resolver->getImage());
     }
 
@@ -46,7 +47,7 @@ class JitImageResolverTest extends TestCase
         $args = func_get_args();
         array_shift($args);
 
-        $resolver = new JitImageResolver($image = $this->getImageMock(), $this->getCacheMock());
+        $resolver = new JitImageResolver(new JitResolveConfiguration, $image = $this->getImageMock(), $this->getCacheMock());
         $this->setParamsWithoutResolving($resolver, $params, $source, $filter);
 
         $this->assertSame($expected, $this->getPropertyValue('parameter', $resolver));
@@ -61,7 +62,7 @@ class JitImageResolverTest extends TestCase
         $args = func_get_args();
         array_shift($args);
 
-        $resolver = new JitImageResolver($image = $this->getImageMock(), $this->getCacheMock());
+        $resolver = new JitImageResolver(new JitResolveConfiguration, $image = $this->getImageMock(), $this->getCacheMock());
         $this->setParamsWithoutResolving($resolver, $params, $source, $filter);
 
         $this->assertSame($expected['width'], $resolver->getParameter('width'));
@@ -77,7 +78,7 @@ class JitImageResolverTest extends TestCase
      */
     public function testResolveImage()
     {
-        $resolver = new JitImageResolver($image = $this->getImageMock(function (&$mock) {
+        $resolver = new JitImageResolver(new JitResolveConfiguration, $image = $this->getImageMock(function (&$mock) {
             $mock->shouldReceive('load');
             $mock->shouldReceive('process');
             $mock->shouldReceive('getContents')->andReturn('foo');
@@ -105,7 +106,7 @@ class JitImageResolverTest extends TestCase
      */
     public function testResolveCachedImage()
     {
-        $resolver = new JitImageResolver($image = $this->getImageMock(), $this->getCacheMock(function (&$mock) use ($image) {
+        $resolver = new JitImageResolver(new JitResolveConfiguration(['cache' => true]), $image = $this->getImageMock(), $this->getCacheMock(function (&$mock) use ($image) {
             $mock->shouldReceive('has')->andReturn(true);
             $mock->shouldReceive('get')->andReturn($image);
         }));
