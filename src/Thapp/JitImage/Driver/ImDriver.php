@@ -110,10 +110,9 @@ class ImDriver extends AbstractDriver
     public function process()
     {
         $cmd = $this->compile();
-        //var_dump($cmd);
-        //die;
 
-        $this->runCmd($cmd, '\Thapp\JitImage\Exception\ImageProcessException', function ($stderr)
+        $this->runCmd($cmd, '\Thapp\JitImage\Exception\ImageProcessException',
+            function ($stderr)
             {
                 $this->clean();
             }
@@ -372,7 +371,7 @@ class ImDriver extends AbstractDriver
         array_unshift($commands, $vs);
         array_unshift($commands, $vs);
 
-        array_push($values, sprintf('%s:%s', substr($this->getOutputType(), 6), $this->tmpFile));
+        array_push($values, sprintf('%s:%s', $this->getOutputType(), $this->tmpFile));
         array_push($commands, $vs);
 
         $cmd = implode(' ', $commands);

@@ -211,6 +211,17 @@ class Image implements ImageInterface
     }
 
     /**
+     * getMimeType
+     *
+     * @access public
+     * @return mixed
+     */
+    public function getMimeType()
+    {
+        return $this->driver->getOutputMimeType();
+    }
+
+    /**
      * setFileFormat
      *
      * @access public

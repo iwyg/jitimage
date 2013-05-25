@@ -117,16 +117,42 @@ class GdDriver extends AbstractDriver
      */
     public function getImageBlob()
     {
-        $fn = sprintf('image%s', $this->outputType);
+        $fn = sprintf('image%s', $type = $this->getOutputType());
+
+        if ('png' === $type) {
+            imagesavealpha($this->resource, true);
+        }
 
         ob_start();
-
-        $fn($this->resource, null, $this->quality);
+        call_user_func($fn, $this->resource, null, $this->getQuality());
         $contents = ob_get_contents();
-
         ob_end_clean();
 
         return $contents;
+    }
+
+    protected function getQuality()
+    {
+        if ('png' === $this->getOutputType()) {
+            return floor((9 / 100) * min(100, $this->quality));
+        }
+        return $this->quality;
+    }
+
+    /**
+     * filter
+     *
+     * @param mixed $name
+     * @param mixed $options
+     * @access public
+     * @return mixed
+     */
+    public function filter($name, $options)
+    {
+        if (static::EXT_FILTER === parent::filter($name, $options)) {
+            $filter = new $this->filters[$name]($this, $options);
+            $filter->run();
+        }
     }
 
     /**

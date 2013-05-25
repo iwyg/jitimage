@@ -214,10 +214,41 @@ abstract class AbstractDriver implements DriverInterface
      */
     public function getOutputType()
     {
-        if (!isset($this->outputType)) {
-            return $this->getInfo('type');
+        $type = $this->outputType;
+
+        if (is_null($type)) {
+            $type = $this->getInfo('type');
         }
-        return $this->outputType;
+
+        return preg_replace('~image/~', null, $this->formatType($type));
+    }
+
+    protected function formatType($type)
+    {
+        return strtolower(preg_replace('~jpg~', 'jpeg', $type));
+    }
+
+    /**
+     * getOutputMimeType
+     *
+     * @access public
+     * @return mixed
+     */
+    public function getOutputMimeType()
+    {
+        return $this->getMimeFromFormatString($this->getOutputType());
+    }
+
+    /**
+     * getMimeFromFormatString
+     *
+     * @param mixed $format
+     * @access private
+     * @return mixed
+     */
+    private function getMimeFromFormatString($format)
+    {
+        return sprintf('image/%s', strtolower($format));
     }
 
     /**

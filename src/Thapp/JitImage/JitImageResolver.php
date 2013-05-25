@@ -83,8 +83,10 @@ class JitImageResolver implements ResolverInterface
      */
     public function resolve()
     {
+
         if ($this->cache and $this->processCache->has($id = $this->getImageRequestId($this->getInputQuery()))) {
-            return $this->processCache->get($id);
+            $this->image = $this->processCache->get($id);
+            return true;
         }
 
         $this->parseParameter();
@@ -99,10 +101,8 @@ class JitImageResolver implements ResolverInterface
         $this->image->load($img);
         $this->image->process($this);
 
-        $contents = $this->image->getContents();
-        $this->cache and $this->processCache->put($id, $contents);
-        $this->image->close();
-        return $contents;
+        $this->cache and $this->processCache->put($id, $this->image->getContents());
+        return $this->image;
     }
 
     /**

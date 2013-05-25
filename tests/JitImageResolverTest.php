@@ -77,7 +77,7 @@ class JitImageResolverTest extends TestCase
      */
     public function testResolveImage()
     {
-        $resolver = new JitImageResolver($this->getImageMock(function (&$mock) {
+        $resolver = new JitImageResolver($image = $this->getImageMock(function (&$mock) {
             $mock->shouldReceive('load');
             $mock->shouldReceive('process');
             $mock->shouldReceive('getContents')->andReturn('foo');
@@ -88,32 +88,34 @@ class JitImageResolverTest extends TestCase
         }));
 
         $resolver->setResolveBase();
+        $resolver->disableCache();
 
         $resolver->setParameter('0');
         $resolver->setSource('image.jpg');
-
         $resolver->setFilter(null);
 
-        $this->assertFalse($resolver->resolve());
 
+        $this->assertFalse($resolver->resolve());
         $resolver->setSource('http://example.com/image.jpg');
-        $this->assertEquals('foo', $resolver->resolve());
+
+        $this->assertSame($image, $resolver->resolve());
     }
     /**
      * @test
      */
     public function testResolveCachedImage()
     {
-        $resolver = new JitImageResolver($image = $this->getImageMock(), $this->getCacheMock(function (&$mock) {
+        $resolver = new JitImageResolver($image = $this->getImageMock(), $this->getCacheMock(function (&$mock) use ($image) {
             $mock->shouldReceive('has')->andReturn(true);
-            $mock->shouldReceive('get')->andReturn('foo');
+            $mock->shouldReceive('get')->andReturn($image);
         }));
 
         $resolver->setParameter('0');
         $resolver->setSource('some/image.jpg');
         $resolver->setFilter(null);
 
-        $this->assertEquals('foo', $resolver->resolve());
+        $this->assertTrue($resolver->resolve());
+        $this->assertSame($image, $resolver->getImage());
     }
 
     /**

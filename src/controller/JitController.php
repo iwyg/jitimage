@@ -71,11 +71,11 @@ class JitController extends \BaseController
         $this->imageResolver->setSource($source);
         $this->imageResolver->setFilter($filter);
 
-        if (!$image = $this->imageResolver->resolve()) {
+        if (!$resolved = $this->imageResolver->resolve()) {
             throw new NotFoundHttpException;
         }
 
-        return $this->render($image);
+        return $this->render($this->imageResolver->getImage());
     }
 
     /**
@@ -102,10 +102,11 @@ class JitController extends \BaseController
      * @access protected
      * @return mixed
      */
-    protected function render($src)
+    protected function render($image)
     {
-        header('Content-type: ' .  $this->imageResolver->getImage()->getFileFormat());
-        echo $src;
+        header('Content-type: ' .  $image->getMimeType());
+        echo $image->getContents();
+        $image->close();
         exit(0);
     }
 

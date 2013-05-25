@@ -118,8 +118,9 @@ class ImagickDriver extends ImDriver
      */
     public function getOutputType()
     {
-        return $this->getMimeFromFormatString($this->resource->getImageFormat());
+        return $this->formatType($this->resource->getImageFormat());
     }
+
 
     /**
      * load
@@ -423,17 +424,6 @@ class ImagickDriver extends ImDriver
         return $this->resource->getNumberImages() > 1;
     }
 
-    /**
-     * getMimeFromFormatString
-     *
-     * @param mixed $format
-     * @access private
-     * @return mixed
-     */
-    private function getMimeFromFormatString($format)
-    {
-        return sprintf('image/%s', strtolower($format));
-    }
 
     /**
      * callParentFilter

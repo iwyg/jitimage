@@ -113,6 +113,23 @@ abstract class JitImageDriverTest extends TestCase
     }
 
     /**
+     * @dataProvider imageTypeProvider
+     */
+    public function testGetOutputFormat($setType, $type, $mime)
+    {
+        $image = $this->createTestImage();
+        $this->driver->load($image);
+
+        if (!is_null($setType)) {
+            $this->driver->setOutputType($setType);
+        }
+
+        //var_dump($this->driver->getOutputType());
+
+        $this->assertSame($type, $this->driver->getOutputType());
+    }
+
+    /**
      * testFilterResizeToFit
      *
      * @param mixed $w
@@ -182,6 +199,17 @@ abstract class JitImageDriverTest extends TestCase
             ['image-2.jpg']
         ];
     }
+
+    public function imageTypeProvider()
+    {
+        return [
+         [null,  'jpeg', 'image/jpeg'],
+         ['jpg', 'jpeg', 'image/jpeg'],
+         ['png', 'png', 'image/png'],
+         ['gif', 'gif', 'image/gif']
+        ];
+    }
+
 
     /**
      * resizeParameterProvider
