@@ -58,7 +58,7 @@ class ImageCache implements CacheInterface
     {
         $this->image = $image;
         $this->files = $files;
-        $this->setPath($path, $permission);
+        $this->setPath(realpath($path), $permission);
     }
 
     /**
@@ -89,7 +89,7 @@ class ImageCache implements CacheInterface
     {
         if ($this->has($id)) {
 
-            $this->image->clean();
+            $this->image->close();
             $this->image->load($this->pool[$id]);
 
             return $raw ? $this->image->getImageBlob() : $this->image;
