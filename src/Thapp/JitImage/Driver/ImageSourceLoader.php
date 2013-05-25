@@ -12,7 +12,7 @@
 namespace Thapp\JitImage\Driver;
 
 use \Resource;
-use Thapp\Exception\ImageResourceLoaderException;
+use Thapp\JitImage\Exception\ImageResourceLoaderException;
 
 /**
  * Class: ImageSourceLoader
@@ -106,18 +106,26 @@ class ImageSourceLoader implements SourceLoaderInterface
      */
     protected function loadRemoteFile($url)
     {
-        $this->file =  tempnam($this->tmp, 'jit_rmt_');
+        $this->file = tempnam($this->tmp, 'jit_rmt_');
 
         if (!function_exists('curl_init')) {
 
-            file_put_contents(file_get_contents($url), $this->file);
+            if (!$contents = file_get_contents($url)) {
+                return false;
+            }
+
+            file_put_contents($contents, $this->file);
+
             return $this->file;
 
         }
 
         $handle = fopen($this->file, 'w');
 
-        $this->fetchFile($handle, $url);
+        if (!$this->fetchFile($handle, $url)) {
+            fclose($handle);
+            return false;
+        }
 
         fclose($handle);
 
@@ -131,12 +139,30 @@ class ImageSourceLoader implements SourceLoaderInterface
      * @access protected
      * @return void
      */
-    protected function fetchFile(\Resource $handle, $url)
+    protected function fetchFile($handle, $url, &$message = null)
     {
+
         $curl = curl_init($url);
 
         curl_setopt($curl, CURLOPT_FILE, $handle);
-        curl_exec($curl);
+        curl_setopt($curl, CURLOPT_HEADER, true);
+        //curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+
+        $status = curl_exec($curl);
+        $info = curl_getinfo($curl);
+
+        if (!in_array($info['http_code'], [200, 302])) {
+            $status = false;
+        }
+
+        if (0 !== strlen($msg = curl_error($curl))) {
+
+            $message = $msg;
+            $status = false;
+        }
+
         curl_close($curl);
+
+        return $status;
     }
 }

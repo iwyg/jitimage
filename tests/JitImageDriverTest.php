@@ -130,20 +130,23 @@ abstract class JitImageDriverTest extends TestCase
     }
 
     /**
-     * testFilterResizeToFit
-     *
-     * @param mixed $w
-     * @param mixed $h
-     * @param mixed $nw
-     * @param mixed $nh
-     * @param array $expected
-     * @access public
-     * @return mixed
+     * @test
+     * @dataProvider cropFilterParameterProvider
      */
-    //public function testFilterCrop($w, $h,  $nw, $nh, array $expected)
-    //{
+    public function testFilterCrop($w, $h,  $nw, $nh, array $expected)
+    {
+        $this->markTestIncomplete();
+    }
 
-    //}
+    /**
+     * @test
+     * @dataProvider cropScaleFilterParameterProvider
+     */
+    public function testFilterCropScale($w, $h,  $nw, $nh, array $expected)
+    {
+        $this->markTestIncomplete();
+    }
+
 
     /**
      * runImageFilter
@@ -259,6 +262,33 @@ abstract class JitImageDriverTest extends TestCase
             [500, 750, 200, 200, [133, 200]],
         ];
     }
+
+    /**
+     * cropScaleFilterParameterProvider
+     *
+     * @access public
+     * @return mixed
+     */
+    public function cropScaleFilterParameterProvider()
+    {
+        return [
+            [0, 0, 0, 0, []]
+        ];
+    }
+
+    /**
+     * cropFilterParameterProvider
+     *
+     * @access public
+     * @return mixed
+     */
+    public function cropFilterParameterProvider()
+    {
+        return [
+            [0, 0, 0, 0, []]
+        ];
+    }
+
 
     /**
      * createTestImage

@@ -23,6 +23,7 @@ use \Closure;
  */
 trait ShellCommand
 {
+    private $cmds = [];
     /**
      * runCmd
      *
@@ -35,20 +36,42 @@ trait ShellCommand
      * @throws \RuntimeException;
      * @return string the command result
      */
-    public function runCmd($cmd, $exception = '\RuntimeException', Closure $callback = null)
+    public function runCmd($cmd, $exception = '\RuntimeException', Closure $callback = null, array $noEscapeChars = null)
     {
         $cmd = escapeshellcmd($cmd);
-        $cmd = preg_replace('~\\\#~', '#', $cmd);
+
+        if (is_array($noEscapeChars) and !empty($noEscapeChars)) {
+
+            $repl = '\\\\' . implode("|\\\\", $noEscapeChars);
+            $cmd = preg_replace_callback("~$repl~", function ($found) {
+                return trim($found[0], "\\");
+            }, $cmd);
+        }
+
+        $this->cmds[] = $cmd;
+
         $exitStatus = $this->execCmd($cmd, $stdout, $stderr);
 
         if ($exitStatus > 0) {
-            if (is_null($callback)) {
+            if (!is_null($callback)) {
                 $callback($stderr);
             }
             throw new $exception(sprintf('Command exited with %d: %s', $exitStatus, $stderr));
         }
 
         return $stdout;
+    }
+
+    /**
+     * getLastCmd
+     *
+     * @access public
+     * @return string
+     */
+    public function getLastCmd()
+    {
+        $cmds = $this->cmds;
+        return array_pop($cmds);
     }
 
     /**

@@ -115,7 +115,8 @@ class ImDriver extends AbstractDriver
             function ($stderr)
             {
                 $this->clean();
-            }
+            },
+            ['#']
         );
     }
 
@@ -421,7 +422,6 @@ class ImDriver extends AbstractDriver
      */
     private function getValueString($value)
     {
-        return (string)($value === 0 ? '' : $value);
+        return (string)(0 === $value ? '' : $value);
     }
-
 }
