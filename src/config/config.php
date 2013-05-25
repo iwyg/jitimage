@@ -9,6 +9,14 @@ return [
 
     'route'      => 'images',
 
+
+    /* ------------------------------------------------
+     * the base directory from where to resolve images
+     * ------------------------------------------------
+     */
+
+    'base'       => public_path(),
+
     /* ------------------------------------------------
      * driver that powers the image manipulation:
      *
@@ -17,14 +25,14 @@ return [
      * ------------------------------------------------
      */
 
-    'driver'      => 'gd',
+    'driver'      => 'im',
 
     /* ------------------------------------------------
-     * cache processed images
+     * cache processed images only in this environments
      * ------------------------------------------------
      */
 
-    'cache'       => false,
+    'cache'       => ['production'],
 
     /* ------------------------------------------------
      * the compression quality:
@@ -76,7 +84,7 @@ return [
      */
 
     'recepies' => [
-        //'tumbs' => '2/200/200/5/{source}/filter:gs}'
+        //'thumbs' => '2/500/500/5/,filter:circ:gs'
     ],
 
     /* ------------------------------------------------
@@ -86,3 +94,4 @@ return [
      */
     'trusted-sites' => [],
 ];
+
