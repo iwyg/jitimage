@@ -1,7 +1,6 @@
 language: php
 php:
   - 5.4
-  - 5.5
 services:
   - imagemagick
   - convert
@@ -9,7 +8,7 @@ services:
 before_script:
   - composer self-update && composer --dev install && composer --dev update
   - pear config-set preferred_state beta
-  - pecl install imagick
+  - printf "\n" | pecl install imagick
   - echo "extension = imagick.so" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
   - php -m | grep imagick 
 script: phpunit --configuration phpunit.xml.dist
