@@ -42,6 +42,12 @@ class JitImage
      * @var mixed
      */
     protected $mode;
+
+    /**
+     * filters
+     *
+     * @var array
+     */
     protected $filters;
 
     /**
@@ -68,6 +74,7 @@ class JitImage
      */
     public function source($source)
     {
+        $this->clean();
         $this->source = $source;
         return $this;
     }
@@ -159,17 +166,6 @@ class JitImage
     }
 
     /**
-     * get
-     *
-     * @access public
-     * @return mixed
-     */
-    public function get()
-    {
-        return $this->process();
-    }
-
-    /**
      * process
      *
      * @access protected
@@ -251,6 +247,12 @@ class JitImage
         return null;
     }
 
+    /**
+     * clean
+     *
+     * @access private
+     * @return mixed
+     */
     private function clean()
     {
         $this->mode       = null;
@@ -291,7 +293,13 @@ class JitImage
         throw new \BadMethodCallException(sprintf('call to undefined method [%s]', $method));
     }
 
-    public function getMode()
+    /**
+     * getMode
+     *
+     * @access public
+     * @return mixed
+     */
+    protected function getMode()
     {
         switch ($this->mode) {
         case 'resize':
