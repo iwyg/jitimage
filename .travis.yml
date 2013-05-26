@@ -5,7 +5,7 @@ php:
 services:
   - imagemagick
   - convert
-  - iamgick
+  - imagick
 before_script:
   - composer self-update && composer --dev install && composer --dev update
   - printf "\n" | pecl install -f imagick
