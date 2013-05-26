@@ -9,9 +9,16 @@ return [
 
     'route'      => 'images',
 
+    /* ------------------------------------------------
+     * the base route:
+     * ------------------------------------------------
+     */
+
+    'cacheroute'      => 'jit/storage',
 
     /* ------------------------------------------------
-     * the base directory from where to resolve images
+     * the base directory from where to dynamically resolve
+     * images
      * ------------------------------------------------
      */
 
@@ -33,6 +40,12 @@ return [
      */
 
     'cache'       => ['production'],
+
+    /* ------------------------------------------------
+     * cache processed images only in this environments
+     * ------------------------------------------------
+     */
+    'cacheprefix' => 'thapp',
 
     /* ------------------------------------------------
      * the compression quality:
@@ -68,30 +81,30 @@ return [
      * allow mode 2 crop rescale, with a 200x200 px crop and a grey scale
      * filter:
      *
-     *  '2/200/200/5/,filter:gs'
+     *  'thumbs' => '2/200/200/5, filter:gs'
      *
      * allow mode 1 resize, with a resize of 800px width
-     * and any filter filter:
+     * greyscale filter:
      *
-     *  '1/400/0/,filter:circ',
+     *  'gallery' => '1/800/0, filter:gs',
      *
-     * allow mode 5 best fit, with a resize of max 800px width
+     * allow mode 4 best fit, with a resize of max 800px width
      * and 600px height, no filters:
      *
-     *  '5/800/600'
+     *  'preview' => '4/800/600'
      *
      * ------------------------------------------------
      */
 
     'recepies' => [
-        //'thumbs' => '2/500/500/5/,filter:circ:gs'
     ],
 
     /* ------------------------------------------------
      * a list of trusted sites that deliver assets:
-     *  e.g. 'media.tumblr.com'
+     *  e.g. 'http://25.media.tumblr.com'
      * ------------------------------------------------
      */
-    'trusted-sites' => [],
+    'trusted-sites' => [
+    ],
 ];
 

@@ -193,6 +193,17 @@ abstract class AbstractDriver implements DriverInterface
     }
 
     /**
+     * getSource
+     *
+     * @access public
+     * @return mixed
+     */
+    public function getSource()
+    {
+        return $this->source;
+    }
+
+    /**
      * setOutputType
      *
      * @param mixed $type

@@ -13,6 +13,7 @@ namespace Thapp\JitImage\Controller;
 
 use Illuminate\Http\Response;
 use Illuminate\Routing\Router;
+use Thapp\JitImage\ImageInterface;
 use Illuminate\Container\Container;
 use Thapp\JitImage\ResolverInterface;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -79,11 +80,11 @@ class JitController extends \BaseController
         $this->imageResolver->setSource($source);
         $this->imageResolver->setFilter($filter);
 
-        if (!$resolved = $this->imageResolver->resolve()) {
-            throw new NotFoundHttpException;
+        if ($image = $this->imageResolver->resolve()) {
+            $this->render($image);
         }
 
-        $this->render($this->imageResolver->getImage());
+        return $this->notFound();
     }
 
     /**
@@ -97,23 +98,17 @@ class JitController extends \BaseController
     {
         extract($this->defaults);
 
-        if ($parameter) {
-            $params = list($parameters, $filter) = array_pad(explode(',', $parameter), 2, null);
+        if (is_string($parameter) and strlen($parameter) > 0) {
+
+            list($parameters, $filter) = array_pad(
+                explode(',', str_replace(' ', null, $parameter)),
+                2, null
+            );
+
             return $this->getImage($parameters, $source, $filter);
         }
-    }
 
-    /**
-     * render
-     *
-     * @access protected
-     * @return mixed
-     */
-    protected function render($image)
-    {
-        $response = new Response($image->getContents(), 200);
-        $response->header('Content-type', $image->getMimeType());
-        $response->send();
+        return $this->notFound();
     }
 
     /**
@@ -126,5 +121,51 @@ class JitController extends \BaseController
     {
         $this->defaults = $router->getCurrentRoute()->getDefaults();
         parent::callAction($container, $router, $method, $parameters);
+    }
+
+    /**
+     * getCached
+     *
+     * @param mixed $source
+     * @access public
+     * @return mixed
+     */
+    public function getCached($id)
+    {
+        if ($image = $this->imageResolver->resolveFromCache($id)) {
+            return $this->render($image);
+        }
+
+        return $this->notFound();
+    }
+
+    /**
+     * notFound
+     *
+     * @access protected
+     * @return mixed
+     */
+    protected function notFound()
+    {
+        $this->imageResolver->close();
+        throw new NotFoundHttpException;
+    }
+
+
+    /**
+     * render
+     *
+     * @access protected
+     * @return mixed
+     */
+    protected function render(ImageInterface $image)
+    {
+        $response = new Response($image->getContents(), 200);
+        $response->header('Content-type', $image->getMimeType());
+
+        $image->close();
+        $this->imageResolver->close();
+
+        $response->send();
     }
 }

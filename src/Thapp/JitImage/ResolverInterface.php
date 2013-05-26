@@ -23,5 +23,63 @@ namespace Thapp\JitImage;
  */
 interface ResolverInterface
 {
+    /**
+     * resolve
+     *
+     * @access public
+     * @return mixed
+     */
+    public function resolve();
 
+    /**
+     * resolveFromCache
+     *
+     * @param mixed $id
+     * @access public
+     * @return mixed
+     */
+    public function resolveFromCache($id);
+
+    /**
+     * getCached
+     *
+     * @access public
+     * @return mixed
+     */
+    public function getCached();
+
+    /**
+     * setFilter
+     *
+     * @param mixed $filter
+     * @access public
+     * @return mixed
+     */
+    public function setFilter($filter = null);
+
+    /**
+     * setParameter
+     *
+     * @param mixed $parameter
+     * @access public
+     * @return mixed
+     */
+    public function setParameter($parameter);
+
+    /**
+     * setSource
+     *
+     * @param mixed $source
+     * @access public
+     * @return mixed
+     */
+    public function setSource($source);
+
+    /**
+     * disableCache
+     *
+     * @access public
+     * @return mixed
+     */
+    public function disableCache();
 }

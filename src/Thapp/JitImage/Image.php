@@ -98,28 +98,6 @@ class Image implements ImageInterface
         return $this->driver->load($source);
     }
 
-
-    /**
-     * __get
-     *
-     * @param mixed $attribute
-     * @access public
-     * @return mixed
-     */
-    public function __get($attribute)
-    {
-        return isset($this->attributes[$attribute]) ? $this->attributes[$attribute] : null;
-    }
-    /**
-     * filter
-     *
-     * @access public
-     */
-    public function filter(FilterInterface $filter)
-    {
-
-    }
-
     /**
      * process
      *
@@ -130,26 +108,11 @@ class Image implements ImageInterface
     public function process(ResolverInterface $resolver)
     {
         extract($resolver->getParameter());
-        return  $this->processImage($mode, $width, $height, $gravity, $background, $filter);
-    }
 
-    /**
-     * processImage
-     *
-     * @param mixed $mode
-     * @param mixed $width
-     * @param mixed $height
-     * @param int $gravity
-     * @param mixed $background
-     * @param mixed $filter
-     * @access protected
-     * @return mixed
-     */
-    protected function processImage($mode, $width = null, $height = null, $gravity = 5, $background = null, $filters = null)
-    {
         $this->driver->setTargetSize($width, $height);
 
         switch($mode) {
+
         case static::IM_NOSCALE:
             break;
         case static::IM_RESIZE:
@@ -168,8 +131,8 @@ class Image implements ImageInterface
             break;
         }
 
-        foreach ($filters as $filter => $parameter) {
-            $this->addFilter($filter, $parameter);
+        foreach ($filter as $f => $parameter) {
+            $this->addFilter($f, $parameter);
         }
 
         $this->driver->setQuality($this->compression);
@@ -301,5 +264,10 @@ class Image implements ImageInterface
     public function close()
     {
         return $this->driver->clean();
+    }
+
+    public function getSource()
+    {
+        return $this->driver->getSource();
     }
 }

@@ -66,9 +66,11 @@ class ImageSourceLoader implements SourceLoaderInterface
         }
 
         if (preg_match('#^(https?|spdy)://#', $url)) {
+
             if ($file = $this->loadRemoteFile($url)) {
                 return $file;
             }
+
         }
 
         throw new ImageResourceLoaderException(sprintf('Invalid Source URL: %s', $url));
@@ -144,9 +146,9 @@ class ImageSourceLoader implements SourceLoaderInterface
 
         $curl = curl_init($url);
 
+        curl_setopt($curl, CURLOPT_RETURNTRANSFER, false);
+        curl_setopt($curl, CURLOPT_HEADER, false);
         curl_setopt($curl, CURLOPT_FILE, $handle);
-        curl_setopt($curl, CURLOPT_HEADER, true);
-        //curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
 
         $status = curl_exec($curl);
         $info = curl_getinfo($curl);
@@ -162,7 +164,6 @@ class ImageSourceLoader implements SourceLoaderInterface
         }
 
         curl_close($curl);
-
         return $status;
     }
 }

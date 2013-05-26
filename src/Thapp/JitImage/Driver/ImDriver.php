@@ -137,7 +137,11 @@ class ImDriver extends AbstractDriver
         if (file_exists($this->tmpFile)) {
             @unlink($this->tmpFile);
         }
+
+        $this->targetSize = null;
         $this->loader->clean();
+        $this->source = null;
+        $this->commands = [];
     }
 
     /**
@@ -150,7 +154,7 @@ class ImDriver extends AbstractDriver
      */
     public function filter($name, $options)
     {
-        if (static::EXT_FILTER === parent::filter($name, $options)) {
+        if (static::EXT_FILTER === parent::filter($name, $options) and isset($this->filters[$name])) {
 
             $filter = new $this->filters[$name]($this, $options);
             $this->commands = array_merge($this->commands, $filter->run());
@@ -225,14 +229,13 @@ class ImDriver extends AbstractDriver
      */
     protected function resize($width, $height, $flag = '')
     {
-        // compensating some imagick /im differences:
+
         if (0 === $width) {
             $width = (int)floor($height * $this->getInfo('ratio'));
         }
         if (0 === $height) {
             $height = (int)floor($width / $this->getInfo('ratio'));
         }
-
         $w = $this->getValueString($width);
         $h = $this->getValueString($height);
 
@@ -244,11 +247,17 @@ class ImDriver extends AbstractDriver
             // fix it
             if (0 === min($height, $width)) {
                 $flag = '';
-
             }
         case static::FL_OSRK_LGR:
             break;
         default:
+            // compensating some imagick /im differences:
+            if (0 === $width) {
+                $width = (int)floor($height * $this->getInfo('ratio'));
+            }
+            if (0 === $height) {
+                $height = (int)floor($width / $this->getInfo('ratio'));
+            }
             $h = '';
             break;
         }
@@ -370,7 +379,8 @@ class ImDriver extends AbstractDriver
 
         $this->tmpFile = $this->getTempFile();
 
-        array_unshift($values, $this->source);
+        array_unshift($values, sprintf('%s:%s', preg_replace('#^image/#', null, $this->getInfo('type')), $this->source));
+
         array_unshift($values, $bin);
 
         array_unshift($commands, $vs);

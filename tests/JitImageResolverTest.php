@@ -32,15 +32,6 @@ class JitImageResolverTest extends TestCase
 
     /**
      * @test
-     */
-    public function testResolverGetImage()
-    {
-        $resolver = new JitImageResolver(new JitResolveConfiguration, $image = $this->getImageMock(), $this->getCacheMock());
-        $this->assertSame($image, $resolver->getImage());
-    }
-
-    /**
-     * @test
      * @dataProvider paramProvider
      */
     public function testResolveParameter($expected, $params, $source, $filter)
@@ -98,7 +89,12 @@ class JitImageResolverTest extends TestCase
 
 
         $this->assertFalse($resolver->resolve());
+
+        $resolver->close();
+
+        $resolver->setParameter('0');
         $resolver->setSource('http://example.com/image.jpg');
+        $resolver->setFilter(null);
 
         $this->assertSame($image, $resolver->resolve());
     }
@@ -116,8 +112,7 @@ class JitImageResolverTest extends TestCase
         $resolver->setSource('some/image.jpg');
         $resolver->setFilter(null);
 
-        $this->assertTrue($resolver->resolve());
-        $this->assertSame($image, $resolver->getImage());
+        $this->assertSame($image, $resolver->resolve());
     }
 
     /**
@@ -182,6 +177,7 @@ class JitImageResolverTest extends TestCase
     protected function getImageMock(Closure $setup = null)
     {
         $image = m::mock('\Thapp\JitImage\ImageInterface');
+        $image->shouldReceive('close');
 
         if (!is_null($setup)) {
             $setup($image);

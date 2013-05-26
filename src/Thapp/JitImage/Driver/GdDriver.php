@@ -149,7 +149,7 @@ class GdDriver extends AbstractDriver
      */
     public function filter($name, $options)
     {
-        if (static::EXT_FILTER === parent::filter($name, $options)) {
+        if (static::EXT_FILTER === parent::filter($name, $options) and isset($this->filters[$name])) {
             $filter = new $this->filters[$name]($this, $options);
             $filter->run();
         }
@@ -183,6 +183,9 @@ class GdDriver extends AbstractDriver
         if (is_resource($this->resource)) {
             imagedestroy($this->resource);
         }
+
+        $this->source = null;
+        $this->targetSize = null;
     }
     /**
      * swapResource

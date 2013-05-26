@@ -54,6 +54,13 @@ class JitImageResolver implements ResolverInterface
     protected $processCache;
 
     /**
+     * cachedNames
+     *
+     * @var mixed
+     */
+    protected $cachedNames;
+
+    /**
      * __construct
      *
      * @param ImageInterface $image
@@ -78,15 +85,17 @@ class JitImageResolver implements ResolverInterface
     public function resolve()
     {
 
-        if ($this->config->cache and $this->processCache->has($id = $this->getImageRequestId($this->getInputQuery()))) {
-            $this->image = $this->processCache->get($id);
-            return true;
+        $this->image->close();
+
+        if (!$this->canResolve()) {
+            return false;
         }
 
-        $this->parseParameter();
-        $this->parseSource();
-        $this->parseFilter();
+        $this->parseAll();
 
+        if ($this->config->cache and $image = $this->resolveFromCache($id = $this->getImageRequestId($this->getInputQuery(), $this->input['source']))) {
+            return $image;
+        }
 
         if (!$img = $this->isReadableFile($this->parameter)) {
             return false;
@@ -100,6 +109,80 @@ class JitImageResolver implements ResolverInterface
     }
 
     /**
+     * close
+     *
+     * @access public
+     * @return mixed
+     */
+    public function close()
+    {
+        $this->input = [];
+        $this->parameter = [];
+    }
+
+    /**
+     * getCached
+     *
+     * @access public
+     * @return mixed
+     */
+    public function getCached()
+    {
+        if (!$this->canResolve()) {
+            return false;
+        }
+
+        $this->resolve();
+        return $this->resolveFromCache($id = $this->getImageRequestId($this->getInputQuery(), $this->input['source']));
+    }
+
+
+    /**
+     * resolveFromCache
+     *
+     * @param mixed $id
+     * @access public
+     * @return bool
+     */
+    public function resolveFromCache($id)
+    {
+        if (!$this->canResolve()) {
+            return false;
+        }
+
+        if ($this->processCache->has($id)) {
+            return $this->processCache->get($id);
+        }
+
+        return false;
+    }
+
+    protected function canResolve()
+    {
+        return is_array($this->input)
+            and array_key_exists('parameter', $this->input)
+            and array_key_exists('source', $this->input)
+            and array_key_exists('filter', $this->input);
+    }
+
+    /**
+     * parseAll
+     *
+     * @access protected
+     * @return void
+     */
+    protected function parseAll()
+    {
+        if (!empty($this->parameter)) {
+            return $this->parameter;
+        }
+
+        $this->parseParameter();
+        $this->parseSource();
+        $this->parseFilter();
+    }
+
+    /**
      * disableCache
      *
      * @param mixed $param
@@ -109,17 +192,6 @@ class JitImageResolver implements ResolverInterface
     public function disableCache()
     {
         $this->config->set('cache', false);
-    }
-
-    /**
-     * getImage
-     *
-     * @access public
-     * @return mixed
-     */
-    public function getImage()
-    {
-        return $this->image;
     }
 
     /**
@@ -156,9 +228,9 @@ class JitImageResolver implements ResolverInterface
     public function getFilterVars($filter = null)
     {
         if (!is_null($filter) and isset($this->parameter['filter'][$filter])) {
-            return $this->params['filter'][$filter];
+            return $this->parameter['filter'][$filter];
         }
-        return $this->params['filter'];
+        return $this->parameter['filter'];
     }
 
     /**
@@ -379,6 +451,7 @@ class JitImageResolver implements ResolverInterface
     protected function getOptionalColor(array &$parameter)
     {
         preg_match('/^[0-9A-Fa-f]{3,6}/', $parameter['source'], $color);
+
         $length = strpos($parameter['source'], '/');
 
         $hasColor = (6 === $length or 3 === $length) and $length === strlen(current($color));
@@ -401,9 +474,17 @@ class JitImageResolver implements ResolverInterface
      * @access protected
      * @return string
      */
-    protected function getImageRequestId($requestString)
+    protected function getImageRequestId($requestString, $source = null)
     {
-        return sprintf('%s', hash('md5', $requestString));
+        if (!isset($this->cachedNames[$requestString])) {
+            $this->cachedNames[$requestString] = sprintf('%s_%s.%s',
+                $this->config->cache_prefix,
+                hash('md5', $requestString),
+                pathinfo($source, PATHINFO_EXTENSION)
+            );
+        }
+
+        return $this->cachedNames[$requestString];
     }
 
     /**
@@ -416,8 +497,8 @@ class JitImageResolver implements ResolverInterface
     {
         extract($parameter);
 
-        if (preg_match('#^(https?://|spdy://|file://)#', $source, $matches)) {
-            return $source;
+        if (preg_match('#^(https?://|spdy://|file://)#', $source)) {
+            return $this->isValidDomain($source);
         }
 
         if (is_file($file = $this->config->base . '/' . $source)) {
@@ -425,5 +506,28 @@ class JitImageResolver implements ResolverInterface
         }
 
         return false;
+    }
+
+    /**
+     * isValidDomain
+     *
+     * @access protected
+     * @return string|boolean
+     */
+    protected function isValidDomain($url)
+    {
+
+        $trusted = $this->config->trusted_sites;
+
+        if (!empty($trusted)) {
+
+            extract(parse_url($url));
+
+            if (!in_array($host, $trusted)) {
+                return false;
+            }
+        }
+
+        return $url;
     }
 }

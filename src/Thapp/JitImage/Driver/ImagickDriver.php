@@ -152,7 +152,8 @@ class ImagickDriver extends ImDriver
             $result = $this->callParentFilter($name, $options);
         }
 
-        if (static::EXT_FILTER === $result) {
+        if (static::EXT_FILTER === $result and isset($this->filters[$name])) {
+
             $filter = new $this->filters[$name]($this, $options);
 
             foreach ($this->resource as $frame) {

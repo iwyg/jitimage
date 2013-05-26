@@ -36,6 +36,7 @@ class JitImageServiceProvider extends ServiceProvider
         $this->package('thapp/jitimage');
         $this->registerDriver();
         $this->registerResolver();
+        $this->regsiterCommands();
     }
 
     /**
@@ -86,6 +87,10 @@ class JitImageServiceProvider extends ServiceProvider
         );
 
         $this->registerFilter($driverName, $this->getFilters());
+
+        $this->app['jitimage'] = $this->app->share(function () {
+            return $this->app->make('Thapp\JitImage\JitImage');
+        });
     }
 
     /**
@@ -98,13 +103,20 @@ class JitImageServiceProvider extends ServiceProvider
     {
         $config = $this->app['config'];
 
-        $this->app->bind('Thapp\JitImage\ResolverInterface', 'Thapp\JitImage\JitImageResolver');
+        $this->app->singleton('Thapp\JitImage\ResolverInterface', 'Thapp\JitImage\JitImageResolver');
         $this->app->bind(
             'Thapp\JitImage\ResolverConfigInterface', function () use ($config) {
 
+                $trustedSites = [];
+
+                foreach ($config->get('jitimage::trusted-sites', []) as $site) {
+                    extract(parse_url($site));
+                    $trustedSites[] = $host;
+                }
                 $conf = [
-                    'trusted-sites' => $config->get('jitimage::trusted-sites', []),
-                    'base'          => $config->get('jitimage::base-sites', public_path()),
+                    'trusted_sites' => $trustedSites,
+                    'cache_prefix'  => $config->get('jitimage::cacheprefix', 'jit_'),
+                    'base'          => $config->get('jitimage::base', public_path()),
                     'cache'         => in_array($config->getEnvironment(), $config->get('jitimage::cache', []))
                 ];
                 return new \Thapp\JitImage\JitResolveConfiguration($conf);
@@ -121,8 +133,11 @@ class JitImageServiceProvider extends ServiceProvider
     {
         $config = $this->app['config'];
 
-        $recepies = $config->get('jitimage::recepies', []);
-        $route    = $config->get('jitimage::route', 'image');
+        $recepies   = $config->get('jitimage::recepies', []);
+        $route      = $config->get('jitimage::route', 'image');
+        $cacheroute = $config->get('jitimage::cacheroute', 'jit/storage');
+
+        $this->app['router']->get($cacheroute . '/{id}', 'Thapp\JitImage\Controller\JitController@getCached');
 
         if (!empty($recepies)) {
             return $this->registerRecepies($recepies, $route);
@@ -136,6 +151,20 @@ class JitImageServiceProvider extends ServiceProvider
             ->where('filter', '(filter:.*)');
     }
 
+    /**
+     * regsiterCommands
+     *
+     * @access protected
+     * @return mixed
+     */
+    protected function regsiterCommands()
+    {
+
+        $this->app->bind('command.jitimage.clearcache', 'Thapp\JitImage\Console\JitImageCacheClearCommand');
+        $this->commands(
+            'command.jitimage.clearcache'
+        );
+    }
     /**
      * registerRecepies
      *
@@ -170,13 +199,25 @@ class JitImageServiceProvider extends ServiceProvider
      */
     protected function registerFilter($driverName, $filters)
     {
-        $this->app->extend('Thapp\JitImage\Driver\DriverInterface', function ($driver) use ($driverName, $filters){
+        $this->app->extend('Thapp\JitImage\Driver\DriverInterface', function ($driver) use ($driverName, $filters) {
+
+            $addFilters = $this->app['events']->fire('jitimage.registerfitler', [$driverName]);
+
+            foreach ($addFilters as $filter) {
+                foreach ($filter as $name => $class) {
+                    if (class_exists($class)) {
+                        $driver->registerFilter($name, $class);
+                    }
+                }
+            }
+
             foreach ($filters as $name => $filter) {
                 $driver->registerFilter(
                     $filter,
                     sprintf('Thapp\JitImage\Filter\%s\%s%sFilter', $name, $driverName, ucfirst($filter))
                 );
             }
+
             return $driver;
         });
     }
