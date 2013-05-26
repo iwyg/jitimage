@@ -180,7 +180,6 @@ class ImDriver extends AbstractDriver
         return null;
     }
 
-
     /**
      * setQuality
      *
@@ -203,8 +202,6 @@ class ImDriver extends AbstractDriver
         }
         return file_get_contents($this->source);
     }
-
-
 
     /**
      * background
@@ -366,7 +363,7 @@ class ImDriver extends AbstractDriver
     private function compile()
     {
         $commands = array_keys($this->commands);
-        $values = array_flatten(array_values($this->commands));
+        $values = $this->getArrayValues(array_values($this->commands));
 
         $vs = '%s';
         $bin = $this->converter;
@@ -385,6 +382,24 @@ class ImDriver extends AbstractDriver
         $cmd = implode(' ', $commands);
 
         return vsprintf($cmd, $values);
+    }
+
+    /**
+     * getArrayValues
+     *
+     * @param mixed $array
+     * @access private
+     * @return mixed
+     */
+    private function getArrayValues($array)
+    {
+        $out = [];
+        $it = new \RecursiveIteratorIterator(new \RecursiveArrayIterator($array));
+
+        foreach ($it as $value) {
+            $out[] = $value;
+        }
+        return $out;
     }
 
     /**

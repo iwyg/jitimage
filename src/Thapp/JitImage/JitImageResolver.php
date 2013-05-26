@@ -155,7 +155,7 @@ class JitImageResolver implements ResolverInterface
      */
     public function getFilterVars($filter = null)
     {
-        if (!is_null($filter) && isset($this->parameter['filter'][$filter])) {
+        if (!is_null($filter) and isset($this->parameter['filter'][$filter])) {
             return $this->params['filter'][$filter];
         }
         return $this->params['filter'];
@@ -381,7 +381,7 @@ class JitImageResolver implements ResolverInterface
         preg_match('/^[0-9A-Fa-f]{3,6}/', $parameter['source'], $color);
         $length = strpos($parameter['source'], '/');
 
-        $hasColor = (6 === $length || 3 === $length) and $length === strlen(current($color));
+        $hasColor = (6 === $length or 3 === $length) and $length === strlen(current($color));
 
         if (!empty($color)) {
             $parameter['source'] = substr($parameter['source'], strlen(current($color)));

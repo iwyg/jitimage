@@ -29,6 +29,7 @@ use Thapp\JitImage\JitResolveConfiguration;
  */
 class JitImageResolverTest extends TestCase
 {
+
     /**
      * @test
      */

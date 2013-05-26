@@ -1,7 +1,7 @@
 <?php
 
 /**
- * This File is part of the vendor\thapp\jitimage\src\Thapp\JitImage\Filter\GreyScale package
+ * This File is part of the Thapp\JitImage package
  *
  * (c) Thomas Appel <mail@thomas-appel.com>
  *
@@ -18,7 +18,7 @@ use Thapp\JitImage\Filter\ImFilter;
  *
  * @uses ImagickFilter
  *
- * @package
+ * @package Thapp\JitImage
  * @version
  * @author Thomas Appel <mail@thomas-appel.com>
  * @license MIT
