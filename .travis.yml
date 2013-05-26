@@ -9,7 +9,7 @@ services:
 before_script:
   - composer self-update && composer --dev install && composer --dev update
   - pear config-set preferred_state beta
-  - printf "\n" | pecl install imagick
+  - pecl install imagick
   - echo "extension = imagick.so" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
   - php -m | grep imagick 
 script: phpunit --configuration phpunit.xml.dist
