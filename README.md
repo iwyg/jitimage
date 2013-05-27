@@ -123,6 +123,8 @@ To apply additional filters, the filter url segment is appended. The filter segm
 
 ### using the facade class
 
+This is a convenient way to scale images within your blade templates. It will create an imageurl similar to `/jit/storage/jit_139e2ead8b71b8c7e52a36a378835961.jpg`
+
 ```php
 
 // proportionally resize the image have a width of 200px:
