@@ -183,7 +183,7 @@ class JitImage
         $this->resolver->setFilter($filter);
 
         if ($image = $this->resolver->getCached()) {
-            $src = $image->getSource();
+            $src = $this->resolver->getCachedUrl($image);
             $this->resolver->close();
             $image->close();
             return $src;

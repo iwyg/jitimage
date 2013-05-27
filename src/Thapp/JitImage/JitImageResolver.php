@@ -136,6 +136,16 @@ class JitImageResolver implements ResolverInterface
         return $this->resolveFromCache($id = $this->getImageRequestId($this->getInputQuery(), $this->input['source']));
     }
 
+    /**
+     * getCachedUrl
+     *
+     * @access public
+     * @return string
+     */
+    public function getCachedUrl(ImageInterface $cachedImage)
+    {
+        return sprintf('/%s/%s', $this->config->cache_route, basename($cachedImage->getSource()));
+    }
 
     /**
      * resolveFromCache
@@ -146,10 +156,6 @@ class JitImageResolver implements ResolverInterface
      */
     public function resolveFromCache($id)
     {
-        if (!$this->canResolve()) {
-            return false;
-        }
-
         if ($this->processCache->has($id)) {
             return $this->processCache->get($id);
         }

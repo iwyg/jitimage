@@ -18,9 +18,9 @@ use Illuminate\Support\ServiceProvider;
  *
  * @uses ServiceProvider
  *
- * @package
- * @version
- * @author Thomas Appel <mail@thomas-appel.com>
+ * @package Thapp\JitImage
+ * @version $Id$
+ * @author  Thomas Appel <mail@thomas-appel.com>
  * @license MIT
  */
 class JitImageServiceProvider extends ServiceProvider
@@ -49,6 +49,7 @@ class JitImageServiceProvider extends ServiceProvider
     {
         $config = $this->app['config'];
 
+        //var_dump($config->get('jitimage::driver', 'gd'));
         $driver = sprintf('\Thapp\JitImage\Driver\%sDriver', $driverName = ucfirst($config->get('jitimage::driver', 'gd')));
         $this->app->bind('Thapp\JitImage\Cache\CacheInterface', function ()
             {
@@ -86,36 +87,32 @@ class JitImageServiceProvider extends ServiceProvider
             }
         );
 
-        $this->registerFilter($driverName, $this->getFilters());
 
         $this->app['jitimage'] = $this->app->share(function () {
             return $this->app->make('Thapp\JitImage\JitImage');
         });
+
+        $this->registerFilter($driverName, $this->getFilters());
     }
 
     /**
      * registerResolver
      *
      * @access protected
-     * @return mixed
+     * @return void
      */
     protected function registerResolver()
     {
         $config = $this->app['config'];
 
         $this->app->singleton('Thapp\JitImage\ResolverInterface', 'Thapp\JitImage\JitImageResolver');
-        $this->app->bind(
-            'Thapp\JitImage\ResolverConfigInterface', function () use ($config) {
 
-                $trustedSites = [];
+        $this->app->bind('Thapp\JitImage\ResolverConfigInterface', function () use ($config) {
 
-                foreach ($config->get('jitimage::trusted-sites', []) as $site) {
-                    extract(parse_url($site));
-                    $trustedSites[] = $host;
-                }
                 $conf = [
-                    'trusted_sites' => $trustedSites,
+                    'trusted_sites' => $this->extractDomains($config->get('jitimage::trusted-sites', [])),
                     'cache_prefix'  => $config->get('jitimage::cacheprefix', 'jit_'),
+                    'cache_route'   => $config->get('jitimage::cacheroute', 'jit/storage'),
                     'base'          => $config->get('jitimage::base', public_path()),
                     'cache'         => in_array($config->getEnvironment(), $config->get('jitimage::cache', []))
                 ];
@@ -155,15 +152,12 @@ class JitImageServiceProvider extends ServiceProvider
      * regsiterCommands
      *
      * @access protected
-     * @return mixed
+     * @return void
      */
     protected function regsiterCommands()
     {
-
         $this->app->bind('command.jitimage.clearcache', 'Thapp\JitImage\Console\JitImageCacheClearCommand');
-        $this->commands(
-            'command.jitimage.clearcache'
-        );
+        $this->commands('command.jitimage.clearcache');
     }
     /**
      * registerRecepies
@@ -184,18 +178,12 @@ class JitImageServiceProvider extends ServiceProvider
         }
     }
 
-    protected function getParamsRegexp()
-    {
-
-    }
-
-
     /**
      * registerFilter
      *
      * @param mixed $driverName
      * @access protected
-     * @return mixed
+     * @return void
      */
     protected function registerFilter($driverName, $filters)
     {
@@ -222,16 +210,6 @@ class JitImageServiceProvider extends ServiceProvider
         });
     }
 
-    /**
-     * getFilters
-     *
-     * @access protected
-     * @return array
-     */
-    protected function getFilters()
-    {
-        return $this->app['config']->get('jitimage::filter', []);
-    }
 
     /**
      * boot
@@ -241,6 +219,37 @@ class JitImageServiceProvider extends ServiceProvider
      */
     public function boot()
     {
+
         $this->registerController();
+        $this->regsiterCommands();
+    }
+
+    /**
+     * getFilters
+     *
+     * @access private
+     * @return array
+     */
+    private function getFilters()
+    {
+        return $this->app['config']->get('jitimage::filter', []);
+    }
+
+    /**
+     * extractDomains
+     *
+     * @access private
+     * @return mixed
+     */
+    private function extractDomains($sites)
+    {
+        $trustedSites = [];
+
+        foreach ($sites as $site) {
+            extract(parse_url($site));
+            $trustedSites[] = $host;
+        }
+
+        return $trustedSites;
     }
 }
