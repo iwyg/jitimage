@@ -93,6 +93,27 @@ abstract class JitImageDriverTest extends TestCase
             @unlink($this->testFile);
         }
     }
+    public function testParalellProcess()
+    {
+        $imageA = $this->createTestImage(400, 400);
+        $imageB = $this->createTestImage(400, 600);
+
+        $this->driver->load($imageA);
+        $this->runImageFilter('resize', 200, 0);
+
+        list($tw, $th) = getimagesize($this->writeTestImage($this->driver));
+        $this->assertSame([$tw, $th], [200, 200]);
+
+        $this->driver->clean();
+
+        $this->driver->load($imageB);
+
+        $this->runImageFilter('resize', 200, 0);
+
+        list($tw, $th) = getimagesize($this->writeTestImage($this->driver));
+        $this->assertSame([$tw, $th], [200, 300]);
+
+    }
 
     /**
      * @dataProvider resizeFilterParameterProvider

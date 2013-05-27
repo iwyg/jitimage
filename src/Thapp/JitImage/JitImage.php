@@ -189,7 +189,8 @@ class JitImage
             return $src;
         }
 
-        return '';
+        $this->resolver->close();
+        return;
     }
 
     /**
@@ -235,8 +236,12 @@ class JitImage
 
         foreach ($this->filters as $filter => $options) {
             $opt = [];
-            foreach  ($options as $option => $value) {
-                $opt[] = sprintf('%s=%s', $option, $value);
+
+            if (is_array($options)) {
+
+                foreach  ($options as $option => $value) {
+                    $opt[] = sprintf('%s=%s', $option, $value);
+                }
             }
             $filters[] = sprintf('%s;%s', $filter, implode(';', $opt));
         }

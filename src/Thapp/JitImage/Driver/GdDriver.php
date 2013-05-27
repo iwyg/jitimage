@@ -84,6 +84,7 @@ class GdDriver extends AbstractDriver
      */
     public function load($source)
     {
+        $this->clean();
         $this->resource = $this->loadResourceFromType($source);
     }
 
@@ -186,6 +187,7 @@ class GdDriver extends AbstractDriver
 
         $this->source = null;
         $this->targetSize = null;
+        $this->sourceAttributes = null;
     }
     /**
      * swapResource

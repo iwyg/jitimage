@@ -132,6 +132,7 @@ class ImagickDriver extends ImDriver
      */
     public function load($source)
     {
+        $this->clean();
         $this->source = $this->loader->load($source);
         $this->resource = new Imagick($source);
     }

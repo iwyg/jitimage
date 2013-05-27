@@ -157,7 +157,9 @@ class JitImageResolver implements ResolverInterface
     public function resolveFromCache($id)
     {
         if ($this->processCache->has($id)) {
-            return $this->processCache->get($id);
+            $this->image->close();
+            $this->image = $this->processCache->get($id);
+            return $this->image;
         }
 
         return false;

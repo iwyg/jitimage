@@ -49,7 +49,6 @@ class JitImageServiceProvider extends ServiceProvider
     {
         $config = $this->app['config'];
 
-        //var_dump($config->get('jitimage::driver', 'gd'));
         $driver = sprintf('\Thapp\JitImage\Driver\%sDriver', $driverName = ucfirst($config->get('jitimage::driver', 'gd')));
         $this->app->bind('Thapp\JitImage\Cache\CacheInterface', function ()
             {
@@ -252,4 +251,9 @@ class JitImageServiceProvider extends ServiceProvider
 
         return $trustedSites;
     }
+
+	public function provides()
+	{
+		return array('jitimage');
+	}
 }

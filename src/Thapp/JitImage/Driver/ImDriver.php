@@ -108,6 +108,7 @@ class ImDriver extends AbstractDriver
      */
     public function load($source)
     {
+        $this->clean();
         $this->source = $this->loader->load($source);
     }
 
@@ -119,6 +120,9 @@ class ImDriver extends AbstractDriver
     public function process()
     {
         $cmd = $this->compile();
+        $this->cmd = $cmd;
+
+        //\Log::info($cmd);
 
         $this->runCmd($cmd, '\Thapp\JitImage\Exception\ImageProcessException',
             function ($stderr)
@@ -141,6 +145,7 @@ class ImDriver extends AbstractDriver
         $this->targetSize = null;
         $this->loader->clean();
         $this->source = null;
+        $this->sourceAttributes = null;
         $this->commands = [];
     }
 
@@ -230,26 +235,17 @@ class ImDriver extends AbstractDriver
     protected function resize($width, $height, $flag = '')
     {
 
-        if (0 === $width) {
-            $width = (int)floor($height * $this->getInfo('ratio'));
-        }
-        if (0 === $height) {
-            $height = (int)floor($width / $this->getInfo('ratio'));
-        }
-        $w = $this->getValueString($width);
-        $h = $this->getValueString($height);
+        $min = min($width, $height);
+
 
         switch ($flag) {
+        case static::FL_OSRK_LGR:
+            break;
         case static::FL_IGNR_ASPR:
             // if one value is zero, imagmagick will
             // replace that value with the max. image size instead of the
             // scaled valiue. so removeing the ignore ascpect ration flag will
             // fix it
-            if (0 === min($height, $width)) {
-                $flag = '';
-            }
-        case static::FL_OSRK_LGR:
-            break;
         default:
             // compensating some imagick /im differences:
             if (0 === $width) {
@@ -261,6 +257,8 @@ class ImDriver extends AbstractDriver
             $h = '';
             break;
         }
+        $w = $this->getValueString($width);
+        $h = $this->getValueString($height);
 
         $this->commands['-resize %sx%s%s'] = [$w, $h, $flag];
         return $this;
