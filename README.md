@@ -10,7 +10,7 @@ jitimage
 
 Add thapp/jitimage as a requirement to composer.json:
 
-```
+```json
 {
     "require": {
         "thapp/jitimage": "dev-master"
@@ -28,7 +28,7 @@ Then run `composer update` or `composer install`
 
 Next step is to tell laravel to load the serviceprovider. In `app/config/app.php` add
 
-```
+```php
   // ...
   'Thapp\XmlConf\JitImageServiceProvider' 
   // ...
@@ -43,39 +43,39 @@ php artisan config:publish thapp/jitimage
 
 ## Configuration
 
-`route (string)`  
--
+##### `route (string)`  
+
 The base route for dynamic image processing   
-`cacheroute (string)`:    
--
+##### `cacheroute (string)`:    
+
 The base route for retrieving images by their cache id
-`base (string)`:    
--
+##### `base (string)`:    
+
 The filesystem base path to where your images are stored.
 
-`driver (string)`   
--
+##### `driver (string)`   
+
 The processing driver. Available drivers are `im`, `gd` and `ìmagick`
-`cache (array)`  
--
+##### `cache (array)`  
+
 An array of environments were imagecache should be enabled
-`quality (string)`
--
+##### `quality (string)`
+
 compression quality, 0 - 100 (higher is better but also larger)
-`imagemagick (array)`  
--
+##### `imagemagick (array)`  
+
 This array takes two values: `path`, the path to the imagick binary, and `bin`, the binary name.  
 Typically the binary name is `convert`.  
 
-`filter (array)`  
--
+##### `filter (array)`  
+
 An array of available filter that should be enabled by default
 
-`recepies (array)`  
--
+##### `recepies (array)`  
+
 An array of predefined parameters that are aliased to a root, e.g.
 
-```
+```php
 
 'recepies' => [
 	'thumbs' => '2/200/200/5, filter:gs'
@@ -86,8 +86,8 @@ An array of predefined parameters that are aliased to a root, e.g.
 would create a route thumbs that could be called like `http://example.com/thumbs/path/to/my/image.jpg`.    
 Defining recipies will disable dynamic image processing. 
 
-`trusted_sites (array)`  
--
+##### `trusted_sites (array)`  
+
 An array of trusted sites for processing remote files  
 
 
@@ -114,7 +114,7 @@ To apply additional filters, the filter url segment is appended. The filter segm
 
 ### using the facade class
 
-```
+```php
 
 // proportionally resize the image have a width of 200px:
 JitImage::source('path/to/myimage.jpg')->resize(200, 0);
@@ -131,7 +131,7 @@ JitImage::source('path/to/myimage.jpg')->crop(500, 500, 5, fff);
 // crop 500px * 500px of the image from the center, resize image if image is smaller:
 JitImage::source('path/to/myimage.jpg')->cropAndResize(500, 500, 5);
 
-// resize the image to best fint within the given sizes:
+// resize the image to best fit within the given sizes:
 JitImage::source('path/to/myimage.jpg')->fit(200, 200);
 
 
