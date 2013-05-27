@@ -37,30 +37,30 @@ class ImagickCircFilter extends ImagickFilter
      */
     public function run()
     {
-        $this->driver->setOutPutType('png');
 
         extract($this->driver->getTargetSize());
 
-        list($ox, $oy, $px, $py) = $this->getCoordinates($width, $height);
-
         $image = $this->driver->getResource();
 
-        $image->setImageFormat('png');
-        $image->setImageMatte(false);
-
-        $mask = clone $image;
-        $mask->setImageMatte(false);
+        $mask = new Imagick();
+        $mask->newImage($width, $height, 'transparent');
 
         $mask->thresholdImage(-1);
-        $mask->negateImage(false);
+        $mask->negateImage(1);
+        $mask->setImageMatte(1);
 
-        $circle = new ImagickDraw();
-        $circle->setFillColor('white');
-        $circle->circle($ox, $oy, $px, $py);
+        $circle = $this->makeCircle($width, $height);
 
         $mask->drawImage($circle);
+        $mask->gammaImage(2.2);
 
-        $image->compositeImage($mask, Imagick::COMPOSITE_COPYOPACITY, 0, 0);
+        $image->setImageFormat('png');
+        $image->setImageMatte(1);
+
+        $image->setImageBackgroundColor('white');
+        $image->compositeImage($mask, Imagick::COMPOSITE_DSTIN, 0, 0);
+
+        $this->driver->swapResource($image);
     }
 
     /**
@@ -81,5 +81,24 @@ class ImagickCircFilter extends ImagickFilter
             [$max, $min, $max, $this->getOption('o', 1)]:
             [$min, $max, $this->getOption('o', 1), $max];
     }
-}
 
+    /**
+     * makeCircle
+     *
+     * @param mixed $width
+     * @param mixed $height
+     * @access protected
+     * @return mixed
+     */
+    protected function makeCircle($width, $height)
+    {
+        list($ox, $oy, $px, $py) = $this->getCoordinates($width, $height);
+
+        $circle = new ImagickDraw();
+        $circle->setFillColor('white');
+        $circle->circle($ox, $oy, $px, $py);
+
+        return $circle;
+    }
+
+}
