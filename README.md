@@ -155,5 +155,17 @@ JitImage::source('path/to/myimage.jpg')->filter('gs')->cropAndResize(200, 200, 5
 
 There's really just one command right now. `php artisan jitimage:clearcache` will clear the whole image cache. 
 
+## Register external filter
+
+```php
+
+Event::listen('jitimage.registerfilter', function ($driverName) {
+
+    return [
+        "mf" => "Namespace\\Filter\MyFilter\\" . ucfirst($driverName) . 'MfFilter'
+    ];
+
+});
+
 
 
