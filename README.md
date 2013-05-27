@@ -13,7 +13,8 @@ Add thapp/jitimage as a requirement to composer.json:
 ```json
 {
     "require": {
-        "thapp/jitimage": "dev-master"
+        "php":">=5.4.0",
+        "thapp/jitimage": "dev-development"
     },
     "repositories": [
     	{
@@ -111,8 +112,18 @@ An Image url my look like this: `http://exmaple.com/images/2/200/200/5/path/to/m
 To apply additional filters, the filter url segment is appended. The filter segments starts with `filter:` followed by the filter alias and the filter options. Filters are separated by a double colon `:`, filter parameter are separated by a semicolon `;`, eg `filter:gs;s=100;c=1:circ;o=12`. 
 
 
+### Modes
+
+- mode 0 : passthrough, no processing
+- mode 1 : resize 
+- mode 2 : resize and crop  
+- mode 3 : crop 
+- mode 4 : best fit
+
 
 ### using the facade class
+
+This is a convenient way to scale images within your blade templates. It will create an imageurl similar to `/jit/storage/jit_139e2ead8b71b8c7e52a36a378835961.jpg`
 
 ```php
 
@@ -134,6 +145,9 @@ JitImage::source('path/to/myimage.jpg')->cropAndResize(500, 500, 5);
 // resize the image to best fit within the given sizes:
 JitImage::source('path/to/myimage.jpg')->fit(200, 200);
 
+// crop 200px * 200px of the image from the center, resize image if image is smaller and apply a greyscale filter:
+JitImage::source('path/to/myimage.jpg')->filter('gs')->cropAndResize(200, 200, 5);
+
 
 ```
 
@@ -141,16 +155,17 @@ JitImage::source('path/to/myimage.jpg')->fit(200, 200);
 
 There's really just one command right now. `php artisan jitimage:clearcache` will clear the whole image cache. 
 
+## Register external filter
 
+```php
 
+Event::listen('jitimage.registerfilter', function ($driverName) {
 
+    return [
+        "mf" => "Namespace\\Filter\MyFilter\\" . ucfirst($driverName) . 'MfFilter'
+    ];
 
-## Modes
+});
 
-- mode 0 : passthrough, no processing
-- mode 1 : resize 
-- mode 2 : resize and crop  
-- mode 3 : crop 
-- mode 4 : best fit
 
 
