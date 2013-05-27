@@ -54,13 +54,11 @@ class ImagickCircFilter extends ImagickFilter
         $mask->drawImage($circle);
         $mask->gammaImage(2.2);
 
-        $image->setImageFormat('png');
         $image->setImageMatte(1);
 
         $image->setImageBackgroundColor('white');
         $image->compositeImage($mask, Imagick::COMPOSITE_DSTIN, 0, 0);
-
-        $this->driver->swapResource($image);
+        $image->setImageFormat('png');
     }
 
     /**
