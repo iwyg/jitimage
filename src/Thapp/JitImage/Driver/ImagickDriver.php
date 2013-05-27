@@ -94,7 +94,7 @@ class ImagickDriver extends ImDriver
             throw new \InvalidArgumentException('Wrong resource type');
         }
 
-        return $this->resource;
+        $this->resource = $resource;
     }
 
     /**
