@@ -111,6 +111,17 @@ class JitImageResolver implements ResolverInterface
     /**
      * {@inheritDoc}
      */
+    public function getParameter($key = null)
+    {
+        if (is_null($key)) {
+            return $this->parameter;
+        }
+        return isset($this->parameter[$key]) ? $this->parameter[$key] : null;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public function resolve()
     {
         $this->image->close();

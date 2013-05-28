@@ -57,11 +57,9 @@ class JitImageResolverTest extends TestCase
         $resolver = new JitImageResolver(new JitResolveConfiguration, $image = $this->getImageMock(), $this->getCacheMock());
         $this->setParamsWithoutResolving($resolver, $params, $source, $filter);
 
-        $params = $this->getPropertyValue('parameter', $resolver);
-
-        $this->assertSame($expected['width'],  $params['width']);
-        $this->assertSame($expected['source'], $params['source']);
-        $this->assertSame($expected['filter'], $params['filter']);
+        $this->assertSame($expected['width'], $resolver->getParameter('width'));
+        $this->assertSame($expected['source'], $resolver->getParameter('source'));
+        $this->assertSame($expected['filter'], $resolver->getParameter('filter'));
     }
 
     /**

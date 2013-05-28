@@ -107,6 +107,16 @@ interface ResolverInterface
     public function getCachedUrl(ImageInterface $cachedImage);
 
     /**
+     * Get a parameter by its name.
+     *
+     * @param  string $key
+     * @access public
+     * @return mixed|array the value of the patameter, all parametes if $key is not
+     * set or null if no parameter was found.
+     */
+    public function getParameter($key = null);
+
+    /**
      * close and cleanup parameter of the resolver
      *
      * @access public
