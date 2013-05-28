@@ -12,7 +12,7 @@
 namespace Thapp\JitImage\Console;
 
 use Illuminate\Console\Command;
-use Illuminate\Filesystem\Filesystem;
+use Thapp\JitImage\Cache\CacheInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\InputArgument;
 
@@ -61,10 +61,10 @@ class JitImageCacheClearCommand extends Command
      *
      * @return void
      */
-    public function __construct(Filesystem $files)
+    public function __construct(CacheInterface $cache)
     {
         parent::__construct();
-        $this->files = $files;
+        $this->cache = $cache;
     }
 
     /**
@@ -74,12 +74,7 @@ class JitImageCacheClearCommand extends Command
      */
     public function fire()
     {
-        try {
-            foreach ($this->files->files(storage_path() . DIRECTORY_SEPARATOR . 'jit') as $file) {
-                unlink($file);
-            }
-        } catch (\Exception $e) {}
-
+        $this->cache->purge();
         $this->info('cache was successfully cleared');
     }
 }

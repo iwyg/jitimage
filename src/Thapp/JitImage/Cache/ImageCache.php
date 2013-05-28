@@ -13,6 +13,7 @@ namespace Thapp\JitImage\Cache;
 
 use Thapp\JitImage\ImageInterface;
 use Illuminate\Filesystem\Filesystem;
+use Illuminate\Support\NamespacedItemResolver;
 
 /**
  * Class: ImageCache
@@ -24,7 +25,7 @@ use Illuminate\Filesystem\Filesystem;
  * @author Thomas Appel <mail@thomas-appel.com>
  * @license MIT
  */
-class ImageCache implements CacheInterface
+class ImageCache extends NamespacedItemResolver implements CacheInterface
 {
     /**
      * pool
@@ -58,7 +59,7 @@ class ImageCache implements CacheInterface
     {
         $this->image = $image;
         $this->files = $files;
-        $this->setPath(realpath($path), $permission);
+        $this->setPath($path, $permission);
     }
 
     /**
@@ -109,11 +110,52 @@ class ImageCache implements CacheInterface
             return true;
         }
 
-        if (file_exists($path = $this->getFilePath($id))) {
+        if ($this->files->exists($path = $this->getPath($id))) {
             $this->pool[$id] = $path;
             return true;
         }
+
         return false;
+    }
+
+    /**
+     * getRelPath
+     *
+     * @param mixed $path
+     * @access public
+     * @return mixed
+     */
+    public function getRelPath($path)
+    {
+        return ltrim(substr($path, strlen($this->path)), '\\\/');
+    }
+
+    /**
+     * getIdFromUrl
+     *
+     * @param mixed $path
+     * @access public
+     * @return mixed
+     */
+    public function getIdFromUrl($url)
+    {
+        $parts = preg_split('~/~', $url, -1, PREG_SPLIT_NO_EMPTY);
+        return implode('.', array_slice($parts, count($parts) >= 2 ? -2 : -1));
+    }
+
+    /**
+     * createKey
+     *
+     * @param string $src
+     * @param string $fingerprint
+     * @param string $prefix
+     * @param string $suffix
+     * @access public
+     * @return string
+     */
+    public function createKey($src, $fingerprint = null, $prefix = 'io',  $suffix = 'f')
+    {
+        return sprintf('%s.%s_%s.%s', substr(hash('sha1', $src), 0, 8), $prefix, $this->pad($src, $fingerprint), $suffix);
     }
 
     /**
@@ -122,14 +164,60 @@ class ImageCache implements CacheInterface
      * @param mixed $id
      * @param mixed $contents
      * @access public
-     * @return mixed
+     * @return void
      */
     public function put($id, $contents)
     {
         if (false === $this->has($id)) {
-            file_put_contents($this->getFilePath($id), $contents);
+            $this->files->put($this->realizeDir($id), $contents);
         }
     }
+
+    /**
+     * create a directory if necessary
+     *
+     * @param  string $key
+     *
+     * @access protected
+     * @return string cache file path
+     */
+    protected function realizeDir($key)
+    {
+        $path = $this->getPath($key);
+
+        if (!$this->files->exists($dir = dirname($path))) {
+            $this->files->makeDirectory($dir);
+        }
+
+        return $path;
+    }
+
+    /**
+     * getPath
+     *
+     * @param mixed $key
+     * @access protected
+     * @return mixed
+     */
+    protected function getPath($key)
+    {
+        list ($ns, $dir, $file) = $this->parseKey($key);
+        return sprintf('%s/%s/%s', $this->path, $dir, $file);
+    }
+
+    /**
+     * pad
+     *
+     * @param mixed $src
+     * @param mixed $pad
+     * @access protected
+     * @return mixed
+     */
+    protected function pad($src, $pad)
+    {
+        return substr(hash('sha1', sprintf('%s%s', $src, $pad)), 0, 16);
+    }
+
 
     /**
      * getFilePath
@@ -140,5 +228,37 @@ class ImageCache implements CacheInterface
     protected function getFilePath($id)
     {
         return sprintf('%s/%s', $this->path, $id);
+    }
+
+    /**
+     * purge
+     *
+     * @access public
+     * @return void
+     */
+    public function purge()
+    {
+        try {
+            foreach ($this->files->directories($this->path) as $directory) {
+                $this->files->deleteDirectory($directory);
+            }
+        } catch (\Exception $e) {}
+    }
+
+    /**
+     * delete
+     *
+     * @param mixed $src
+     * @access public
+     * @return mixed
+     */
+    public function delete($id)
+    {
+        $id = $this->createKey($id);
+        $dir = substr($id, 0, strpos($id, '.'));
+
+        if ($this->files->exists($dir = $this->path . '/' . $dir)) {
+            $this->files->deleteDirectory($dir);
+        }
     }
 }

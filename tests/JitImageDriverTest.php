@@ -93,6 +93,10 @@ abstract class JitImageDriverTest extends TestCase
             @unlink($this->testFile);
         }
     }
+
+    /**
+     * @test
+     */
     public function testParalellProcess()
     {
         $imageA = $this->createTestImage(400, 400);
@@ -160,6 +164,21 @@ abstract class JitImageDriverTest extends TestCase
     }
 
     /**
+     * @dataProvider imageTypeProvider
+     */
+    public function testGetOutputMimeType($setType, $type, $mime)
+    {
+        $image = $this->createTestImage();
+        $this->driver->load($image);
+
+        if (!is_null($setType)) {
+            $this->driver->setOutputType($setType);
+        }
+
+        $this->assertSame($mime, $this->driver->getOutputMimeType());
+    }
+
+    /**
      * @test
      * @dataProvider cropFilterParameterProvider
      */
@@ -177,6 +196,53 @@ abstract class JitImageDriverTest extends TestCase
         $this->markTestIncomplete();
     }
 
+    /**
+     * @dataProvider imageTypeProvider
+     */
+    public function testGetInfoType($what, $imageType, $mime)
+    {
+        $image = $this->createTestImage(200, 200, $imageType);
+        $this->driver->load($image);
+
+        extract($this->driver->getInfo());
+
+        $this->assertSame($mime, $type);
+    }
+
+    /**
+     * testGetInfoDimenstios
+     *
+     * @param mixed $what
+     * @param mixed $imageType
+     * @param mixed $mime
+     * @access public
+     * @return mixed
+     * @dataProvider sizeRatioProvider
+     */
+    public function testGetInfoDimenstios($w, $h, $imageRatio)
+    {
+        $image = $this->createTestImage($w, $h);
+        $this->driver->load($image);
+
+        extract($this->driver->getInfo());
+
+        $this->assertSame($imageRatio, $ratio);
+    }
+
+    /**
+     * @dataProvider imageTypeProvider
+     */
+    public function testGetInfoModifiedOutPutType($what, $imageType, $mime)
+    {
+        $image = $this->createTestImage();
+        $this->driver->load($image);
+
+        $this->driver->setOutputType($imageType);
+
+        extract($this->driver->getInfo());
+
+        $this->assertSame('image/jpeg', $type);
+    }
 
     /**
      * runImageFilter
@@ -233,6 +299,12 @@ abstract class JitImageDriverTest extends TestCase
         ];
     }
 
+    /**
+     * imageTypeProvider
+     *
+     * @access public
+     * @return mixed
+     */
     public function imageTypeProvider()
     {
         return [
@@ -244,6 +316,21 @@ abstract class JitImageDriverTest extends TestCase
     }
 
 
+    /**
+     * sizeRatioProvider
+     *
+     * @access public
+     * @return mixed
+     */
+    public function sizeRatioProvider()
+    {
+        return [
+            [200, 200, 1],
+            [200, 144, (float)(200 / 144)],
+            [144, 220, (float)(144 / 220)],
+            [530, 445, (float)(530 / 445)]
+        ];
+    }
     /**
      * resizeParameterProvider
      *

@@ -32,7 +32,7 @@ return [
      * ------------------------------------------------
      */
 
-    'driver'      => 'im',
+    'driver'      => 'imagick',
 
     /* ------------------------------------------------
      * cache processed images only in this environments

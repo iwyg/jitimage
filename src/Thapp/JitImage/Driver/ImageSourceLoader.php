@@ -62,18 +62,33 @@ class ImageSourceLoader implements SourceLoaderInterface
     public function load($url)
     {
         if (file_exists($url)) {
-            return $url;
+            return $this->validate($url);
         }
 
         if (preg_match('#^(https?|spdy)://#', $url)) {
 
             if ($file = $this->loadRemoteFile($url)) {
-                return $file;
+                return $this->validate($file);
             }
-
         }
 
         throw new ImageResourceLoaderException(sprintf('Invalid Source URL: %s', $url));
+    }
+
+    /**
+     * valid
+     *
+     * @param mixed $url
+     * @access private
+     * @return mixed
+     */
+    private function validate($url)
+    {
+        if (@getimagesize($url)) {
+            return $url;
+        }
+
+        return false;
     }
 
     /**

@@ -71,11 +71,11 @@ class JitImageResolverTest extends TestCase
     public function testResolveImage()
     {
         $resolver = new JitImageResolver(new JitResolveConfiguration, $image = $this->getImageMock(function (&$mock) {
-            $mock->shouldReceive('load');
+            $mock->shouldReceive('load')->andReturn(true);
             $mock->shouldReceive('process');
             $mock->shouldReceive('getContents')->andReturn('foo');
             $mock->shouldReceive('close');
-        }), $this->getCacheMock(function (&$mock) {
+        }), $this->getCacheMock(function (&$mock) use ($image) {
             $mock->shouldReceive('put');
             $mock->shouldReceive('has')->andReturn(false);
         }));
@@ -103,9 +103,10 @@ class JitImageResolverTest extends TestCase
      */
     public function testResolveCachedImage()
     {
-        $resolver = new JitImageResolver(new JitResolveConfiguration(['cache' => true]), $image = $this->getImageMock(), $this->getCacheMock(function (&$mock) use ($image) {
+        $resolver = new JitImageResolver(new JitResolveConfiguration(['cache' => true]), $image = $this->getImageMock(), $cache = $this->getCacheMock(function (&$mock) use ($image) {
             $mock->shouldReceive('has')->andReturn(true);
             $mock->shouldReceive('get')->andReturn($image);
+            $mock->shouldReceive('getIdFromUrl')->andReturn('some/image.jpg');
         }));
 
         $resolver->setParameter('0');
@@ -190,6 +191,8 @@ class JitImageResolverTest extends TestCase
     protected function getCacheMock(Closure $setup = null)
     {
         $cache = m::mock('\Thapp\JitImage\Cache\CacheInterface');
+
+        $cache->shouldReceive('createKey');
 
         if (!is_null($setup)) {
             $setup($cache);

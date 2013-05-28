@@ -68,6 +68,14 @@ interface DriverInterface
     public function clean();
 
     /**
+     * getError
+     *
+     * @access public
+     * @return string|boolean false
+     */
+    public function getError();
+
+    /**
      * registers an imagefilter
      *
      * @param  string $alias filter alias

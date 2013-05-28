@@ -41,7 +41,6 @@ class JitImageImageSourceLoaderTest extends TestCase
      */
     protected $loader;
 
-
     /**
      * create new Thapp\JitImage\Driver\ImageSourceLoader instance
      *
@@ -91,7 +90,7 @@ class JitImageImageSourceLoaderTest extends TestCase
     {
         $url = './file.jpg';
 
-        $this->loader->load($url);
+        $this->assertFalse($this->loader->load($url));
     }
 
     /**
@@ -116,8 +115,16 @@ class JitImageImageSourceLoaderTest extends TestCase
         $root = vfsStream::setup('images');
         $url  = vfsStream::url('images');
 
+
+        $image = imagecreatetruecolor(200, 200);
+
+        ob_start();
+        imagejpeg($image);
+        $contents = ob_get_contents();
+        ob_end_clean();
+
         $file = $url . '/image.jpg';
-        touch($file);
+        file_put_contents($file, $contents);
 
         $this->assertEquals($file, $this->loader->load($file));
     }

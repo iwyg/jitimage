@@ -85,7 +85,13 @@ class GdDriver extends AbstractDriver
     public function load($source)
     {
         $this->clean();
-        $this->resource = $this->loadResourceFromType($source);
+
+        if (!$src = $this->loadResourceFromType($source)) {
+            return false;
+        }
+
+        $this->resource = $src;
+        return true;
     }
 
     /**
@@ -125,14 +131,22 @@ class GdDriver extends AbstractDriver
         }
 
         ob_start();
+
         call_user_func($fn, $this->resource, null, $this->getQuality());
         $contents = ob_get_contents();
+
         ob_end_clean();
 
         return $contents;
     }
 
-    protected function getQuality()
+    /**
+     * getQuality
+     *
+     * @access protected
+     * @return mixed
+     */
+    private function getQuality()
     {
         if ('png' === $this->getOutputType()) {
             return floor((9 / 100) * min(100, $this->quality));
@@ -166,11 +180,20 @@ class GdDriver extends AbstractDriver
      */
     private function loadResourceFromType($source)
     {
-        $this->source = $this->loader->load($source);
 
-        $type = getimagesize($this->source);
+        $type = getimagesize($source);
 
         $fn = sprintf('imagecreatefrom%s', $type = substr($type['mime'], strpos($type['mime'], '/') + 1));
+
+        if (!function_exists($fn)) {
+
+            $this->error = sprintf('%s is not a supported image type', $type['mime']);
+            $this->clean();
+            return false;
+
+        }
+
+        $this->source = $this->loader->load($source);
         $this->outputType = $type;
 
         return call_user_func($fn, $this->source);

@@ -84,7 +84,6 @@ class JitImageResolver implements ResolverInterface
      */
     public function resolve()
     {
-
         $this->image->close();
 
         if (!$this->canResolve()) {
@@ -97,14 +96,20 @@ class JitImageResolver implements ResolverInterface
             return $image;
         }
 
+        // something went wrong
         if (!$img = $this->isReadableFile($this->parameter)) {
             return false;
         }
 
-        $this->image->load($img);
+        // something went wrong
+        if (!$this->image->load($img)) {
+            return false;
+        }
+
         $this->image->process($this);
 
         $this->config->cache and $this->processCache->put($id, $this->image->getContents());
+
         return $this->image;
     }
 
@@ -144,7 +149,7 @@ class JitImageResolver implements ResolverInterface
      */
     public function getCachedUrl(ImageInterface $cachedImage)
     {
-        return sprintf('/%s/%s', $this->config->cache_route, basename($cachedImage->getSource()));
+        return sprintf('/%s/%s', $this->config->cache_route, $this->processCache->getRelPath($cachedImage->getSource()));
     }
 
     /**
@@ -156,6 +161,8 @@ class JitImageResolver implements ResolverInterface
      */
     public function resolveFromCache($id)
     {
+        $id = $this->processCache->getIdFromUrl($id);
+
         if ($this->processCache->has($id)) {
             $this->image->close();
             $this->image = $this->processCache->get($id);
@@ -485,9 +492,11 @@ class JitImageResolver implements ResolverInterface
     protected function getImageRequestId($requestString, $source = null)
     {
         if (!isset($this->cachedNames[$requestString])) {
-            $this->cachedNames[$requestString] = sprintf('%s_%s.%s',
+
+            $this->cachedNames[$requestString] = $this->processCache->createKey(
+                $source,
+                $requestString,
                 $this->config->cache_prefix,
-                hash('md5', $requestString),
                 pathinfo($source, PATHINFO_EXTENSION)
             );
         }
@@ -527,7 +536,7 @@ class JitImageResolver implements ResolverInterface
 
         $trusted = $this->config->trusted_sites;
 
-        if (!empty($trusted)) {
+        if (false === empty($trusted)) {
 
             extract(parse_url($url));
 
@@ -535,7 +544,7 @@ class JitImageResolver implements ResolverInterface
                 return false;
             }
         }
-
+        //var_dump('ttttt', $url);
         return $url;
     }
 }

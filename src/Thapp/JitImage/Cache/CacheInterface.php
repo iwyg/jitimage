@@ -1,7 +1,7 @@
 <?php
 
 /**
- * This File is part of the vendor\thapp\jitimage\src\Thapp\JitImage\Cache package
+ * This File is part of the Thapp\JitImage package
  *
  * (c) Thomas Appel <mail@thomas-appel.com>
  *
@@ -12,11 +12,11 @@
 namespace Thapp\JitImage\Cache;
 
 /**
- * Class: CacheInterface
+ * Interface: CacheInterface
  *
  *
- * @package
- * @version
+ * @package Thapp\JitImage
+ * @version $Id$
  * @author Thomas Appel <mail@thomas-appel.com>
  * @license MIT
  */
@@ -50,5 +50,54 @@ interface CacheInterface
      * @return mixed
      */
     public function put($id, $contents);
+
+    /**
+     * createKey
+     *
+     * @param mixed $src
+     * @param mixed $fingerprint
+     * @param string $prefix
+     * @param string $suffix
+     * @access public
+     * @return mixed
+     */
+    public function createKey($src, $fingerprint = null, $prefix = 'io',  $suffix = 'f');
+
+    /**
+     * delete
+     *
+     * @param mixed $id
+     * @access public
+     * @return void
+     */
+    public function delete($id);
+
+    /**
+     * purge
+     *
+     * @access public
+     * @return void
+     */
+    public function purge();
+
+    /**
+     * getRelPath
+     *
+     * @param  string $path
+     *
+     * @access public
+     * @return string
+     */
+    public function getRelPath($path);
+
+    /**
+     * getIdFromUrl
+     *
+     * @param  string $url
+     *
+     * @access public
+     * @return string
+     */
+    public function getIdFromUrl($url);
 }
 

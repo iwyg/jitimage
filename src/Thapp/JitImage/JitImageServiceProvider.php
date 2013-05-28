@@ -91,6 +91,10 @@ class JitImageServiceProvider extends ServiceProvider
             return $this->app->make('Thapp\JitImage\JitImage');
         });
 
+        $this->app['jitimage.cache'] = $this->app->share(function () {
+            return $this->app->make('Thapp\JitImage\Cache\CacheInterface');
+        });
+
         $this->registerFilter($driverName, $this->getFilters());
     }
 
@@ -133,7 +137,9 @@ class JitImageServiceProvider extends ServiceProvider
         $route      = $config->get('jitimage::route', 'image');
         $cacheroute = $config->get('jitimage::cacheroute', 'jit/storage');
 
-        $this->app['router']->get($cacheroute . '/{id}', 'Thapp\JitImage\Controller\JitController@getCached');
+        $this->app['router']
+            ->get($cacheroute . '/{id}', 'Thapp\JitImage\Controller\JitController@getCached')
+            ->where('id', '(.*\/){1}.*');
 
         if (!empty($recepies)) {
             return $this->registerRecepies($recepies, $route);
@@ -155,7 +161,11 @@ class JitImageServiceProvider extends ServiceProvider
      */
     protected function regsiterCommands()
     {
-        $this->app->bind('command.jitimage.clearcache', 'Thapp\JitImage\Console\JitImageCacheClearCommand');
+        $this->app['command.jitimage.clearcache'] = $this->app->share(function($app)
+		{
+			return new Console\JitImageCacheClearCommand($app['jitimage.cache']);
+        });
+
         $this->commands('command.jitimage.clearcache');
     }
     /**

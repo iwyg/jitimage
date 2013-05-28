@@ -109,7 +109,14 @@ class ImDriver extends AbstractDriver
     public function load($source)
     {
         $this->clean();
-        $this->source = $this->loader->load($source);
+
+        if ($src = $this->loader->load($source)) {
+            $this->source = $src;
+            return true;
+        }
+
+        $this->error = 'error loading source';
+        return false;
     }
 
     /**

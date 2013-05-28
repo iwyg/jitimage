@@ -133,8 +133,17 @@ class ImagickDriver extends ImDriver
     public function load($source)
     {
         $this->clean();
-        $this->source = $this->loader->load($source);
-        $this->resource = new Imagick($source);
+
+        if ($src = $this->loader->load($source)) {
+            $this->source = $src;
+            $this->resource = new Imagick($source);
+            $this->getInfo();
+
+            return true;
+        }
+
+        $this->error = 'error loading source';
+        return false;
     }
 
     /**
@@ -322,9 +331,6 @@ class ImagickDriver extends ImDriver
             break;
         // ignoring aspect ration is default behaviour on imagick resize
         case static::FL_IGNR_ASPR:
-            if (0 === min($width, $height)) {
-                //var_dump($width, $height); die;
-            }
             break;
         // No scaling for larger images.
         // Would be easier to just set `bestfit`, but its behaviour changed
@@ -368,7 +374,7 @@ class ImagickDriver extends ImDriver
             'height' => $height,
             'ratio'  => $this->ratio($width, $height),
             'size'   => $this->resource->getImageLength(),
-            'type'   => $this->getOutputType(),
+            'type'   => sprintf('image/%s', strtolower($this->resource->getImageFormat())),
         ];
     }
 

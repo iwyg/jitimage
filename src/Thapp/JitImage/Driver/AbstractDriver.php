@@ -94,6 +94,13 @@ abstract class AbstractDriver implements DriverInterface
     protected $outputType;
 
     /**
+     * error
+     *
+     * @var string
+     */
+    protected $error;
+
+    /**
      * clean up temporary files after shutdown
      *
      * @access public
@@ -170,6 +177,17 @@ abstract class AbstractDriver implements DriverInterface
     {
         extract($this->targetSize);
         return $this->getImageSize($width, $height);
+    }
+
+    /**
+     * getError
+     *
+     * @access public
+     * @return mixed
+     */
+    public function getError()
+    {
+        return !is_null($this->error) ? $this->error : false;
     }
 
     /**
