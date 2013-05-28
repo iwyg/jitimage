@@ -1,7 +1,7 @@
 <?php
 
 /**
- * This File is part of the Thapp\JitImage\Filter\Oval package
+ * This File is part of the Thapp\JitImage package
  *
  * (c) Thomas Appel <mail@thomas-appel.com>
  *
@@ -21,8 +21,8 @@ use Thapp\JitImage\Filter\ImagickFilter;
  *
  * @uses ImagickFilter
  *
- * @package
- * @version
+ * @package Thapp\JitImage
+ * @version $Id$
  * @author Thomas Appel <mail@thomas-appel.com>
  * @license MIT
  */
@@ -30,14 +30,10 @@ class ImagickCircFilter extends ImagickFilter
 {
 
     /**
-     * run
-     *
-     * @access public
-     * @return mixed
+     * {@inheritdoc}
      */
     public function run()
     {
-
         extract($this->driver->getTargetSize());
 
         $image = $this->driver->getResource();

@@ -16,8 +16,8 @@ namespace Thapp\JitImage;
  *
  * @implements Thapp\JitImage\ResolverConfigInterface
  *
- * @package
- * @version
+ * @package Thapp\JitImage
+ * @version $Id$
  * @author Thomas Appel <mail@thomas-appel.com>
  * @license MIT
  */
@@ -40,9 +40,9 @@ class JitResolveConfiguration implements ResolverConfigInterface
     ];
 
     /**
-     * __construct
+     * Create a new JitResolveConfiguration object.
      *
-     * @param array $data
+     * @param array $data initial configuration data.
      * @access public
      */
     public function __construct(array $data = [])
@@ -51,10 +51,10 @@ class JitResolveConfiguration implements ResolverConfigInterface
     }
 
     /**
-     * set
+     * Will set a configuration value, given its attribute name is contained in
+     * `static::$allowedAttributes`
      *
-     * @access public
-     * @return void|boolean false on failure
+     * {@inheritdoc}
      */
     public function set($attribute, $value)
     {
@@ -65,11 +65,7 @@ class JitResolveConfiguration implements ResolverConfigInterface
     }
 
     /**
-     * setAttributesArray
-     *
-     * @param array $attributes
-     * @access public
-     * @return void
+     * {@inheritdoc}
      */
     public function setAttributesArray(array $attributes)
     {
@@ -79,10 +75,7 @@ class JitResolveConfiguration implements ResolverConfigInterface
     }
 
     /**
-     * get
-     *
-     * @access public
-     * @return mixed
+     * {@inheritdoc}
      */
     public function get($attribute = null)
     {
@@ -97,11 +90,7 @@ class JitResolveConfiguration implements ResolverConfigInterface
     }
 
     /**
-     * __get
-     *
-     * @param mixed $attribute
-     * @access public
-     * @return mixed
+     * {@inheritdoc}
      */
     public function __get($attribute)
     {

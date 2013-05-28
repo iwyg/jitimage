@@ -13,6 +13,7 @@ namespace Thapp\JitImage\Controller;
 
 use Illuminate\Http\Response;
 use Illuminate\Routing\Router;
+use Illuminate\Routing\Controller\Controller;
 use Thapp\JitImage\ImageInterface;
 use Illuminate\Container\Container;
 use Thapp\JitImage\ResolverInterface;
@@ -21,14 +22,14 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 /**
  * Class: JitController
  *
- * @uses \BaseController
+ * @uses Controller
  *
- * @package
- * @version
+ * @package Thapp\JitImage
+ * @version $Id$
  * @author Thomas Appel <mail@thomas-appel.com>
  * @license MIT
  */
-class JitController extends \BaseController
+class JitController extends Controller
 {
     /**
      * image
@@ -40,21 +41,15 @@ class JitController extends \BaseController
     /**
      * defaults
      *
-     * @var mixed
+     * @var array
      */
     protected $defaults;
 
     /**
-     * defaults
+     * Create a new JitController
      *
-     * @var mixed
-     */
-    protected $response;
-
-    /**
-     * __construct
+     * @param  ResolverInterface $imageResolver The resolver object
      *
-     * @param Image $image
      * @access public
      */
     public function __construct(ResolverInterface $imageResolver)
@@ -63,7 +58,7 @@ class JitController extends \BaseController
     }
 
     /**
-     * getImage
+     * Handler method that's being called for dynamic image processing.
      *
      * @param string $mode
      * @param string $height
@@ -88,9 +83,10 @@ class JitController extends \BaseController
     }
 
     /**
-     * getResource
+     * Handler method that's being called for aliased image processing.
      *
-     * @param mixed $source
+     * @param  string $source the source image to be processed
+     *
      * @access public
      * @return mixed
      */
@@ -112,8 +108,25 @@ class JitController extends \BaseController
     }
 
     /**
-     * callAction
+     * Handler method for resolving cached images.
      *
+     * @param mixed $key
+     * @access public
+     * @return void
+     */
+    public function getCached($key)
+    {
+        if ($image = $this->imageResolver->resolveFromCache($key)) {
+            return $this->render($image);
+        }
+
+        return $this->notFound();
+    }
+
+    /**
+     * Set the bound defaul values and execute the parent callAction() method.
+     *
+     * @see \Illuminate\Routing\Controller\Controller#callAction()
      * @access public
      * @return void
      */
@@ -124,26 +137,11 @@ class JitController extends \BaseController
     }
 
     /**
-     * getCached
+     * Hanlde image not found error.
      *
-     * @param mixed $source
-     * @access public
-     * @return mixed
-     */
-    public function getCached($id)
-    {
-        if ($image = $this->imageResolver->resolveFromCache($id)) {
-            return $this->render($image);
-        }
-
-        return $this->notFound();
-    }
-
-    /**
-     * notFound
-     *
+     * @throws NotFoundHttpException
      * @access protected
-     * @return mixed
+     * @return void
      */
     protected function notFound()
     {
@@ -153,10 +151,10 @@ class JitController extends \BaseController
 
 
     /**
-     * render
+     * Create a new response and send its contents.
      *
      * @access protected
-     * @return mixed
+     * @return void
      */
     protected function render(ImageInterface $image)
     {

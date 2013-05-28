@@ -16,29 +16,22 @@ use Thapp\JitImage\Cache\CacheInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\InputArgument;
 
-
 /**
  * Class: JitImageCacheClearCommand
  *
  *
  * @package Thapp\JitImage
- * @version
+ * @version $Id$
  * @author Thomas Appel <mail@thomas-appel.com>
  * @license MIT
  */
 class JitImageCacheClearCommand extends Command
 {
-    /**
-     * config
-     *
-     * @var array
-     */
-    protected $config;
 
     /**
-     * container
+     * files
      *
-     * @var Illuminate\Container\Container
+     * @var \Illuminate\Filesystem\Filesystem
      */
     protected $files;
 

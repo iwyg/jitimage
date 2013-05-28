@@ -1,7 +1,7 @@
 <?php
 
 /**
- * This File is part of the vendor\thapp\jitimage\src\Thapp\JitImage\Filter package
+ * This File is part of the Thapp\JitImage package
  *
  * (c) Thomas Appel <mail@thomas-appel.com>
  *
@@ -12,9 +12,17 @@
 namespace Thapp\JitImage\Filter;
 
 /**
- * @class ImagickFilter
+ * Class: ImagickFilter
+ * Baseclass for Imagick filters.
+ *
+ * @uses AbstractFilter
+ * @abstract
+ *
+ * @package Thapp\JitImage
+ * @version $Id$
+ * @author Thomas Appel <mail@thomas-appel.com>
+ * @license MIT
  */
-
 abstract class ImagickFilter extends AbstractFilter
 {
     /**

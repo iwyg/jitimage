@@ -14,9 +14,10 @@ namespace Thapp\JitImage;
 /**
  * Class: JitImage
  *
+ * An adapter to easily utilize Image and ImageResolver
  *
- * @package
- * @version
+ * @package Thapp\JitImage
+ * @version $Id$
  * @author Thomas Appel <mail@thomas-appel.com>
  * @license MIT
  */

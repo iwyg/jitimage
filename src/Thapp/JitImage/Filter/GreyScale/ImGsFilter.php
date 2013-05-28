@@ -14,22 +14,20 @@ namespace Thapp\JitImage\Filter\GreyScale;
 use Thapp\JitImage\Filter\ImFilter;
 
 /**
- * Class: ImagickGsFilter
+ * Class: ImGsFilter
  *
- * @uses ImagickFilter
+ * @uses ImFilter
  *
  * @package Thapp\JitImage
- * @version
+ * @version $Id$
  * @author Thomas Appel <mail@thomas-appel.com>
  * @license MIT
  */
 class ImGsFilter extends ImFilter
 {
+
     /**
-     * run
-     *
-     * @access public
-     * @return void
+     * {@inheritdoc}
      */
     public function run()
     {

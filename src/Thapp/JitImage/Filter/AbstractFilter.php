@@ -1,7 +1,7 @@
 <?php
 
 /**
- * This File is part of the vendor\thapp\jitimage\src\Thapp\JitImage\Filter package
+ * This File is part of the Thapp\JitImage package
  *
  * (c) Thomas Appel <mail@thomas-appel.com>
  *
@@ -14,9 +14,16 @@ namespace Thapp\JitImage\Filter;
 use Thapp\JitImage\Driver\DriverInterface;
 
 /**
- * @class ImagickFilter
+ * Class: AbstractFilter
+ *
+ * @implements FilterInterface
+ * @abstract
+ *
+ * @package Thapp\JitImage
+ * @version $Id$
+ * @author Thomas Appel <mail@thomas-appel.com>
+ * @license MIT
  */
-
 abstract class AbstractFilter implements FilterInterface
 {
     /**
@@ -34,7 +41,7 @@ abstract class AbstractFilter implements FilterInterface
     protected $options = [];
 
     /**
-     * run
+     * Exeecute the filter processing.
      *
      * @access public
      * @abstract
@@ -43,11 +50,10 @@ abstract class AbstractFilter implements FilterInterface
     abstract public function run();
 
     /**
-     * __construct
+     * Creates a new filter object.
      *
      * @param Imagick $resource
      * @access public
-     * @return mixed
      */
     final public function __construct(DriverInterface $driver, $options)
     {
@@ -58,10 +64,10 @@ abstract class AbstractFilter implements FilterInterface
     }
 
     /**
-     * getOption
+     * Get a filter option.
      *
-     * @param mixed $option
-     * @param mixed $default
+     * @param string $option option name
+     * @param mixed  $default the default value to return
      * @access public
      * @return mixed
      */
@@ -74,8 +80,9 @@ abstract class AbstractFilter implements FilterInterface
     }
 
     /**
-     * ensureCompat
+     * Ensure driver compatibility.
      *
+     * @throws \Exception
      * @access private
      * @return void
      */

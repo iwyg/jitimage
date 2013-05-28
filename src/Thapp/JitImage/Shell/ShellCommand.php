@@ -1,7 +1,7 @@
 <?php
 
 /**
- * This File is part of the vendor\thapp\jitimage\src\Thapp\JitImage\Shell package
+ * This File is part of the Thapp\JitImage package
  *
  * (c) Thomas Appel <mail@thomas-appel.com>
  *
@@ -16,16 +16,24 @@ use \Closure;
 /**
  * Trait: ShellCommand
  *
- * @package
- * @version
+ * @package Thapp\JitImage
+ * @version $Id$
  * @author Thomas Appel <mail@thomas-appel.com>
  * @license MIT
  */
 trait ShellCommand
 {
-    private $cmds = [];
     /**
-     * runCmd
+     * cmds
+     *
+     * list of all executed commands
+     *
+     * @var array
+     */
+    private $cmds = [];
+
+    /**
+     * run a shell command
      *
      * @param string  $cmd the shell command
      * @param string  $exception exeption class
@@ -63,7 +71,7 @@ trait ShellCommand
     }
 
     /**
-     * getLastCmd
+     * get last executed command
      *
      * @access public
      * @return string
@@ -75,7 +83,7 @@ trait ShellCommand
     }
 
     /**
-     * exec
+     * execute the command
      *
      * @param string $cmd
      * @param string $stdout

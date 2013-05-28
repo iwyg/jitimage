@@ -19,12 +19,15 @@ use Illuminate\Support\Facades\Facade;
  * @uses Facade
  *
  * @package Thapp\JitImage
- * @version
+ * @version $Id$
  * @author Thomas Appel <mail@thomas-appel.com>
  * @license MIT
  */
 class JitImage extends Facade
 {
+    /**
+     * @see Illuminate\Support\Facades\Facade#getFacadeAccessor()
+     */
     protected static function getFacadeAccessor()
     {
         return 'jitimage';

@@ -18,7 +18,7 @@ namespace Thapp\JitImage\Driver;
  * @abstract
  *
  * @package Thapp\JitImage
- * @version
+ * @version $Id$
  * @author Thomas Appel <mail@thomas-appel.com>
  * @license MIT
  */

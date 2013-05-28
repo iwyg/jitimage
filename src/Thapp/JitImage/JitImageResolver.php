@@ -14,12 +14,12 @@ namespace Thapp\JitImage;
 use Thapp\JitImage\Cache\CacheInterface;
 
 /**
- * Class: ImageUrlResolver
+ * Class: JitImageResolver
  *
  * @implements ResolverInterface
  *
- * @package
- * @version
+ * @package Thapp\JitImage
+ * @version $Id$
  * @author Thomas Appel <mail@thomas-appel.com>
  * @license MIT
  */
@@ -61,12 +61,13 @@ class JitImageResolver implements ResolverInterface
     protected $cachedNames;
 
     /**
-     * __construct
+     * create a new instance of \Thapp\JitImage\JitImageResolver
      *
-     * @param ImageInterface $image
-     * @param CacheInterface $cache
+     * @param \Thapp\JitImage\ResolverConfigInterface  $config
+     * @param \Thapp\JitImage\ImageInterface           $image
+     * @param \Thapp\JitImage\Cache\CacheInterface     $cache
+     *
      * @access public
-     * @return mixed
      */
     public function __construct(ResolverConfigInterface $config, ImageInterface $image, CacheInterface $cache)
     {
@@ -76,11 +77,39 @@ class JitImageResolver implements ResolverInterface
     }
 
     /**
-     * resolvePath
-     *
-     * @param mixed $arguments
-     * @access public
-     * @return mixed
+     * {@inheritDoc}
+     */
+    public function setResolveBase($base = '/')
+    {
+        return $this->config->set('base', $base);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function setParameter($parameter)
+    {
+        $this->input['parameter'] = $parameter;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function setSource($source)
+    {
+        $this->input['source'] = $source;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function setFilter($filter = null)
+    {
+        $this->input['filter'] = $filter;
+    }
+
+    /**
+     * {@inheritDoc}
      */
     public function resolve()
     {
@@ -114,10 +143,7 @@ class JitImageResolver implements ResolverInterface
     }
 
     /**
-     * close
-     *
-     * @access public
-     * @return mixed
+     * {@inheritDoc}
      */
     public function close()
     {
@@ -126,10 +152,7 @@ class JitImageResolver implements ResolverInterface
     }
 
     /**
-     * getCached
-     *
-     * @access public
-     * @return mixed
+     * {@inheritDoc}
      */
     public function getCached()
     {
@@ -142,10 +165,7 @@ class JitImageResolver implements ResolverInterface
     }
 
     /**
-     * getCachedUrl
-     *
-     * @access public
-     * @return string
+     * {@inheritDoc}
      */
     public function getCachedUrl(ImageInterface $cachedImage)
     {
@@ -153,11 +173,7 @@ class JitImageResolver implements ResolverInterface
     }
 
     /**
-     * resolveFromCache
-     *
-     * @param mixed $id
-     * @access public
-     * @return bool
+     * {@inheritDoc}
      */
     public function resolveFromCache($id)
     {
@@ -172,6 +188,20 @@ class JitImageResolver implements ResolverInterface
         return false;
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    public function disableCache()
+    {
+        $this->config->set('cache', false);
+    }
+
+    /**
+     * determine if all params are set
+     *
+     * @access protected
+     * @return bool
+     */
     protected function canResolve()
     {
         return is_array($this->input)
@@ -181,7 +211,7 @@ class JitImageResolver implements ResolverInterface
     }
 
     /**
-     * parseAll
+     * parse input parameter
      *
      * @access protected
      * @return void
@@ -198,110 +228,25 @@ class JitImageResolver implements ResolverInterface
     }
 
     /**
-     * disableCache
-     *
-     * @param mixed $param
-     * @access public
-     * @return mixed
-     */
-    public function disableCache()
-    {
-        $this->config->set('cache', false);
-    }
-
-    /**
-     * setResolveBase
-     *
-     * @param string $base
-     * @access public
-     * @return mixed
-     */
-    public function setResolveBase($base = '/')
-    {
-        return $this->config->set('base', $base);
-    }
-
-    /**
-     * setQuality
-     *
-     * @param mixed $param
-     * @access public
-     * @return mixed
-     */
-    public function setQuality($quality)
-    {
-        $this->quality = $quality;
-    }
-
-    /**
-     * getFilterVars
-     *
-     * @param mixed $filter
-     * @access public
-     * @return array
-     */
-    public function getFilterVars($filter = null)
-    {
-        if (!is_null($filter) and isset($this->parameter['filter'][$filter])) {
-            return $this->parameter['filter'][$filter];
-        }
-        return $this->parameter['filter'];
-    }
-
-    /**
-     * getParameter
-     *
-     * @param array $fragments
-     * @access protected
-     * @return array
-     */
-    public function setParameter($parameter)
-    {
-        $this->input['parameter'] = $parameter;
-    }
-
-    /**
-     * setSource
-     *
-     * @param mixed $source
-     * @access public
-     * @return mixed
-     */
-    public function setSource($source)
-    {
-        $this->input['source'] = $source;
-    }
-
-    /**
-     * setFilter
-     *
-     * @param mixed $filter
-     * @access public
-     * @return mixed
-     */
-    public function setFilter($filter = null)
-    {
-        $this->input['filter'] = $filter;
-    }
-
-    /**
-     * getInputQuery
+     * get the input query as a string
      *
      * @access protected
-     * @return mixed
+     * @return string
      */
     protected function getInputQuery()
     {
         return implode('/', array_values($this->input));
     }
+
     /**
-     * parseParameter
+     * parse input parameter
      *
-     * @param mixed $mode
-     * @param mixed $width
-     * @param mixed $height
-     * @param mixed $gravity
-     * @param mixed $source
+     * @param string       $mode
+     * @param string|null  $width
+     * @param string|null  $height
+     * @param string|null  $gravity
+     * @param string       $source
+     *
      * @access protected
      * @return void
      */
@@ -340,7 +285,7 @@ class JitImageResolver implements ResolverInterface
 
 
     /**
-     * parseSource
+     * parse the input source parameter
      *
      * @access protected
      * @return mixed
@@ -351,18 +296,7 @@ class JitImageResolver implements ResolverInterface
     }
 
     /**
-     * getIntVal
-     *
-     * @param mixed $value
-     * @access protected
-     * @return int|null
-     */
-    protected function getIntVal($value = null)
-    {
-        return is_null($value) ? $value : (int)$value;
-    }
-    /**
-     * parseFilter
+     * parse the filter input parameter
      *
      * @access protected
      * @return mixed
@@ -379,20 +313,16 @@ class JitImageResolver implements ResolverInterface
         $this->parameter['filter'] = [];
     }
 
-
-
     /**
-     * getParameter
+     * getIntVal
      *
-     * @access public
-     * @return mixed
+     * @param mixed $value
+     * @access protected
+     * @return int|null
      */
-    public function getParameter($key = null)
+    protected function getIntVal($value = null)
     {
-        if (is_null($key)) {
-            return $this->parameter;
-        }
-        return isset($this->parameter[$key]) ? $this->parameter[$key] : null;
+        return is_null($value) ? $value : (int)$value;
     }
 
     /**
@@ -456,9 +386,8 @@ class JitImageResolver implements ResolverInterface
     }
 
     /**
-     * getOptionalColor
+     * extract a possible color string from the parameter input
      *
-     * @param mixed $source
      * @param array $parameter
      * @access protected
      * @return void
@@ -481,7 +410,7 @@ class JitImageResolver implements ResolverInterface
     }
 
     /**
-     * getImageRequestId
+     * returns the image cache id string
      *
      * @param mixed $requestString
      * @param mixed $width
@@ -508,7 +437,7 @@ class JitImageResolver implements ResolverInterface
      * isReadableFile
      *
      * @access protected
-     * @return mixed
+     * @return string|boolean
      */
     protected function isReadableFile(array $parameter)
     {
@@ -544,7 +473,6 @@ class JitImageResolver implements ResolverInterface
                 return false;
             }
         }
-        //var_dump('ttttt', $url);
         return $url;
     }
 }

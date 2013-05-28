@@ -1,7 +1,7 @@
 <?php
 
 /**
- * This File is part of the vendor\thapp\jitimage\src\Thapp\JitImage\Filter\GreyScale package
+ * This File is part of the Thapp\JitImage package
  *
  * (c) Thomas Appel <mail@thomas-appel.com>
  *
@@ -14,22 +14,20 @@ namespace Thapp\JitImage\Filter\Circle;
 use Thapp\JitImage\Filter\GdFilter;
 
 /**
- * Class: ImagickGsFilter
+ * Class: GdCircFilter
  *
- * @uses ImagickFilter
+ * @uses GdFilter
  *
- * @package
- * @version
+ * @package Thapp\JitImage
+ * @version $Id$
  * @author Thomas Appel <mail@thomas-appel.com>
  * @license MIT
  */
 class GdCircFilter extends GdFilter
 {
+
     /**
-     * run
-     *
-     * @access public
-     * @return void
+     * {@inheritdoc}
      */
     public function run()
     {

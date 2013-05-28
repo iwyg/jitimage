@@ -11,75 +11,106 @@
 
 namespace Thapp\JitImage;
 
-
 /**
- * Class: ResolverInterface
+ * Interface: ResolverInterface
  *
- *
- * @package
- * @version
+ * @package Thapp\JitImage
+ * @version $Id$
  * @author Thomas Appel <mail@thomas-appel.com>
  * @license MIT
  */
 interface ResolverInterface
 {
     /**
-     * resolve
+     * resolve and image that sould be processed
      *
      * @access public
-     * @return mixed
+     * @return mixed|bool false on failure, ans instance of \Thapp\JitImage\ImageInterface
+     * on success
      */
     public function resolve();
 
     /**
-     * resolveFromCache
+     * resolve an image with its cache-id name
      *
      * @param mixed $id
      * @access public
-     * @return mixed
+     * @return mixed|bool false on failure, ans instance of \Thapp\JitImage\ImageInterface
+     * on success
      */
     public function resolveFromCache($id);
 
     /**
-     * getCached
+     * always returns the cached instance of \Thapp\JitImage\ImageInterface
      *
      * @access public
-     * @return mixed
+     * @return mixed|bool false on failure, ans instance of \Thapp\JitImage\ImageInterface
+     * on success
      */
     public function getCached();
 
     /**
-     * setFilter
+     * set the root path from where to resolve an image file
      *
-     * @param mixed $filter
+     * @param string $base
+     *
      * @access public
-     * @return mixed
+     * @return void
      */
-    public function setFilter($filter = null);
+    public function setResolveBase($base = '/');
 
     /**
-     * setParameter
+     * set the process parameter necessary for
+     * processing the image
      *
-     * @param mixed $parameter
+     * @param string $parameter the parameter url string
      * @access public
-     * @return mixed
+     * @return void
      */
     public function setParameter($parameter);
 
     /**
-     * setSource
+     * set the image source url
      *
-     * @param mixed $source
+     * @param string $source
      * @access public
-     * @return mixed
+     * @return void
      */
     public function setSource($source);
 
     /**
-     * disableCache
+     * set optional filter parameter
+     *
+     * @param string $filter
+     * @access public
+     * @return void
+     */
+    public function setFilter($filter = null);
+
+    /**
+     * disable iamges from beeing cached cached
+     *
+     * @access public
+     * @return void
+     */
+    public function disableCache();
+
+    /**
+     * get the resolvable url of a cached image
+     *
+     * @param \Thapp\JitImage\ImageInterface $cachedImage an image retreived
+     * from \Thapp\JitImage\ResolverInterface#getGached()
      *
      * @access public
      * @return mixed
      */
-    public function disableCache();
+    public function getCachedUrl(ImageInterface $cachedImage);
+
+    /**
+     * close and cleanup parameter of the resolver
+     *
+     * @access public
+     * @return void
+     */
+    public function close();
 }

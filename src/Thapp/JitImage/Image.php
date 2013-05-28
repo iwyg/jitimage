@@ -1,7 +1,7 @@
 <?php
 
 /**
- * This File is part of the vendor\thapp\jitimage\src\Thapp\JitImage package
+ * This File is part of the Thapp\JitImage package
  *
  * (c) Thomas Appel <mail@thomas-appel.com>
  *
@@ -18,8 +18,8 @@ use Thapp\JitImage\Driver\DriverInterface;
  *
  * @implements ImageInterface
  *
- * @package
- * @version
+ * @package Thapp\JitImage
+ * @version $Id$
  * @author Thomas Appel <mail@thomas-appel.com>
  * @license MIT
  */
@@ -38,7 +38,7 @@ class Image implements ImageInterface
     /**
      * @var int
      */
-    const IM_SCALECROP = 2;
+    const IM_SCALECROP   = 2;
 
     /**
      * @var int
@@ -72,7 +72,7 @@ class Image implements ImageInterface
     protected $attributes = [];
 
     /**
-     * __construct
+     * create a new instance of Image
      *
      * @param InterfaceDriver $driver
      * @access public
@@ -87,11 +87,7 @@ class Image implements ImageInterface
     }
 
     /**
-     * load
-     *
-     * @param string $source image source url
-     * @access public
-     * @return void
+     * {@inheritDoc}
      */
     public function load($source)
     {
@@ -99,11 +95,7 @@ class Image implements ImageInterface
     }
 
     /**
-     * process
-     *
-     * @param ResolverInterface $resolver
-     * @access public
-     * @return void
+     * {@inheritDoc}
      */
     public function process(ResolverInterface $resolver)
     {
@@ -140,22 +132,20 @@ class Image implements ImageInterface
     }
 
     /**
-     * setQuality
-     *
-     * @param int $quality compression quality 0 - 100
-     * @access public
-     * @return mixed
+     * {@inheritDoc}
      */
     public function setQuality($quality)
     {
         $this->compression = $quality;
     }
 
+    public function setFileFormat($format)
+    {
+        return $this->driver->setOutputType($format);
+    }
+
     /**
-     * getContents
-     *
-     * @access public
-     * @return string
+     * {@inheritDoc}
      */
     public function getContents()
     {
@@ -163,10 +153,7 @@ class Image implements ImageInterface
     }
 
     /**
-     * getFileFormat
-     *
-     * @access public
-     * @return mixed
+     * {@inheritDoc}
      */
     public function getFileFormat()
     {
@@ -174,10 +161,7 @@ class Image implements ImageInterface
     }
 
     /**
-     * getMimeType
-     *
-     * @access public
-     * @return mixed
+     * {@inheritDoc}
      */
     public function getMimeType()
     {
@@ -185,14 +169,19 @@ class Image implements ImageInterface
     }
 
     /**
-     * setFileFormat
-     *
-     * @access public
-     * @return void
+     * {@inheritDoc}
      */
-    public function setFileFormat($format)
+    public function getSource()
     {
-        return $this->driver->setOutputType($format);
+        return $this->driver->getSource();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function close()
+    {
+        return $this->driver->clean();
     }
 
     /**
@@ -201,7 +190,7 @@ class Image implements ImageInterface
      * @access public
      * @return mixed
      */
-    public function addFilter($filter, array $options = [])
+    protected function addFilter($filter, array $options = [])
     {
         $this->driver->filter($filter, $options);
     }
@@ -213,7 +202,7 @@ class Image implements ImageInterface
      * @access public
      * @return mixed
      */
-    public function resize()
+    protected function resize()
     {
         return $this->driver->filter('resize', func_get_args());
     }
@@ -227,7 +216,7 @@ class Image implements ImageInterface
      * @access public
      * @return mixed
      */
-    public function cropScale($gravity)
+    protected function cropScale($gravity)
     {
         return $this->driver->filter('cropScale', func_get_args());
     }
@@ -239,7 +228,7 @@ class Image implements ImageInterface
      * @access public
      * @return mixed
      */
-    public function crop($gravity, $background = null)
+    protected function crop($gravity, $background = null)
     {
         return $this->driver->filter('crop', func_get_args());
     }
@@ -250,24 +239,9 @@ class Image implements ImageInterface
      * @access public
      * @return void
      */
-    public function resizeToFit()
+    protected function resizeToFit()
     {
         return $this->driver->filter('resizeToFit', func_get_args());
     }
 
-    /**
-     * close
-     *
-     * @access public
-     * @return mixed
-     */
-    public function close()
-    {
-        return $this->driver->clean();
-    }
-
-    public function getSource()
-    {
-        return $this->driver->getSource();
-    }
 }

@@ -1,7 +1,7 @@
 <?php
 
 /**
- * This File is part of the Thapp\JitImage\Filter\Oval package
+ * This File is part of the Thapp\JitImage package
  *
  * (c) Thomas Appel <mail@thomas-appel.com>
  *
@@ -14,12 +14,12 @@ namespace Thapp\JitImage\Filter\Circle;
 use Thapp\JitImage\Filter\ImFilter;
 
 /**
- * Class: ImOvFilter
+ * Class: ImCircFilter
  *
  * @uses ImFilter
  *
- * @package
- * @version
+ * @package Thapp\JitImage
+ * @version $Id$
  * @author Thomas Appel <mail@thomas-appel.com>
  * @license MIT
  */
@@ -27,10 +27,7 @@ class ImCircFilter extends ImFilter
 {
 
     /**
-     * run
-     *
-     * @access public
-     * @return mixed
+     * {@inheritdoc}
      */
     public function run()
     {

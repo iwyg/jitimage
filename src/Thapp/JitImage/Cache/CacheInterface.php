@@ -23,57 +23,48 @@ namespace Thapp\JitImage\Cache;
 interface CacheInterface
 {
     /**
-     * get
+     * Get an image from the cache.
      *
-     * @param mixed $id
-     * @param mixed $raw
+     * @param string $key  cached id
+     * @param bool   $raw whather to return the contents or an image object
      * @access public
-     * @return mixed
+     * @return mixed|string|void
      */
-    public function get($id, $raw = false);
+    public function get($key, $raw = false);
 
     /**
-     * has
+     * Determine weather a cached file exists or not.
      *
-     * @param mixed $id
+     * @param string $key the cache identifier key
+     *
      * @access public
-     * @return mixed
+     * @return boolean
      */
-    public function has($id);
+    public function has($key);
 
     /**
-     * put
+     * Put a image to the cache.
      *
-     * @param mixed $id
-     * @param mixed $contents
-     * @access public
-     * @return mixed
-     */
-    public function put($id, $contents);
-
-    /**
-     * createKey
+     * @param string $key        the cache key
+     * @param string $contents  the image contents
      *
-     * @param mixed $src
-     * @param mixed $fingerprint
-     * @param string $prefix
-     * @param string $suffix
-     * @access public
-     * @return mixed
-     */
-    public function createKey($src, $fingerprint = null, $prefix = 'io',  $suffix = 'f');
-
-    /**
-     * delete
-     *
-     * @param mixed $id
      * @access public
      * @return void
      */
-    public function delete($id);
+    public function put($key, $contents);
 
     /**
-     * purge
+     * Deletes a specifix item from the cache dircetory.
+     *
+     * @param string $key the cache key
+     *
+     * @access public
+     * @return void
+     */
+    public function delete($key);
+
+    /**
+     * Empty the cache directory.
      *
      * @access public
      * @return void
@@ -81,9 +72,9 @@ interface CacheInterface
     public function purge();
 
     /**
-     * getRelPath
+     * Get the relative cache path from a given url of a cached file.
      *
-     * @param  string $path
+     * @param string $path file url of a cached image
      *
      * @access public
      * @return string
@@ -91,13 +82,26 @@ interface CacheInterface
     public function getRelPath($path);
 
     /**
-     * getIdFromUrl
+     * Retreive the cache id key from a cached file url.
      *
-     * @param  string $url
+     * @param string $url
      *
      * @access public
      * @return string
      */
     public function getIdFromUrl($url);
+
+    /**
+     * Create a cache id key from a file url.
+     *
+     * @param string $src         the source url, e.g `uploads/images/image.jpg`
+     * @param string $fingerprint a unique string that identifies this item
+     * @param string $prefix      string to prefix the cachefile name
+     * @param string $suffix      file extension for the cachefile
+     *
+     * @access public
+     * @return string
+     */
+    public function createKey($src, $fingerprint = null, $prefix = 'io',  $suffix = 'f');
 }
 

@@ -1,7 +1,7 @@
 <?php
 
 /**
- * This File is part of the vendor\thapp\jitimage\src\Thapp\JitImage\Filter package
+ * This File is part of the Thapp\JitImage package
  *
  * (c) Thomas Appel <mail@thomas-appel.com>
  *
@@ -14,11 +14,11 @@ namespace Thapp\JitImage\Filter;
 use Thapp\JitImage\Driver\DriverInterface;
 
 /**
- * Class: FilterInterface
+ * Interface: FilterInterface
  *
  *
- * @package
- * @version
+ * @package Thapp\JitImage
+ * @version $Id$
  * @author Thomas Appel <mail@thomas-appel.com>
  * @license MIT
  */
@@ -26,5 +26,21 @@ interface FilterInterface
 {
     public function __construct(DriverInterface $driver, $options);
 
+    /**
+     * Run the filter
+     *
+     * @access public
+     * @return void
+     */
     public function run();
+
+    /**
+     * Get a filter option.
+     *
+     * @param string $option option name
+     * @param mixed  $default the default value to return
+     * @access public
+     * @return mixed
+     */
+    public function getOption($option, $default = null)
 }

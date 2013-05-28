@@ -15,14 +15,14 @@ namespace Thapp\JitImage;
  * Interface: ResolverConfigInterface
  *
  * @package Thapp\JitImage
- * @version
+ * @version $Id$
  * @author Thomas Appel <mail@thomas-appel.com>
  * @license MIT
  */
 interface ResolverConfigInterface
 {
     /**
-     * set
+     * Set a configuration attribute.
      *
      * @access public
      * @return void|boolean false on failure
@@ -30,16 +30,20 @@ interface ResolverConfigInterface
     public function set($attribute, $value);
 
     /**
-     * setAttributesArray
+     * Set the configuration array.
      *
-     * @param array $attributes
+     * @param array $attributes associative array containing key-value pairs of
+     * configuration attributes.
+     *
      * @access public
      * @return void
      */
     public function setAttributesArray(array $attributes);
 
     /**
-     * get
+     * Get a config value by its attribute name.
+     *
+     * @param mixed $attribute attribute name
      *
      * @access public
      * @return mixed
@@ -47,9 +51,9 @@ interface ResolverConfigInterface
     public function get($attribute = null);
 
     /**
-     * __get
+     * Shortcut for get.
      *
-     * @param mixed $attribute
+     * @param string $attribute attribute name
      * @access public
      * @return mixed
      */

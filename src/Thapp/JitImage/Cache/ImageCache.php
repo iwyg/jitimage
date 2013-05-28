@@ -1,7 +1,7 @@
 <?php
 
 /**
- * This File is part of the vendor\thapp\jitimage\src\Thapp\JitImage\Cache package
+ * This File is part of the Thapp\JitImage package
  *
  * (c) Thomas Appel <mail@thomas-appel.com>
  *
@@ -19,9 +19,10 @@ use Illuminate\Support\NamespacedItemResolver;
  * Class: ImageCache
  *
  * @implements CacheInterface
+ * @uses NamespacedItemResolver
  *
- * @package
- * @version
+ * @package Thapp\JitImage
+ * @version $Id$
  * @author Thomas Appel <mail@thomas-appel.com>
  * @license MIT
  */
@@ -44,16 +45,19 @@ class ImageCache extends NamespacedItemResolver implements CacheInterface
     /**
      * image
      *
-     * @var mixed
+     * @var \Thapp\JitImage\ImageInterface
      */
     protected $image;
 
     /**
-     * __construct
+     * create a new instance of \Thapp\JitImage\Cache\ImageCache
      *
-     * @param mixed $path
+     * @param \Thapp\JitImage\ImageInterface    $image
+     * @param \Illuminate\Filesystem\Filesystem $files
+     * @param string                            $path       cache directory
+     * @param int                               $permission octal r/w permssion
+     *
      * @access public
-     * @return mixed
      */
     public function __construct(ImageInterface $image, Filesystem $files, $path, $permission = 0777)
     {
@@ -63,55 +67,30 @@ class ImageCache extends NamespacedItemResolver implements CacheInterface
     }
 
     /**
-     * setPath
-     *
-     * @param mixed $path
-     * @param mixed $permission
-     * @access protected
-     * @return mixed
+     * {@inheritdoc}
      */
-    protected function setPath($path, $permission)
+    public function get($key, $raw = false)
     {
-        if (true !== $this->files->exists($path)) {
-            $this->files->makeDirectory($path, $permission);
-        }
-        $this->path = $path;
-    }
-
-    /**
-     * get
-     *
-     * @param string $id  cached id
-     * @param bool   $raw whather to return the contents or an image object
-     * @access public
-     * @return mixed
-     */
-    public function get($id, $raw = false)
-    {
-        if ($this->has($id)) {
+        if ($this->has($key)) {
 
             $this->image->close();
-            $this->image->load($this->pool[$id]);
+            $this->image->load($this->pool[$key]);
 
             return $raw ? $this->image->getImageBlob() : $this->image;
         }
     }
 
     /**
-     * has
-     *
-     * @param mixed $id
-     * @access public
-     * @return mixed
+     * {@inheritdoc}
      */
-    public function has($id)
+    public function has($key)
     {
-        if (array_key_exists($id, $this->pool)) {
+        if (array_key_exists($key, $this->pool)) {
             return true;
         }
 
-        if ($this->files->exists($path = $this->getPath($id))) {
-            $this->pool[$id] = $path;
+        if ($this->files->exists($path = $this->getPath($key))) {
+            $this->pool[$key] = $path;
             return true;
         }
 
@@ -119,11 +98,7 @@ class ImageCache extends NamespacedItemResolver implements CacheInterface
     }
 
     /**
-     * getRelPath
-     *
-     * @param mixed $path
-     * @access public
-     * @return mixed
+     * {@inheritdoc}
      */
     public function getRelPath($path)
     {
@@ -131,11 +106,7 @@ class ImageCache extends NamespacedItemResolver implements CacheInterface
     }
 
     /**
-     * getIdFromUrl
-     *
-     * @param mixed $path
-     * @access public
-     * @return mixed
+     * {@inheritdoc}
      */
     public function getIdFromUrl($url)
     {
@@ -144,14 +115,7 @@ class ImageCache extends NamespacedItemResolver implements CacheInterface
     }
 
     /**
-     * createKey
-     *
-     * @param string $src
-     * @param string $fingerprint
-     * @param string $prefix
-     * @param string $suffix
-     * @access public
-     * @return string
+     * {@inheritdoc}
      */
     public function createKey($src, $fingerprint = null, $prefix = 'io',  $suffix = 'f')
     {
@@ -159,24 +123,58 @@ class ImageCache extends NamespacedItemResolver implements CacheInterface
     }
 
     /**
-     * put
-     *
-     * @param mixed $id
-     * @param mixed $contents
-     * @access public
-     * @return void
+     * {@inheritdoc}
      */
-    public function put($id, $contents)
+    public function put($key, $contents)
     {
-        if (false === $this->has($id)) {
-            $this->files->put($this->realizeDir($id), $contents);
+        if (false === $this->has($key)) {
+            $this->files->put($this->realizeDir($key), $contents);
+        }
+    }
+
+
+    /**
+     * {@inheritdoc}
+     */
+    public function purge()
+    {
+        try {
+            foreach ($this->files->directories($this->path) as $directory) {
+                $this->files->deleteDirectory($directory);
+            }
+        } catch (\Exception $e) {}
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function delete($key)
+    {
+        $id = $this->createKey($key);
+        $dir = substr($id, 0, strpos($id, '.'));
+
+        if ($this->files->exists($dir = $this->path . '/' . $dir)) {
+            $this->files->deleteDirectory($dir);
         }
     }
 
     /**
-     * create a directory if necessary
+     * Get the full filepath of an cached item
      *
-     * @param  string $key
+     * @param string $key cache key
+     *
+     * @access protected
+     * @return string
+     */
+    protected function getFilePath($key)
+    {
+        return sprintf('%s/%s', $this->path, $id);
+    }
+
+    /**
+     * Creates a cache subdirectory if necessary.
+     *
+     * @param  string $key the cache key
      *
      * @access protected
      * @return string cache file path
@@ -193,11 +191,12 @@ class ImageCache extends NamespacedItemResolver implements CacheInterface
     }
 
     /**
-     * getPath
+     * Get the cachedirectory from a cache key.
      *
-     * @param mixed $key
+     * @param string $key
+     *
      * @access protected
-     * @return mixed
+     * @return string the dirctory path of the cached item
      */
     protected function getPath($key)
     {
@@ -206,59 +205,33 @@ class ImageCache extends NamespacedItemResolver implements CacheInterface
     }
 
     /**
-     * pad
+     * Appends and hash a string with another string.
      *
-     * @param mixed $src
-     * @param mixed $pad
+     * @param string $src
+     * @param string $pad
+     *
      * @access protected
-     * @return mixed
+     * @return string
      */
     protected function pad($src, $pad)
     {
         return substr(hash('sha1', sprintf('%s%s', $src, $pad)), 0, 16);
     }
 
-
     /**
-     * getFilePath
+     * set the path to the cache directory
+     *
+     * @param string $path path to cache directory
+     * @param int    $permission octal permission level
      *
      * @access protected
-     * @return mixed
-     */
-    protected function getFilePath($id)
-    {
-        return sprintf('%s/%s', $this->path, $id);
-    }
-
-    /**
-     * purge
-     *
-     * @access public
      * @return void
      */
-    public function purge()
+    protected function setPath($path, $permission)
     {
-        try {
-            foreach ($this->files->directories($this->path) as $directory) {
-                $this->files->deleteDirectory($directory);
-            }
-        } catch (\Exception $e) {}
-    }
-
-    /**
-     * delete
-     *
-     * @param mixed $src
-     * @access public
-     * @return mixed
-     */
-    public function delete($id)
-    {
-        $id = $this->createKey($id);
-        $dir = substr($id, 0, strpos($id, '.'));
-
-        if ($this->files->exists($dir = $this->path . '/' . $dir)) {
-            $this->files->deleteDirectory($dir);
+        if (true !== $this->files->exists($path)) {
+            $this->files->makeDirectory($path, $permission);
         }
+        $this->path = $path;
     }
 }

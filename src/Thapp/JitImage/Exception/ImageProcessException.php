@@ -1,7 +1,7 @@
 <?php
 
 /**
- * This File is part of the Thapp\JitImage\Exception package
+ * This File is part of the Thapp\JitImage package
  *
  * (c) Thomas Appel <mail@thomas-appel.com>
  *
@@ -14,8 +14,10 @@ namespace Thapp\JitImage\Exception;
 /**
  * Class: ImageProcessException
  *
- * @package
- * @version
+ * @uses \RuntimeException
+ *
+ * @package Thapp\JitImage
+ * @version $Id$
  * @author Thomas Appel <mail@thomas-appel.com>
  * @license MIT
  */
