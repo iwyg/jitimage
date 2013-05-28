@@ -13,7 +13,7 @@ namespace Thapp\JitImage\Controller;
 
 use Illuminate\Http\Response;
 use Illuminate\Routing\Router;
-use Illuminate\Routing\Controller\Controller;
+use Illuminate\Routing\Controllers\Controller;
 use Thapp\JitImage\ImageInterface;
 use Illuminate\Container\Container;
 use Thapp\JitImage\ResolverInterface;
