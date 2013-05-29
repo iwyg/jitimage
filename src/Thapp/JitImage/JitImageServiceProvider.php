@@ -162,10 +162,9 @@ class JitImageServiceProvider extends ServiceProvider
             return $this->registerRecepies($recepies, $route);
         }
 
-
         $this->app['router']
             ->get($route . '/{params}/{source}/{filter?}', 'Thapp\JitImage\Controller\JitController@getImage')
-            ->where('params', '(\d+\/?){1,4}([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})?')
+            ->where('params', '([0]|[1|4](\/\d+){2}|[2](\/\d+){3}|[3](\/\d+){3}\/?([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})?)')
             ->where('source', '(([^0-9A-Fa-f]{3}|[^0-9A-Fa-f]{6}).*?(?=\/filter:.*)?)')
             ->where('filter', '(filter:.*)');
     }
