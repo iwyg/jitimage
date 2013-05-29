@@ -42,5 +42,5 @@ interface FilterInterface
      * @access public
      * @return mixed
      */
-    public function getOption($option, $default = null)
+    public function getOption($option, $default = null);
 }
