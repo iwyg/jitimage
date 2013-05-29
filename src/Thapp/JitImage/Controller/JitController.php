@@ -13,12 +13,11 @@ namespace Thapp\JitImage\Controller;
 
 use Illuminate\Http\Response;
 use Illuminate\Routing\Router;
-use Illuminate\Routing\Controllers\Controller;
 use Thapp\JitImage\ImageInterface;
-use Thapp\JitImage\Response\FileResponseInterface;
 use Illuminate\Container\Container;
 use Thapp\JitImage\ResolverInterface;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Illuminate\Routing\Controllers\Controller;
+use Thapp\JitImage\Response\FileResponseInterface;
 
 /**
  * Class: JitController
@@ -155,7 +154,7 @@ class JitController extends Controller
     protected function notFound()
     {
         $this->imageResolver->close();
-        throw new NotFoundHttpException;
+        $this->response->notFound();
     }
 
 
@@ -173,13 +172,5 @@ class JitController extends Controller
         $image->close();
 
         $this->response->send();
-
-        //$response = new Response($image->getContents(), 200);
-        //$response->header('Content-type', $image->getMimeType());
-
-        //$image->close();
-        //$this->imageResolver->close();
-
-        //$response->send();
     }
 }

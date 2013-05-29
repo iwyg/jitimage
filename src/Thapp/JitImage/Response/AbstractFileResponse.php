@@ -13,6 +13,7 @@ namespace Thapp\JitImage\Response;
 
 use Thapp\JitImage\Image;
 use Illuminate\Http\Response;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
  * Class: AbstractFileResponse
@@ -62,6 +63,10 @@ abstract class AbstractFileResponse implements FileResponseInterface
      */
     public function send()
     {
+        if (!isset($this->response)) {
+            throw new \Exception('response not created yet. Create a response before calling send.');
+        }
+
         $this->response->send();
     }
 
@@ -75,5 +80,30 @@ abstract class AbstractFileResponse implements FileResponseInterface
      * @return mixed
      */
     abstract protected function setHeaders(Response $response, Image $image);
+
+
+    /**
+     * abort
+     *
+     * @param int $status
+     * @access public
+     * @return mixed
+     */
+    public function abort($status = 404)
+    {
+        $response = new Response(null, $status);
+        $response->send();
+    }
+
+    /**
+     * notFound
+     *
+     * @access public
+     * @return mixed
+     */
+    public function notFound()
+    {
+        throw new NotFoundHttpException;
+    }
 
 }

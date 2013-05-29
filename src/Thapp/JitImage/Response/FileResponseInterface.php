@@ -12,6 +12,7 @@
 namespace Thapp\JitImage\Response;
 
 use Thapp\JitImage\Image;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
  * Interface: FileResponseInterface
@@ -37,7 +38,25 @@ interface FileResponseInterface
      * send the response
      *
      * @access public
-     * @return send
+     * @return void
      */
     public function send();
+
+    /**
+     * abort
+     *
+     * @param int $status
+     * @access public
+     * @return void
+     */
+    public function abort($status = 404);
+
+    /**
+     * notFound
+     *
+     * @throws NotFoundHttpException;
+     * @access public
+     * @return void
+     */
+    public function notFound();
 }
