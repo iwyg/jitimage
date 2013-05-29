@@ -126,4 +126,12 @@ interface DriverInterface
      * @return void
      */
     public function swapResource($resource);
+
+    /**
+     * isProcessed
+     *
+     * @access public
+     * @return bool
+     */
+    public function isProcessed();
 }

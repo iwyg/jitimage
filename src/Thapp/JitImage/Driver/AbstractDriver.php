@@ -101,6 +101,13 @@ abstract class AbstractDriver implements DriverInterface
     protected $error;
 
     /**
+     * processed
+     *
+     * @var bool
+     */
+    protected $processed = false;
+
+    /**
      * clean up temporary files after shutdown
      *
      * @access public
@@ -122,6 +129,28 @@ abstract class AbstractDriver implements DriverInterface
     public function registerFilter($alias, $class)
     {
         $this->filters[$alias] = $class;
+    }
+
+    /**
+     * isProcessed
+     *
+     * @access public
+     * @return bool
+     */
+    public function isProcessed()
+    {
+        return $this->processed;
+    }
+
+    /**
+     * process
+     *
+     * @access public
+     * @return void
+     */
+    public function process()
+    {
+        $this->processed = true;
     }
 
     /**

@@ -94,4 +94,12 @@ interface ImageInterface
      * @return string
      */
     public function getSource();
+
+    /**
+     * Determine if the image has been processed yet.
+     *
+     * @access public
+     * @return bool
+     */
+    public function isProcessed();
 }

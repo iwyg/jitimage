@@ -126,10 +126,10 @@ class ImDriver extends AbstractDriver
      */
     public function process()
     {
+        parent::process();
+
         $cmd = $this->compile();
         $this->cmd = $cmd;
-
-        //\Log::info($cmd);
 
         $this->runCmd($cmd, '\Thapp\JitImage\Exception\ImageProcessException',
             function ($stderr)
@@ -149,6 +149,7 @@ class ImDriver extends AbstractDriver
             @unlink($this->tmpFile);
         }
 
+        $this->processed  = false;
         $this->targetSize = null;
         $this->loader->clean();
         $this->source = null;

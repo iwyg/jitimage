@@ -15,6 +15,7 @@ use Illuminate\Http\Response;
 use Illuminate\Routing\Router;
 use Illuminate\Routing\Controllers\Controller;
 use Thapp\JitImage\ImageInterface;
+use Thapp\JitImage\Response\FileResponseInterface;
 use Illuminate\Container\Container;
 use Thapp\JitImage\ResolverInterface;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -46,14 +47,22 @@ class JitController extends Controller
     protected $defaults;
 
     /**
+     * defaults
+     *
+     * @var mixed
+     */
+    protected $response;
+
+    /**
      * Create a new JitController
      *
      * @param  ResolverInterface $imageResolver The resolver object
      *
      * @access public
      */
-    public function __construct(ResolverInterface $imageResolver)
+    public function __construct(ResolverInterface $imageResolver, FileResponseInterface $response)
     {
+        $this->response      = $response;
         $this->imageResolver = $imageResolver;
     }
 
@@ -158,12 +167,19 @@ class JitController extends Controller
      */
     protected function render(ImageInterface $image)
     {
-        $response = new Response($image->getContents(), 200);
-        $response->header('Content-type', $image->getMimeType());
+
+        $this->response->make($image);
 
         $image->close();
-        $this->imageResolver->close();
 
-        $response->send();
+        $this->response->send();
+
+        //$response = new Response($image->getContents(), 200);
+        //$response->header('Content-type', $image->getMimeType());
+
+        //$image->close();
+        //$this->imageResolver->close();
+
+        //$response->send();
     }
 }

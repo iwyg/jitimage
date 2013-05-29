@@ -180,6 +180,10 @@ class ImagickDriver extends ImDriver
      */
     public function getImageBlob()
     {
+        if (!$this->processed) {
+            return file_get_contents($this->source);
+        }
+
         if ($this->isMultipartImage()) {
 
             $this->tmpFile = tempnam($this->tmp, 'jitim_');
@@ -225,7 +229,7 @@ class ImagickDriver extends ImDriver
      */
     public function process()
     {
-        return null;
+        $this->processed = true;
     }
 
     /**

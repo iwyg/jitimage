@@ -208,8 +208,9 @@ class GdDriver extends AbstractDriver
             imagedestroy($this->resource);
         }
 
-        $this->source = null;
-        $this->targetSize = null;
+        $this->source           = null;
+        $this->processed        = false;
+        $this->targetSize       = null;
         $this->sourceAttributes = null;
     }
     /**
@@ -333,6 +334,8 @@ class GdDriver extends AbstractDriver
      */
     public function process()
     {
+        parent::process();
+
         if (is_int($this->background)) {
 
             extract($this->getBackgroundCoordinates($this->getGravity()));

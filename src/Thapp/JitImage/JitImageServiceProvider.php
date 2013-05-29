@@ -34,8 +34,10 @@ class JitImageServiceProvider extends ServiceProvider
     public function register()
     {
         $this->package('thapp/jitimage');
+
         $this->registerDriver();
         $this->registerResolver();
+        $this->registerResponse();
         $this->regsiterCommands();
     }
 
@@ -121,6 +123,21 @@ class JitImageServiceProvider extends ServiceProvider
                 ];
                 return new \Thapp\JitImage\JitResolveConfiguration($conf);
         });
+    }
+
+    /**
+     * registerResponse
+     *
+     * @access protected
+     * @return void
+     */
+    protected function registerResponse()
+    {
+        $type = $this->app['config']->get('jitimage::response-type', 'generic');
+
+        $this->app->bind('Thapp\JitImage\Response\FileResponseInterface',
+            sprintf('Thapp\JitImage\Response\%sFileResponse', ucfirst($type))
+        );
     }
 
     /**

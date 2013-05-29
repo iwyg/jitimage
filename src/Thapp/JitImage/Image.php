@@ -185,6 +185,17 @@ class Image implements ImageInterface
     }
 
     /**
+     * isProcessed
+     *
+     * @access public
+     * @return mixed
+     */
+    public function isProcessed()
+    {
+        return $this->driver->isProcessed();
+    }
+
+    /**
      * addFilter
      *
      * @access public
