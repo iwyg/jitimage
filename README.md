@@ -139,7 +139,7 @@ JitImage::source('path/to/myimage.jpg')->resize(200, 200);
 JitImage::source('path/to/myimage.jpg')->crop(500, 500, 5);
 
 // You may also specify a background color for the frame:
-JitImage::source('path/to/myimage.jpg')->crop(500, 500, 5, fff);
+JitImage::source('path/to/myimage.jpg')->crop(500, 500, 5, 'fff');
 
 // crop 500px * 500px of the image from the center, resize image if image is smaller:
 JitImage::source('path/to/myimage.jpg')->cropAndResize(500, 500, 5);
@@ -151,10 +151,10 @@ JitImage::source('path/to/myimage.jpg')->fit(200, 200);
 JitImage::source('path/to/myimage.jpg')->filter('gs')->cropAndResize(200, 200, 5);
 
 // Percentual scale the image:
-JitImage::source('uploads/images/test4.jpg')->scale(50);
+JitImage::source('path/to/myimage.jpg')->scale(50);
 
 // Limit the image to max. 200000px:
-JitImage::source('uploads/images/test4.jpg')->pixel(200000);
+JitImage::source('path/to/myimage.jpg')->pixel(200000);
 
 
 ```
