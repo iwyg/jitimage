@@ -103,7 +103,7 @@ trait Scaling
      * @param int   $limit
      * @param float $ratio
      * @access protected
-     * @return array
+     * @return array $width and $height
      */
     protected function pixelLimit($width, $height, $limit, $ratio)
     {
@@ -121,7 +121,7 @@ trait Scaling
      * @param int   $percent
      * @param float $ratio
      * @access protected
-     * @return mixed
+     * @return array $width and $height
      */
     protected function percentualScale($width, $height, $percent, $ratio)
     {

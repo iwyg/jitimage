@@ -16,6 +16,7 @@ use \Closure;
 /**
  * Trait: ShellCommand
  *
+ * @trait
  * @package Thapp\JitImage
  * @version $Id$
  * @author Thomas Appel <mail@thomas-appel.com>

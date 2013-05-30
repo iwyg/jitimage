@@ -115,6 +115,7 @@ class JitImageServiceProvider extends ServiceProvider
                 $conf = [
                     'trusted_sites' => $this->extractDomains($config->get('jitimage::trusted-sites', [])),
                     'cache_prefix'  => $config->get('jitimage::cacheprefix', 'jit_'),
+                    'base_route'    => $config->get('jitimage::route', 'images'),
                     'cache_route'   => $config->get('jitimage::cacheroute', 'jit/storage'),
                     'base'          => $config->get('jitimage::base', public_path()),
                     'cache'         => in_array($config->getEnvironment(), $config->get('jitimage::cache', []))

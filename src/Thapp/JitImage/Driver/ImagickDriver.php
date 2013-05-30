@@ -17,8 +17,9 @@ use \ImagickPixel;
 /**
  * Class: ImagickDriver
  *
+ * @class
  * @implements DriverInterface
- *
+ * @uses Scaling
  * @package Thapp\JitImage
  * @version
  * @author Thomas Appel <mail@thomas-appel.com>

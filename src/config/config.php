@@ -32,7 +32,7 @@ return [
      * ------------------------------------------------
      */
 
-    'driver'      => 'gd',
+    'driver'      => 'im',
 
     /* ------------------------------------------------
      * cache processed images only in this environments
@@ -42,10 +42,10 @@ return [
     'cache'       => ['production'],
 
     /* ------------------------------------------------
-     * cache processed images only in this environments
+     * Cached image prefix
      * ------------------------------------------------
      */
-    'cacheprefix' => 'thapp',
+    'cacheprefix' => 'jit',
 
     /* ------------------------------------------------
      * the compression quality:
@@ -111,6 +111,6 @@ return [
      * `generic` or `xsend`
      * ------------------------------------------------
      */
-    'response-type' => 'generic'
+    'response-type' => 'xsend'
 ];
 

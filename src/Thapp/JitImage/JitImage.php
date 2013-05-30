@@ -156,7 +156,7 @@ class JitImage
     protected function callScale($percent)
     {
         $this->mode = 'percentualScale';
-        $this->targetSize = [$percent, 0];
+        $this->targetSize = [$percent, null];
         $this->arguments = [];
     }
 
@@ -172,7 +172,7 @@ class JitImage
     {
         var_dump($pixel); die;
         $this->mode = 'resizePixelCount';
-        $this->targetSize = [$pixel, 0];
+        $this->targetSize = [$pixel, null];
         $this->arguments = [];
     }
 
@@ -225,6 +225,13 @@ class JitImage
 
         if ($image = $this->resolver->getCached()) {
             $src = $this->resolver->getCachedUrl($image);
+            $this->resolver->close();
+            $image->close();
+            return $src;
+        }
+
+        if ($image = $this->resolver->resolve($image)) {
+            $src = $this->resolver->getImageUrl($image);
             $this->resolver->close();
             $image->close();
             return $src;

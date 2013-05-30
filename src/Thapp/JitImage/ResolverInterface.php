@@ -98,13 +98,22 @@ interface ResolverInterface
     /**
      * get the resolvable url of a cached image
      *
-     * @param \Thapp\JitImage\ImageInterface $cachedImage an image retreived
+     * @param \Thapp\JitImage\ImageInterface $cachedImage an image to retreived
      * from \Thapp\JitImage\ResolverInterface#getGached()
      *
      * @access public
      * @return mixed
      */
     public function getCachedUrl(ImageInterface $cachedImage);
+
+    /**
+     * Get the current request url of the image.
+     *
+     * @param \Thapp\JitImage\ImageInterface $image an image retreived
+     * @access public
+     * @return string
+     */
+    public function getImageUrl(ImageInterface $image);
 
     /**
      * Get a parameter by its name.
