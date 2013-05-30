@@ -12,6 +12,7 @@
 namespace Thapp\Tests\JitImage;
 
 use Mockery as m;
+use Thapp\JitImage\Driver\Scaling;
 use Thapp\JitImage\Driver\ImDriver;
 
 /**
@@ -27,6 +28,7 @@ use Thapp\JitImage\Driver\ImDriver;
 class JitImageImDriverTest extends JitImageDriverTest
 {
 
+    use Scaling;
     /**
      * setUp
      *
@@ -84,6 +86,31 @@ class JitImageImDriverTest extends JitImageDriverTest
         }
 
         return $bin;
+    }
+
+    /**
+     * @test
+     * @dataProvider percentualResizeProvider
+     */
+    public function testFilterPercentualResize($w, $h,  $percent, $expected)
+    {
+        parent::testFilterPercentualResize($w, $h,  $percent, $expected);
+        $dimensions = $this->percentualScale($w, $h, $percent, $this->ratio($w, $h));
+
+        $this->assertSame($expected, array_values($dimensions));
+    }
+
+    /**
+     * @test
+     * @dataProvider pixelLimitProvider
+     */
+    public function testFilterPixelLimit($w, $h,  $limit)
+    {
+        parent::testFilterPixelLimit($w, $h,  $limit);
+        $pxl = $this->pixelLimit($w, $h, $limit, $this->ratio($w, $h));
+        list($tw, $th) = getimagesize($this->writeTestImage($this->driver));
+
+        $this->assertSame(array_values($pxl), [$tw, $th]);
     }
 
 }

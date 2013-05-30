@@ -92,7 +92,44 @@ trait Scaling
      */
     protected function ratio($width, $height)
     {
-        return $width / $height;
+        return (float)($width / $height);
+    }
+
+    /**
+     * pixelLimit
+     *
+     * @param int   $width
+     * @param int   $height
+     * @param int   $limit
+     * @param float $ratio
+     * @access protected
+     * @return array
+     */
+    protected function pixelLimit($width, $height, $limit, $ratio)
+    {
+        $width  = (int)round(sqrt($limit * $ratio));
+        $height = (int)floor($width / $ratio);
+
+        return compact('width', 'height');
+    }
+
+    /**
+     * percentualScale
+     *
+     * @param int   $width
+     * @param int   $height
+     * @param int   $percent
+     * @param float $ratio
+     * @access protected
+     * @return mixed
+     */
+    protected function percentualScale($width, $height, $percent, $ratio)
+    {
+        $width = (int)(round($width * $percent) / 100);
+        $height = (int)floor($width / $ratio);
+
+        return compact('width', 'height');
+
     }
 
     /**

@@ -26,31 +26,43 @@ abstract class AbstractDriver implements DriverInterface
 {
 
     /**
+     * Ignore aspect ration flag
+     *
      * @var string
      */
     const FL_IGNR_ASPR = '!';
 
     /**
+     * Fill area flag
+     *
      * @var string
      */
     const FL_FILL_AREA = '^';
 
     /**
+     * procentual resize flag
+     *
      * @var string
      */
     const FL_RESZ_PERC = '%';
 
     /**
+     * pixel count limit flag
+     *
      * @var string
      */
     const FL_PIXL_CLMT = '@';
 
     /**
+     * only resize smaller flag
+     *
      * @var string
      */
     const FL_OENL_SML  = '<';
 
     /**
+     * only resize larger flag
+     *
      * @var string
      */
     const FL_OSRK_LGR  = '>';
@@ -111,20 +123,21 @@ abstract class AbstractDriver implements DriverInterface
      * clean up temporary files after shutdown
      *
      * @access public
-     * @return mixed
+     * @return void
      */
     public function __destruct()
     {
-        return $this->clean();
+        $this->clean();
     }
 
     /**
-     * registerFilter
+     * register external filter.
      *
-     * @param mixed $alias
-     * @param mixed $class
+     * @param string $alias the filter alias
+     * @param string $class full qualified filter classname
+     *
      * @access public
-     * @return mixed
+     * @return void
      */
     public function registerFilter($alias, $class)
     {
@@ -132,7 +145,7 @@ abstract class AbstractDriver implements DriverInterface
     }
 
     /**
-     * isProcessed
+     * Determine if an image has been processed yet.
      *
      * @access public
      * @return bool
@@ -143,10 +156,7 @@ abstract class AbstractDriver implements DriverInterface
     }
 
     /**
-     * process
-     *
-     * @access public
-     * @return void
+     * {@inheritdoc}
      */
     public function process()
     {
@@ -154,7 +164,7 @@ abstract class AbstractDriver implements DriverInterface
     }
 
     /**
-     * getDriverType
+     * Retrurns the driver type name.
      *
      * @access public
      * @final
@@ -166,14 +176,18 @@ abstract class AbstractDriver implements DriverInterface
     }
 
     /**
-     * filter
+     * Call a filter on the driver.
      *
-     * @param mixed $name
-     * @param mixed $options
+     * if the filter method exists on the driver the method will be called,
+     * otherwise it will return a flag to indecate that the filter is an
+     * external one.
+     *
+     * @param string $name
+     * @param array  $options
      * @access public
-     * @return mixed
+     * @return int
      */
-    public function filter($name, $options)
+    public function filter($name, array $options = [])
     {
         if (method_exists($this, $filter = 'filter' . ucfirst($name))) {
             call_user_func_array([$this, $filter], is_array($options) ? $options : []);
@@ -311,11 +325,12 @@ abstract class AbstractDriver implements DriverInterface
     }
 
     /**
-     * filterCropScale
+     * Crop and resize filter.
      *
-     * @param mixed $width
-     * @param mixed $height
-     * @param mixed $gravity
+     * @param int $width
+     * @param int $height
+     * @param int $gravity
+     *
      * @access protected
      * @return void
      */
@@ -328,11 +343,11 @@ abstract class AbstractDriver implements DriverInterface
     }
 
     /**
-     * filterCrop
+     * Crop filter.
      *
-     * @param mixed $with
-     * @param mixed $height
-     * @param mixed $gravity
+     * @param int $with
+     * @param int $height
+     * @param int $gravity
      *
      * @access protected
      * @return void
@@ -346,7 +361,7 @@ abstract class AbstractDriver implements DriverInterface
     }
 
     /**
-     * filterResizeToFit
+     * Best fit filter.
      *
      * @access protected
      * @return void
@@ -357,47 +372,73 @@ abstract class AbstractDriver implements DriverInterface
     }
 
     /**
-     * resize
+     * Percentual resize filter.
      *
-     * @param mixed $width
-     * @param mixed $height
+     * @access protected
+     * @return void
+     */
+    protected function filterPercentualScale()
+    {
+        $this->resize($this->targetSize['width'], 0, static::FL_RESZ_PERC);
+    }
+
+    /**
+     * filterPercentualScale
+     *
+     * @access protected
+     * @return void
+     */
+    protected function filterResizePixelCount()
+    {
+        $this->resize($this->targetSize['width'], 0, static::FL_PIXL_CLMT);
+    }
+
+    /**
+     * Resize the image.
+     *
+     * @param int $width
+     * @param int $height
      * @param string $flag
+     *
      * @access protected
      * @abstract
-     * @return mixed
+     * @return void
      */
     abstract protected function resize($width, $height, $flag = '');
 
     /**
-     * gravity
+     * Set the image gravity.
      *
-     * @param mixed $gravity
+     * @param int $gravity
      * @param string $flag
+     *
      * @access protected
      * @abstract
-     * @return mixed
+     * @return void
      */
     abstract protected function gravity($gravity, $flag = '');
 
     /**
-     * extent
+     * Extent the image.
      *
-     * @param mixed $width
-     * @param mixed $height
+     * @param int $width
+     * @param int $height
      * @param string $flag
+     *
      * @access protected
      * @abstract
-     * @return mixed
+     * @return void
      */
     abstract protected function extent($width, $height, $flag = '');
 
     /**
-     * background
+     * Set the image background.
      *
-     * @param mixed $color
+     * @param  string $color hex color representation.
+     *
      * @access protected
      * @abstract
-     * @return mixed
+     * @return void
      */
     abstract protected function background($color = null);
 

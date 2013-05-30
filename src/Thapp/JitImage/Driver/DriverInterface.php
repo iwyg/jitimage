@@ -39,7 +39,7 @@ interface DriverInterface
      * @access public
      * @return boolean|void
      */
-    public function filter($name, $options);
+    public function filter($name, array $options = []);
 
     /**
      * process the image
@@ -90,7 +90,7 @@ interface DriverInterface
      *
      * @param mixed $type
      * @access public
-     * @return mixed
+     * @return void
      */
     public function setOutPutType($type);
 
@@ -106,7 +106,7 @@ interface DriverInterface
      * getTargetSize
      *
      * @access public
-     * @return mixed
+     * @return array with width and height values
      */
     public function getTargetSize();
 
@@ -126,6 +126,14 @@ interface DriverInterface
      * @return void
      */
     public function swapResource($resource);
+
+    /**
+     * getDriverType
+     *
+     * @access public
+     * @return string
+     */
+    public function getDriverType();
 
     /**
      * isProcessed

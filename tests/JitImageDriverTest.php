@@ -42,6 +42,11 @@ abstract class JitImageDriverTest extends TestCase
      */
     protected $testFile;
 
+    /**
+     * loaderMock
+     *
+     * @var mixed
+     */
     protected $loaderMock;
 
     /**
@@ -144,6 +149,38 @@ abstract class JitImageDriverTest extends TestCase
 
         list($tw, $th) = getimagesize($this->writeTestImage($this->driver));
         $this->assertSame([$tw, $th], $expected);
+    }
+
+    /**
+     * @test
+     * @dataProvider percentualResizeProvider
+     */
+    public function testFilterPercentualResize($w, $h,  $percent, $expected)
+    {
+        $image = $this->createTestImage($w, $h);
+        $this->driver->load($image);
+        $this->runImageFilter('percentualScale', $percent);
+
+        list($tw, $th) = getimagesize($this->writeTestImage($this->driver));
+
+        $this->assertSame($expected, [$tw, $th]);
+
+    }
+
+    /**
+     * @test
+     * @dataProvider pixelLimitProvider
+     */
+    public function testFilterPixelLimit($w, $h,  $limit)
+    {
+        $image = $this->createTestImage($w, $h);
+        $this->driver->load($image);
+        $this->runImageFilter('resizePixelCount', $limit);
+
+        list($tw, $th) = getimagesize($this->writeTestImage($this->driver));
+
+        $this->assertTrue(($tw * $th) <= $limit);
+
     }
 
     /**
@@ -315,6 +352,22 @@ abstract class JitImageDriverTest extends TestCase
         ];
     }
 
+    /**
+     * percentualResizeProvider
+     *
+     * @access public
+     * @return array
+     */
+    public function percentualResizeProvider()
+    {
+        return [
+            [200, 200, 100, [200, 200]],
+            [200, 200, 50, [100, 100]],
+            [200, 200, 25, [50, 50]],
+            [500, 325, 20, [100, 65]],
+            [325, 500, 20, [65, 100]]
+        ];
+    }
 
     /**
      * sizeRatioProvider
@@ -325,7 +378,7 @@ abstract class JitImageDriverTest extends TestCase
     public function sizeRatioProvider()
     {
         return [
-            [200, 200, 1],
+            [200, 200, 1.0],
             [200, 144, (float)(200 / 144)],
             [144, 220, (float)(144 / 220)],
             [530, 445, (float)(530 / 445)]
@@ -352,6 +405,19 @@ abstract class JitImageDriverTest extends TestCase
             [400, 350, 0, 600, [685, 600]],
             [350, 400, 600, 0, [600, 685]]
         ];
+    }
+
+    public function pixelLimitProvider()
+    {
+        return [
+            /*
+             * width, height, scale w, scale h, expected outcome
+             */
+            [200, 300, 100000],
+            [300, 200, 100000],
+            [200, 200, 100000]
+        ];
+
     }
 
     /**

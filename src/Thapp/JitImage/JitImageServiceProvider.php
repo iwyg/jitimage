@@ -37,12 +37,10 @@ class JitImageServiceProvider extends ServiceProvider
 
         $this->registerDriver();
         $this->registerResolver();
-        $this->registerResponse();
-        $this->regsiterCommands();
     }
 
     /**
-     * registerDriver
+     * Register the image process driver.
      *
      * @access protected
      * @return void
@@ -101,7 +99,7 @@ class JitImageServiceProvider extends ServiceProvider
     }
 
     /**
-     * registerResolver
+     * Register the ResolverInterface on its implementation.
      *
      * @access protected
      * @return void
@@ -126,7 +124,7 @@ class JitImageServiceProvider extends ServiceProvider
     }
 
     /**
-     * registerResponse
+     * Register the response class on the ioc container.
      *
      * @access protected
      * @return void
@@ -141,7 +139,7 @@ class JitImageServiceProvider extends ServiceProvider
     }
 
     /**
-     * registerController
+     * Register the image controller
      *
      * @access protected
      * @return void;
@@ -154,20 +152,71 @@ class JitImageServiceProvider extends ServiceProvider
         $route      = $config->get('jitimage::route', 'image');
         $cacheroute = $config->get('jitimage::cacheroute', 'jit/storage');
 
-        $this->app['router']
-            ->get($cacheroute . '/{id}', 'Thapp\JitImage\Controller\JitController@getCached')
-            ->where('id', '(.*\/){1}.*');
+        $this->registerCacheRoute($cacheroute);
 
-        if (!empty($recepies)) {
-            return $this->registerRecepies($recepies, $route);
+        if (false === $this->registerStaticRoutes($recepies, $route)) {
+            $this->registerDynanmicRoute($route);
+        }
+    }
+
+    /**
+     * Register the controller method for retreiving cached images
+     *
+     * @param string $route
+     * @access protected
+     * @return void
+     */
+    protected function registerCacheRoute($route)
+    {
+        $this->app['router']
+            ->get($route . '/{id}', 'Thapp\JitImage\Controller\JitController@getCached')
+            ->where('id', '(.*\/){1}.*');
+    }
+
+    /**
+     * Register static routes.
+     *
+     * @param  array $recepies array of prefined processing instructions
+     * @param  string $route baseroute name
+     *
+     * @access protected
+     * @return void|boolean false
+     */
+    protected function registerStaticRoutes(array $recepies = [], $route)
+    {
+        if (empty($recepies)) {
+            return false;
         }
 
+        foreach ($recepies as $aliasRoute => $formular) {
+            $this->app['router']
+                ->get($route . '/' . $aliasRoute . '/{source}', [
+                  'uses' => 'Thapp\JitImage\Controller\JitController@getResource'
+                  ])
+                ->where('source', '(([^0-9A-Fa-f]{3}|[^0-9A-Fa-f]{6}).*?(?=\/filter:.*)?)')
+                ->defaults('parameter', $formular);
+        }
+    }
+
+    /**
+     * Register dynanmic routes.
+     *
+     * @param  string $route baseroute name
+     * @access protected
+     * @return void
+     */
+    protected function registerDynanmicRoute($route)
+    {
         $this->app['router']
             ->get($route . '/{params}/{source}/{filter?}', 'Thapp\JitImage\Controller\JitController@getImage')
-            ->where('params', '([0]|[1|4](\/\d+){2}|[2](\/\d+){3}|[3](\/\d+){3}\/?([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})?)')
+            // matching different modes:
+            ->where('params', '([5|6](\/\d+){1}|[0]|[1|4](\/\d+){2}|[2](\/\d+){3}|[3](\/\d+){3}\/?([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})?)')
+            // match the image source:
             ->where('source', '(([^0-9A-Fa-f]{3}|[^0-9A-Fa-f]{6}).*?(?=\/filter:.*)?)')
+            // match the filter:
             ->where('filter', '(filter:.*)');
     }
+
 
     /**
      * regsiterCommands
@@ -183,24 +232,6 @@ class JitImageServiceProvider extends ServiceProvider
         });
 
         $this->commands('command.jitimage.clearcache');
-    }
-    /**
-     * registerRecepies
-     *
-     * @param array $recepies
-     * @access protected
-     * @return void
-     */
-    protected function registerRecepies(array $recepies, $route)
-    {
-        foreach ($recepies as $aliasRoute => $formular) {
-            $this->app['router']
-                ->get($route . '/' . $aliasRoute . '/{source}', [
-                  'uses' => 'Thapp\JitImage\Controller\JitController@getResource'
-                  ])
-                ->where('source', '(([^0-9A-Fa-f]{3}|[^0-9A-Fa-f]{6}).*?(?=\/filter:.*)?)')
-                ->defaults('parameter', $formular);
-        }
     }
 
     /**
@@ -244,7 +275,7 @@ class JitImageServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-
+        $this->registerResponse();
         $this->registerController();
         $this->regsiterCommands();
     }
@@ -278,8 +309,14 @@ class JitImageServiceProvider extends ServiceProvider
         return $trustedSites;
     }
 
+	/**
+	 * provides
+	 *
+	 * @access public
+	 * @return array
+	 */
 	public function provides()
 	{
-		return array('jitimage');
+		return ['jitimage', 'jitimage.cache'];
 	}
 }

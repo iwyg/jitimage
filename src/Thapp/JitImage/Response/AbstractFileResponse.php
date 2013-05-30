@@ -105,5 +105,4 @@ abstract class AbstractFileResponse implements FileResponseInterface
     {
         throw new NotFoundHttpException;
     }
-
 }

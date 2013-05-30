@@ -52,11 +52,10 @@ class JitImage
     protected $filters;
 
     /**
-     * __construct
+     * Creates new JitImage object.
      *
      * @param DriverInterface $driver
      * @access public
-     * @return mixed
      */
     public function __construct(ResolverInterface $resolver)
     {
@@ -65,13 +64,12 @@ class JitImage
     }
 
     /**
-     * size
+     * source
      *
-     * @param mixed $source
-     * @param mixed $width
-     * @param mixed $height
+     * @param string $source
+     *
      * @access public
-     * @return mixed
+     * @return \Thapp\JitImage\JitImage
      */
     public function source($source)
     {
@@ -81,11 +79,13 @@ class JitImage
     }
 
     /**
-     * resize
+     * callResize
      *
-     * @param mixed $gravity
-     * @access public
-     * @return mixed
+     * @param int $width
+     * @param int $height
+     *
+     * @access protected
+     * @return void
      */
     protected function callResize($width, $height)
     {
@@ -95,12 +95,15 @@ class JitImage
     }
 
     /**
-     * crop
+     * callCrop
      *
-     * @param mixed $gravity
-     * @param mixed $background
-     * @access public
-     * @return mixed
+     * @param int    $width
+     * @param int    $height
+     * @param int    $gravity
+     * @param string $background
+     *
+     * @access protected
+     * @return void
      */
     protected function callCrop($width, $height, $gravity, $background = null)
     {
@@ -110,11 +113,14 @@ class JitImage
     }
 
     /**
-     * cropAndResize
+     * callCropAndResize
      *
-     * @param mixed $gravity
-     * @access public
-     * @return mixed
+     * @param int $width
+     * @param int $height
+     * @param int $gravity
+     *
+     * @access protected
+     * @return void
      */
     protected function callCropAndResize($width, $height, $gravity)
     {
@@ -124,10 +130,13 @@ class JitImage
     }
 
     /**
-     * fit
+     * callFit
      *
-     * @access public
-     * @return mixed
+     * @param int $width
+     * @param int $height
+     *
+     * @access protected
+     * @return void
      */
     protected function callFit($width, $height)
     {
@@ -137,17 +146,34 @@ class JitImage
     }
 
     /**
-     * filter
+     * callScale
      *
-     * @param mixed $name
-     * @param mixed $options
-     * @access public
-     * @return mixed
+     * @param int $percent
+     *
+     * @access protected
+     * @return void
      */
-    public function filter($name, $options = null) {
+    protected function callScale($percent)
+    {
+        $this->mode = 'percentualScale';
+        $this->targetSize = [$percent, 0];
+        $this->arguments = [];
+    }
 
-        $this->filters[$name] = $options;
-        return $this;
+    /**
+     * pixel limit
+     *
+     * @param mixed $width
+     * @param mixed $height
+     * @access protected
+     * @return void
+     */
+    protected function callPixel($pixel)
+    {
+        var_dump($pixel); die;
+        $this->mode = 'resizePixelCount';
+        $this->targetSize = [$pixel, 0];
+        $this->arguments = [];
     }
 
     /**
@@ -156,7 +182,21 @@ class JitImage
      * @param mixed $name
      * @param mixed $options
      * @access public
-     * @return mixed
+     * @return \Thapp\JitImage\JitImage
+     */
+    public function filter($name, $options = null) {
+
+        $this->filters[$name] = $options;
+        return $this;
+    }
+
+    /**
+     * filters
+     *
+     * @param array $filters
+     *
+     * @access public
+     * @return \Thapp\JitImage\JitImage
      */
     public function filters(array $filters) {
 
@@ -170,7 +210,7 @@ class JitImage
      * process
      *
      * @access protected
-     * @return mixed
+     * @return string
      */
     protected function process()
     {
@@ -198,7 +238,7 @@ class JitImage
      * compileExpression
      *
      * @access protected
-     * @return mixed
+     * @return array
      */
     protected function compileExpression()
     {
@@ -229,7 +269,7 @@ class JitImage
      * compileFilterExpression
      *
      * @access private
-     * @return mixed
+     * @return string|null
      */
     private function compileFilterExpression()
     {
@@ -257,7 +297,7 @@ class JitImage
      * clean
      *
      * @access private
-     * @return mixed
+     * @return void
      */
     private function clean()
     {
@@ -273,13 +313,12 @@ class JitImage
      *
      * @param mixed $color
      * @access private
-     * @return mixed
+     * @return boolean
      */
     private function isColor($color)
     {
         return preg_match('#^[0-9a-fA-F]{3}|^[0-9a-fA-F]{6}#', $color);
     }
-
 
     /**
      * __call
@@ -287,7 +326,7 @@ class JitImage
      * @param mixed $method
      * @param mixed $arguments
      * @access public
-     * @return mixed
+     * @return string
      */
     public function __call($method, $arguments)
     {
@@ -303,7 +342,7 @@ class JitImage
      * getMode
      *
      * @access public
-     * @return mixed
+     * @return int
      */
     protected function getMode()
     {
@@ -316,6 +355,10 @@ class JitImage
             return 3;
         case 'resizeToFit':
             return 4;
+        case 'percentualScale':
+            return 5;
+        case 'pixelLimit':
+            return 6;
         default:
             return 0;
         }

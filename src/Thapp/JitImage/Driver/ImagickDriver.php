@@ -154,7 +154,7 @@ class ImagickDriver extends ImDriver
      * @access public
      * @return void
      */
-    public function filter($name, $options)
+    public function filter($name, array $options = [])
     {
         $result = static::INT_FILTER;
 
@@ -335,6 +335,12 @@ class ImagickDriver extends ImDriver
             break;
         // ignoring aspect ration is default behaviour on imagick resize
         case static::FL_IGNR_ASPR:
+            break;
+        case static::FL_PIXL_CLMT:
+            extract($this->pixelLimit($this->getInfo('width'), $this->getInfo('height'), $width, $this->getInfo('ratio')));
+            break;
+        case static::FL_RESZ_PERC:
+            extract($this->percentualScale($this->getInfo('width'), $this->getInfo('height'), $width, $this->getInfo('ratio')));
             break;
         // No scaling for larger images.
         // Would be easier to just set `bestfit`, but its behaviour changed

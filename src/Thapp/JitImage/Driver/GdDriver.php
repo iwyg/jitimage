@@ -162,7 +162,7 @@ class GdDriver extends AbstractDriver
      * @access public
      * @return mixed
      */
-    public function filter($name, $options)
+    public function filter($name, array $options = [])
     {
         if (static::EXT_FILTER === parent::filter($name, $options) and isset($this->filters[$name])) {
             $filter = new $this->filters[$name]($this, $options);
@@ -269,6 +269,12 @@ class GdDriver extends AbstractDriver
             extract($this->fitInBounds($width, $height, $this->getInfo('width'), $this->getInfo('height')));
             break;
         case static::FL_IGNR_ASPR:
+            break;
+        case static::FL_RESZ_PERC:
+            extract($this->percentualScale($this->getInfo('width'), $this->getInfo('height'), $width, $this->getInfo('ratio')));
+            break;
+        case static::FL_PIXL_CLMT:
+            extract($this->pixelLimit($this->getInfo('width'), $this->getInfo('height'), $width, $this->getInfo('ratio')));
             break;
         // default set the appropiate height and take width as a fixure in case
             // both the image ratio and the resize ratio don't match

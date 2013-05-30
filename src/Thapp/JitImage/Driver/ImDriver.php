@@ -165,7 +165,7 @@ class ImDriver extends AbstractDriver
      * @access public
      * @return boolean|void
      */
-    public function filter($name, $options)
+    public function filter($name, array $options = [])
     {
         if (static::EXT_FILTER === parent::filter($name, $options) and isset($this->filters[$name])) {
 
@@ -242,12 +242,14 @@ class ImDriver extends AbstractDriver
      */
     protected function resize($width, $height, $flag = '')
     {
-
         $min = min($width, $height);
-
+        $cmd = '-resize %sx%s%s';
 
         switch ($flag) {
         case static::FL_OSRK_LGR:
+            break;
+        case static::FL_RESZ_PERC:
+            $cmd = '-resize %s%s%s';
             break;
         case static::FL_IGNR_ASPR:
             // if one value is zero, imagmagick will
@@ -268,7 +270,7 @@ class ImDriver extends AbstractDriver
         $w = $this->getValueString($width);
         $h = $this->getValueString($height);
 
-        $this->commands['-resize %sx%s%s'] = [$w, $h, $flag];
+        $this->commands[$cmd] = [$w, $h, $flag];
         return $this;
     }
 

@@ -119,6 +119,8 @@ To apply additional filters, the filter url segment is appended. The filter segm
 - mode 2 : resize and crop  
 - mode 3 : crop 
 - mode 4 : best fit
+- mode 5 : percrentual scale
+- mode 6 : pixel limit
 
 
 ### using the facade class
@@ -147,6 +149,12 @@ JitImage::source('path/to/myimage.jpg')->fit(200, 200);
 
 // crop 200px * 200px of the image from the center, resize image if image is smaller and apply a greyscale filter:
 JitImage::source('path/to/myimage.jpg')->filter('gs')->cropAndResize(200, 200, 5);
+
+// Percentual scale the image:
+JitImage::source('uploads/images/test4.jpg')->scale(50);
+
+// Limit the image to max. 200000px:
+JitImage::source('uploads/images/test4.jpg')->pixel(200000);
 
 
 ```

@@ -28,27 +28,37 @@ class Image implements ImageInterface
     /**
      * @var int
      */
-    const IM_NOSCALE    = 0;
+    const IM_NOSCALE      = 0;
 
     /**
      * @var int
      */
-    const IM_RESIZE      = 1;
+    const IM_RESIZE       = 1;
 
     /**
      * @var int
      */
-    const IM_SCALECROP   = 2;
+    const IM_SCALECROP    = 2;
 
     /**
      * @var int
      */
-    const IM_CROP       = 3;
+    const IM_CROP         = 3;
 
     /**
      * @var int
      */
-    const IM_RSIZEFIT   = 4;
+    const IM_RSIZEFIT     = 4;
+
+    /**
+     * @var int
+     */
+    const IM_RSIZEPERCENT = 5;
+
+    /**
+     * @var int
+     */
+    const IM_RSIZEPXCOUNT = 6;
 
     /**
      * driver
@@ -118,6 +128,12 @@ class Image implements ImageInterface
             break;
         case static::IM_RSIZEFIT:
             $this->resizeToFit();
+            break;
+        case static::IM_RSIZEPERCENT:
+            $this->resizePercentual($width);
+            break;
+        case static::IM_RSIZEPXCOUNT:
+            $this->resizePixelCount($width);
             break;
         default:
             break;
@@ -253,6 +269,28 @@ class Image implements ImageInterface
     protected function resizeToFit()
     {
         return $this->driver->filter('resizeToFit', func_get_args());
+    }
+
+    /**
+     * resizeToFit
+     *
+     * @access protected
+     * @return mixed
+     */
+    protected function resizePercentual()
+    {
+        return $this->driver->filter('percentualScale', func_get_args());
+    }
+
+    /**
+     * resizePixelCount
+     *
+     * @access protected
+     * @return mixed
+     */
+    protected function resizePixelCount()
+    {
+        return $this->driver->filter('resizePixelCount', func_get_args());
     }
 
 }
