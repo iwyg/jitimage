@@ -14,14 +14,8 @@ Add thapp/jitimage as a requirement to composer.json:
 {
     "require": {
         "php":">=5.4.0",
-        "thapp/jitimage": "dev-development"
-    },
-    "repositories": [
-    	{
-    		"type":"vcs",
-    		"url":"https://github.com/iwyg/jitimage.git"
-    	}
-    ]
+        "thapp/jitimage": "dev-master"
+    }
 }
 ```
 
