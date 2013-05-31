@@ -72,13 +72,13 @@ Typically the binary name is `convert`.
 
 An array of available filter that should be enabled by default
 
-##### `recepies (array)`  
+##### `recipes (array)`  
 
 An array of predefined parameters that are aliased to a root, e.g.
 
 ```php
 
-'recepies' => [
+'recipes' => [
 	'thumbs' => '2/200/200/5, filter:gs'
 ],
 ```
@@ -185,7 +185,7 @@ Proportionally crop and resize an image to 200px * 200px with a gravity of
 ### Prefined image processing 
 (will disable dynamic processing)
 
-You alias your image processing with predefined recepies. 
+You alias your image processing with predefined recipes. 
 
 #### Examples
 

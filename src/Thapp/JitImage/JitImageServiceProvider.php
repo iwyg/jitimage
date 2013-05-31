@@ -173,13 +173,13 @@ class JitImageServiceProvider extends ServiceProvider
     {
         $config = $this->app['config'];
 
-        $recepies   = $config->get('jitimage::recepies', []);
+        $recipes    = $config->get('jitimage::recipes', []);
         $route      = $config->get('jitimage::route', 'image');
         $cacheroute = $config->get('jitimage::cacheroute', 'jit/storage');
 
         $this->registerCacheRoute($cacheroute);
 
-        if (false === $this->registerStaticRoutes($recepies, $route)) {
+        if (false === $this->registerStaticRoutes($recipes, $route)) {
             $this->registerDynanmicRoute($route);
         }
     }
@@ -201,19 +201,19 @@ class JitImageServiceProvider extends ServiceProvider
     /**
      * Register static routes.
      *
-     * @param  array $recepies array of prefined processing instructions
+     * @param  array $recipes array of prefined processing instructions
      * @param  string $route baseroute name
      *
      * @access protected
      * @return void|boolean false
      */
-    protected function registerStaticRoutes(array $recepies = [], $route)
+    protected function registerStaticRoutes(array $recipes = [], $route)
     {
-        if (empty($recepies)) {
+        if (empty($recipes)) {
             return false;
         }
 
-        foreach ($recepies as $aliasRoute => $formular) {
+        foreach ($recipes as $aliasRoute => $formular) {
             $this->app['router']
                 ->get($route . '/' . $aliasRoute . '/{source}', [
                   'uses' => 'Thapp\JitImage\Controller\JitController@getResource'
