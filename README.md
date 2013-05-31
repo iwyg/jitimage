@@ -112,7 +112,7 @@ An array of trusted sites for processing remote files
 no access to imagemagick or to the imagick php extension. 
 
 There're a few downsides when using gd though, e.g. colorprofiles are not preserved, there's no support for preserving imagesequences when processing an animated gif file. 
-It also has a larger memory footprint so can become impossible in some cases (memory limitations on shared hosting
+It also has a larger memory footprint and processing can become impossible in some cases (memory limitations on shared hosting
 patforms, etc.).
 
 ### ImageMagick
@@ -334,8 +334,8 @@ There's really just one command right now. `php artisan jitimage:clearcache` wil
 
 ### Deleting a cached images if its source file got replaced
 
-It is possible to just delete cached images that have been created from
-a certain source. So lets assume you have to replace an image called `myimage.jpg` in `uploads/images`, 
+It is possible to only delete cached images that have been created from
+a specific source. So lets assume you have to replace an image called `myimage.jpg` in `uploads/images`, 
 you could tell the cache class to to remove this specific cache directory. 
 
 ```php
