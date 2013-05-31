@@ -15,7 +15,7 @@ use Thapp\JitImage\Image;
 use Illuminate\Http\Response;
 
 /**
- * Class: GenericFileResponse
+ * Generic response handler
  *
  * @uses AbstractFileResponse
  *

@@ -40,6 +40,30 @@ class JitImageServiceProvider extends ServiceProvider
     }
 
     /**
+     * boot
+     *
+     * @access public
+     * @return void
+     */
+    public function boot()
+    {
+        $this->registerResponse();
+        $this->registerController();
+        $this->regsiterCommands();
+    }
+
+	/**
+	 * provides
+	 *
+	 * @access public
+	 * @return array
+	 */
+	public function provides()
+	{
+		return ['jitimage', 'jitimage.cache'];
+	}
+
+    /**
      * Register the image process driver.
      *
      * @access protected
@@ -267,20 +291,6 @@ class JitImageServiceProvider extends ServiceProvider
         });
     }
 
-
-    /**
-     * boot
-     *
-     * @access public
-     * @return void
-     */
-    public function boot()
-    {
-        $this->registerResponse();
-        $this->registerController();
-        $this->regsiterCommands();
-    }
-
     /**
      * getFilters
      *
@@ -309,15 +319,4 @@ class JitImageServiceProvider extends ServiceProvider
 
         return $trustedSites;
     }
-
-	/**
-	 * provides
-	 *
-	 * @access public
-	 * @return array
-	 */
-	public function provides()
-	{
-		return ['jitimage', 'jitimage.cache'];
-	}
 }

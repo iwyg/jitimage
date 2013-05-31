@@ -15,7 +15,7 @@ use Thapp\JitImage\Image;
 use Illuminate\Http\Response;
 
 /**
- * Class: XsendFileResponse
+ * X-Sendfile response handler
  *
  * @uses AbstractFileResponse
  *

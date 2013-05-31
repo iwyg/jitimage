@@ -14,7 +14,7 @@ namespace Thapp\JitImage;
 use Thapp\JitImage\Driver\DriverInterface;
 
 /**
- * Class: Image
+ * Processingdriver proxy.
  *
  * @implements ImageInterface
  *
@@ -272,10 +272,10 @@ class Image implements ImageInterface
     }
 
     /**
-     * resizeToFit
+     * mode 5 filte: percentualScale
      *
      * @access protected
-     * @return mixed
+     * @return void
      */
     protected function resizePercentual()
     {
@@ -283,10 +283,10 @@ class Image implements ImageInterface
     }
 
     /**
-     * resizePixelCount
+     * mode 6 filte: resizePixelCount
      *
      * @access protected
-     * @return mixed
+     * @return void
      */
     protected function resizePixelCount()
     {

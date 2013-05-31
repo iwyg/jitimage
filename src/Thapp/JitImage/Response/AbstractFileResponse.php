@@ -16,7 +16,7 @@ use Illuminate\Http\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
- * Class: AbstractFileResponse
+ * Handle file response
  *
  * @implements FileResponseInterface
  *
@@ -42,12 +42,12 @@ abstract class AbstractFileResponse implements FileResponseInterface
     protected $response;
 
     /**
-     * make
+     * Creates a new response.
      *
      * @param Image $image
      * @access public
      * @final
-     * @return mixed
+     * @return void
      */
     final public function make(Image $image)
     {
@@ -56,10 +56,10 @@ abstract class AbstractFileResponse implements FileResponseInterface
     }
 
     /**
-     * send
+     * Send response.
      *
      * @access public
-     * @return mixed
+     * @return void
      */
     public function send()
     {
@@ -71,23 +71,23 @@ abstract class AbstractFileResponse implements FileResponseInterface
     }
 
     /**
-     * setHeaders
+     * Set response headers.
      *
      * @param Response $response
      * @param Image $image
      * @access protected
      * @abstract
-     * @return mixed
+     * @return void
      */
     abstract protected function setHeaders(Response $response, Image $image);
 
 
     /**
-     * abort
+     * Abort with given status code.
      *
      * @param int $status
      * @access public
-     * @return mixed
+     * @return void
      */
     public function abort($status = 404)
     {
@@ -96,10 +96,10 @@ abstract class AbstractFileResponse implements FileResponseInterface
     }
 
     /**
-     * notFound
+     * Not found handler.
      *
      * @access public
-     * @return mixed
+     * @return void
      */
     public function notFound()
     {

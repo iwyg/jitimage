@@ -13,7 +13,7 @@ namespace Thapp\JitImage\Driver;
 use \Imagick;
 
 /**
- * Class: ImagickDriver
+ * Imagick Processing Driver
  *
  * @implements DriverInterface
  *
@@ -258,6 +258,8 @@ class GdDriver extends AbstractDriver
         }
 
         switch ($flag) {
+        case static::FL_IGNR_ASPR:
+            break;
         // oversize image to fill the boundaries.
         case static::FL_FILL_AREA:
             $this->fillArea($width, $height, $this->getInfo('width'), $this->getInfo('height'));
@@ -268,21 +270,18 @@ class GdDriver extends AbstractDriver
         case static::FL_OSRK_LGR:
             extract($this->fitInBounds($width, $height, $this->getInfo('width'), $this->getInfo('height')));
             break;
-        case static::FL_IGNR_ASPR:
-            break;
         case static::FL_RESZ_PERC:
-            extract($this->percentualScale($this->getInfo('width'), $this->getInfo('height'), $width, $this->getInfo('ratio')));
+            extract($this->percentualScale($this->getInfo('width'), $this->getInfo('height'), $width));
             break;
         case static::FL_PIXL_CLMT:
-            extract($this->pixelLimit($this->getInfo('width'), $this->getInfo('height'), $width, $this->getInfo('ratio')));
+            extract($this->pixelLimit($this->getInfo('width'), $this->getInfo('height'), $width));
             break;
         // default set the appropiate height and take width as a fixure in case
-            // both the image ratio and the resize ratio don't match
+        // both the image ratio and the resize ratio don't match
         default:
             $r1 = $this->getInfo('ratio');
             $r2 = $this->ratio($width, $height);
 
-            //if (($r1 >= 1 and $r2 < 1) or ($r1 < 1 and $r2 >= 1)) {
             if (0.001 < abs($r1 - $r2)) {
                 extract($this->getImageSize($width, 0));
             }

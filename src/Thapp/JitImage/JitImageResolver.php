@@ -14,7 +14,7 @@ namespace Thapp\JitImage;
 use Thapp\JitImage\Cache\CacheInterface;
 
 /**
- * Class: JitImageResolver
+ * Image resolver
  *
  * @implements ResolverInterface
  *

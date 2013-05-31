@@ -101,12 +101,13 @@ trait Scaling
      * @param int   $width
      * @param int   $height
      * @param int   $limit
-     * @param float $ratio
+     *
      * @access protected
      * @return array $width and $height
      */
-    protected function pixelLimit($width, $height, $limit, $ratio)
+    protected function pixelLimit($width, $height, $limit)
     {
+        $ratio  = $this->ratio($width, $height);
         $width  = (int)round(sqrt($limit * $ratio));
         $height = (int)floor($width / $ratio);
 
@@ -118,14 +119,15 @@ trait Scaling
      *
      * @param int   $width
      * @param int   $height
-     * @param int   $percent
      * @param float $ratio
+     *
      * @access protected
      * @return array $width and $height
      */
-    protected function percentualScale($width, $height, $percent, $ratio)
+    protected function percentualScale($width, $height, $percent)
     {
-        $width = (int)(round($width * $percent) / 100);
+        $ratio  = $this->ratio($width, $height);
+        $width  = (int)(round($width * $percent) / 100);
         $height = (int)floor($width / $ratio);
 
         return compact('width', 'height');

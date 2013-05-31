@@ -111,6 +111,6 @@ return [
      * `generic` or `xsend`
      * ------------------------------------------------
      */
-    'response-type' => 'xsend'
+    'response-type' => 'generic'
 ];
 

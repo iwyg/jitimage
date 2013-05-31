@@ -15,7 +15,7 @@ use Thapp\JitImage\Shell\ShellCommand;
 use Thapp\JitImage\Exception\ImageProcessException;
 
 /**
- * Class: ImDriver
+ * Imagemagick Processing Driver
  *
  * @uses AbstractDriver
  *
@@ -100,8 +100,6 @@ class ImDriver extends AbstractDriver
         $this->loader    = $loader;
         $this->converter = $locator->getConverterPath();
     }
-
-
 
     /**
      * {@inheritDoc}
@@ -234,6 +232,7 @@ class ImDriver extends AbstractDriver
         }
         return $this;
     }
+
     /**
      * resize
      *

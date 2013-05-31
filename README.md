@@ -81,11 +81,22 @@ An array of predefined parameters that are aliased to a root, e.g.
 'recepies' => [
 	'thumbs' => '2/200/200/5, filter:gs'
 ],
-
 ```
 
 would create a route thumbs that could be called like `http://example.com/thumbs/path/to/my/image.jpg`.    
 Defining recipies will disable dynamic image processing. 
+
+
+##### `response-type (string)`  
+
+You can choose `generic` or `xsend`. 
+
+Note: your server must be capable to handle [x-send headers](https://www.google.com/search?q=x-send+headers&oq=x-send+headers&aqs=chrome.0.57&sourceid=chrome&ie=UTF-8) when using the
+`xsend` response type.
+
+```php
+'response-type' => 'generic'
+```
 
 ##### `trusted_sites (array)`  
 
@@ -93,8 +104,31 @@ An array of trusted sites for processing remote files
 
 
 
+## Image Processors
 
+### GD  
 
+[GD](http://www.php.net/manual/en/book.image.php) is the standard php image processing library. Choose `gd` if you have either
+no access to imagemagick or to the imagick php extension. 
+
+There're a few downsides when using gd though, e.g. colorprofiles are not preserved, there's no support for preserving imagesequences when processing an animated gif file. 
+It also has a larger memory footprint so can become impossible in some cases (memory limitations on shared hosting
+patforms, etc.).
+
+### ImageMagick
+
+Imagemagick is an incredible fast and versatile image processing libraray. Choose `im`
+ in your `config.php`, if you have access to the `convert` binray. 
+
+ For further information on imagemagick please visit the [official website](http://www.imagemagick.org/)
+
+### Imagick
+
+Imagick is imagemagick OOP for php. Choose `imagick` if you have the
+[imagick](http://www.php.net/manual/en/book.imagick.php)
+extensions installed but no access to the imagemagick binary.  
+
+<!-- give me some air -->
 
 ## Usage
 
@@ -108,24 +142,137 @@ Anatomy of an image url:
 
 Parameter consists of one to five components, `mode`, `width`, `height`, `gravity` (crop position), and `background`
 
+
+
 An Image url my look like this: `http://exmaple.com/images/2/200/200/5/path/to/my/image.jpg` 
 To apply additional filters, the filter url segment is appended. The filter segments starts with `filter:` followed by the filter alias and the filter options. Filters are separated by a double colon `:`, filter parameter are separated by a semicolon `;`, eg `filter:gs;s=100;c=1:circ;o=12`. 
 
-
-### Modes
-
-- mode 0 : passthrough, no processing
-- mode 1 : resize 
-- mode 2 : resize and crop  
-- mode 3 : crop 
-- mode 4 : best fit
-- mode 5 : percrentual scale
-- mode 6 : pixel limit
+#### Examples
 
 
-### using the facade class
+Example URIs (assuming you have set `route` to `'images'` and you images are
+stored in `public/uploads/images`.   
 
-This is a convenient way to scale images within your blade templates. It will create an imageurl similar to `/jit/storage/jit_139e2ead8b71b8c7e52a36a378835961.jpg`
+
+**resizing**  
+Proportionally resize an image to 200px width:  
+
+`http://example.com/images/1/200/0/uploads/images/image.jpg`
+
+Resize an image to 200 * 200 px, ignoring its aspect ratio :  
+
+`http://example.com/images/1/200/200/uploads/images/image.jpg`
+
+Proportionally resize an image to best fit 400 * 280 px:  
+
+`http://example.com/images/4/400/280/uploads/images/image.jpg`
+
+Scale an image down to 50%:  
+
+`http://example.com/images/5/50/uploads/images/image.jpg`
+
+Limit to 200.000px pixel:  
+
+`http://example.com/images/6/200000/uploads/images/image.jpg`
+
+**cropping**  
+Proportionally crop and resize an image to 200px * 200px with a gravity of
+5 (center):    
+
+`http://example.com/images/2/200/200/5/uploads/images/image.jpg`
+
+
+### Prefined image processing 
+(will disable dynamic processing)
+
+You alias your image processing with predefined recepies. 
+
+#### Examples
+
+Map mode 2 crop rescale, with a 200x200 px crop and a grey scale
+      filter to `http://example.com/thumbs/uploads/images/image.jpg`:  
+
+```php
+	'thumbs' => '2/200/200/5, filter:gs'
+```
+ 
+Map mode 1 resize, with a resize of 800px width and a 
+greyscale filter to `http://example.com/gellery/uploads/images/image.jpg`:
+     
+```php
+   'gallery' => '1/800/0, filter:gs',
+```     
+Map mode 4 best fit, with a resize of max 800px width and 600px height, to `http://example.com/preview/uploads/images/image.jpg`:
+
+```php
+     
+   'preview' => '4/800/600'
+```     
+
+#### Modes
+
+**mode 0**  
+Passthrough, no processing. 
+
+**mode 1** `< width/height >`  
+Resizes the image with the given width and height values and ignores aspect
+ratio unless one of the values is zero.  
+
+**mode 2** `< width/height/gravity >`  
+Resize the image to fit within the cropping boundaries defined in width and height. 
+
+Gravity explained:        
+
+```
+-------------  
+| 1 | 2 | 3 |  
+-------------  
+| 4 | 5 | 6 |  
+-------------  
+| 7 | 8 | 9 |  
+-------------  
+```
+
+**mode 3** `< width/height/gravity/[color] >`  
+Crops the image with cropping boundaries defined in width and height. Will
+create a frame if the image is smaller than the cropping area. 
+
+**mode 4** `< width/height >`  
+Best fit  within the given bounds.
+
+**mode 5** `< percentage >`  
+Percrentual scale. 
+
+**mode 6** `< pixelcount >`  
+Pixel limit.
+
+#### Filters
+
+JitImage comes with 2 predfined filters, `GreyScale` and `Cirlce`:
+
+##### GreyScale
+
+- **alias** `gs`  
+- **options** (not available for the `gd` driver) 
+	- `b` Brightness, 0-100
+	- `s` Satturation, 0-100
+	- `h` Hue, 0-100
+	- `c` Contrast 0 or 1 
+  
+##### Circle
+
+- **alias** `circ`  
+- **options** 
+	- `o` offset, any positive integer value
+
+
+### The facade class
+
+
+This is a convenient way to scale images within your blade templates. It will create an imageurl similar to `/jit/storage/2egf4gfg/jit_139e2ead8b71b8c7e.jpg`
+
+Note: this won't work if both caching and dynamic processing are disabled.
+Note: this won't work if both caching and dynamic processing are disabled.
 
 ```php
 
@@ -159,21 +306,50 @@ JitImage::source('path/to/myimage.jpg')->pixel(200000);
 
 ```
 
-### Artisan commands
-
-There's really just one command right now. `php artisan jitimage:clearcache` will clear the whole image cache. 
 
 ## Register external filter
+
+You may add your own filter classes to be used with JitImage. 
+
+(more to come).
 
 ```php
 
 Event::listen('jitimage.registerfilter', function ($driverName) {
 
     return [
-        "mf" => "Namespace\\Filter\MyFilter\\" . ucfirst($driverName) . 'MfFilter'
+        "mf" => sprintf("Namespace\\Filter\MyFilter\\%s%s", ucfirst($driverName) , 'MfFilter')
     ];
 
 });
+```
 
 
+## Caching
 
+### Artisan commands
+
+There's really just one command right now. `php artisan jitimage:clearcache` will clear the whole image cache. 
+
+
+### Deleting a cached images if its source file got replaced
+
+It is possible to just delete cached images that have been created from
+a certain source. So lets assume you have to replace an image called `myimage.jpg` in `uploads/images`, 
+you could tell the cache class to to remove this specific cache directory. 
+
+```php
+$app['jitimage.cache']->delete('uploads/images/myimage.jpg');
+```
+
+You may also hoock this up to an upload event
+
+```php
+
+// attention! pseudo code:
+
+Event::listen('image.upload', function ($event) use ($app) {
+	$app['jitimage.cache']->delete($event->image);
+});
+
+```

@@ -15,9 +15,8 @@ use \Imagick;
 use \ImagickPixel;
 
 /**
- * Class: ImagickDriver
+ * GD Processing Driver
  *
- * @class
  * @implements DriverInterface
  * @uses Scaling
  * @package Thapp\JitImage
@@ -338,10 +337,10 @@ class ImagickDriver extends ImDriver
         case static::FL_IGNR_ASPR:
             break;
         case static::FL_PIXL_CLMT:
-            extract($this->pixelLimit($this->getInfo('width'), $this->getInfo('height'), $width, $this->getInfo('ratio')));
+            extract($this->pixelLimit($this->getInfo('width'), $this->getInfo('height'), $width));
             break;
         case static::FL_RESZ_PERC:
-            extract($this->percentualScale($this->getInfo('width'), $this->getInfo('height'), $width, $this->getInfo('ratio')));
+            extract($this->percentualScale($this->getInfo('width'), $this->getInfo('height'), $width));
             break;
         // No scaling for larger images.
         // Would be easier to just set `bestfit`, but its behaviour changed

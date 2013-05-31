@@ -15,8 +15,7 @@ use Thapp\JitImage\Image;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
- * Interface: FileResponseInterface
- *
+ * Handle file response
  *
  * @package Thapp\JitImage
  * @version $Id$

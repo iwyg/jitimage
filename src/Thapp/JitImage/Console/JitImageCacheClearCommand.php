@@ -17,8 +17,7 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\InputArgument;
 
 /**
- * Class: JitImageCacheClearCommand
- *
+ * Clear JitImage cache command
  *
  * @package Thapp\JitImage
  * @version $Id$
@@ -27,13 +26,6 @@ use Symfony\Component\Console\Input\InputArgument;
  */
 class JitImageCacheClearCommand extends Command
 {
-
-    /**
-     * files
-     *
-     * @var \Illuminate\Filesystem\Filesystem
-     */
-    protected $files;
 
     /**
      * The console command name.
