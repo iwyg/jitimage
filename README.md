@@ -78,7 +78,7 @@ An array of predefined parameters that are aliased to a root, e.g.
 ```
 
 would create a route thumbs that could be called like `http://example.com/thumbs/path/to/my/image.jpg`.    
-Defining recipies will disable dynamic image processing. 
+Defining recipes will disable dynamic image processing. 
 
 
 ##### `response-type (string)`  
