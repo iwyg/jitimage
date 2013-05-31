@@ -1,0 +1,996 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<meta name="generator" content="ApiGen 2.8.0" />
+
+	<title>Class Thapp\JitImage\Driver\GdDriver</title>
+
+	<script type="text/javascript" src="resources/combined.js?2420500170"></script>
+	<script type="text/javascript" src="elementlist.js?2380344294"></script>
+	<link rel="stylesheet" type="text/css" media="all" href="resources/bootstrap.min.css?260161822" />
+	<link rel="stylesheet" type="text/css" media="all" href="resources/style.css?2015443609" />
+
+</head>
+
+<body>
+	<div id="navigation" class="navbar navbar-fixed-top">
+		<div class="navbar-inner">
+			<div class="container">
+				<a href="index.html" class="brand">Overview</a>
+				<div class="nav-collapse">
+					<ul class="nav">
+						<li>
+							<a href="namespace-Thapp.JitImage.Driver.html" title="Summary of Thapp\JitImage\Driver"><span>Namespace</span></a>
+						</li>
+						<li class="active">
+<span>Class</span>						</li>
+
+						<li class="divider-vertical"></li>
+
+						<li>
+							<a href="tree.html" title="Tree view of classes, interfaces, traits and exceptions"><span>Tree</span></a>
+						</li>
+						<li>
+							<a href="todo.html" title="Todo list"><span>Todo</span></a>
+						</li>
+
+
+					</ul>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div id="left">
+	<div id="menu">
+		<form id="search" class="form-search">
+			<input type="hidden" name="cx" value="" />
+			<input type="hidden" name="ie" value="UTF-8" />
+			<input type="text" name="q" class="search-query" placeholder="Search" />
+		</form>
+
+
+		<div id="groups">
+			<h3>Namespaces</h3>
+			<ul>
+				<li><a href="namespace-PHP.html">PHP</a>
+						</li>
+				<li class="active"><a href="namespace-Thapp.html">Thapp<span></span></a>
+						<ul>
+				<li class="active"><a href="namespace-Thapp.JitImage.html">JitImage<span></span></a>
+						<ul>
+				<li><a href="namespace-Thapp.JitImage.Cache.html">Cache</a>
+						</li>
+				<li><a href="namespace-Thapp.JitImage.Console.html">Console</a>
+						</li>
+				<li><a href="namespace-Thapp.JitImage.Controller.html">Controller</a>
+						</li>
+				<li class="active"><a href="namespace-Thapp.JitImage.Driver.html">Driver</a>
+						</li>
+				<li><a href="namespace-Thapp.JitImage.Exception.html">Exception</a>
+						</li>
+				<li><a href="namespace-Thapp.JitImage.Facades.html">Facades</a>
+						</li>
+				<li><a href="namespace-Thapp.JitImage.Filter.html">Filter<span></span></a>
+						<ul>
+				<li><a href="namespace-Thapp.JitImage.Filter.Circle.html">Circle</a>
+						</li>
+				<li><a href="namespace-Thapp.JitImage.Filter.GreyScale.html">GreyScale</a>
+						</li>
+							</ul></li>
+				<li><a href="namespace-Thapp.JitImage.Response.html">Response</a>
+						</li>
+				<li><a href="namespace-Thapp.JitImage.Shell.html">Shell</a>
+						</li>
+							</ul></li></ul></li>
+			</ul>
+		</div>
+
+
+		<div id="elements">
+			<h3>Classes</h3>
+			<ul>
+				<li><a href="class-Thapp.JitImage.Driver.AbstractDriver.html">AbstractDriver</a></li>
+				<li class="active"><a href="class-Thapp.JitImage.Driver.GdDriver.html">GdDriver</a></li>
+				<li><a href="class-Thapp.JitImage.Driver.ImageSourceLoader.html">ImageSourceLoader</a></li>
+				<li><a href="class-Thapp.JitImage.Driver.ImagickDriver.html">ImagickDriver</a></li>
+				<li><a href="class-Thapp.JitImage.Driver.ImBinLocator.html">ImBinLocator</a></li>
+				<li><a href="class-Thapp.JitImage.Driver.ImDriver.html">ImDriver</a></li>
+			</ul>
+
+			<h3>Interfaces</h3>
+			<ul>
+				<li><a href="class-Thapp.JitImage.Driver.BinLocatorInterface.html">BinLocatorInterface</a></li>
+				<li><a href="class-Thapp.JitImage.Driver.DriverInterface.html">DriverInterface</a></li>
+				<li><a href="class-Thapp.JitImage.Driver.SourceLoaderInterface.html">SourceLoaderInterface</a></li>
+			</ul>
+
+			<h3>Traits</h3>
+			<ul>
+				<li><a href="class-Thapp.JitImage.Driver.Scaling.html">Scaling</a></li>
+			</ul>
+
+
+
+		</div>
+	</div>
+</div>
+
+<div id="splitter"></div>
+
+<div id="right">
+	<div id="rightInner">
+<div id="content" class="class">
+	<h1>Class GdDriver</h1>
+
+
+	<div class="description">
+	
+<p>Imagick Processing Driver</p>
+
+	</div>
+
+	<dl class="tree well">
+		<dd style="padding-left:0px">
+			<a href="class-Thapp.JitImage.Driver.AbstractDriver.html"><span>Thapp\JitImage\Driver\AbstractDriver</span></a>
+			
+			 implements 
+				<a href="class-Thapp.JitImage.Driver.DriverInterface.html"><span>Thapp\JitImage\Driver\DriverInterface</span></a>
+			
+			
+		</dd>
+		<dd style="padding-left:30px">
+			<img src="resources/inherit.png" alt="Extended by" />
+<b><span>Thapp\JitImage\Driver\GdDriver</span></b>			
+			
+			 uses 
+				<a href="class-Thapp.JitImage.Driver.Scaling.html"><span>Thapp\JitImage\Driver\Scaling</span></a>
+			
+		</dd>
+	</dl>
+
+
+
+
+
+
+
+
+	<div class="alert alert-info">
+		
+		
+		<b>Namespace:</b> <a href="namespace-Thapp.html">Thapp</a>\<a href="namespace-Thapp.JitImage.html">JitImage</a>\<a href="namespace-Thapp.JitImage.Driver.html">Driver</a><br />
+		<b>Package:</b> Thapp\JitImage<br />
+
+				<b>License:</b>
+				<a href="MIT">MIT</a><br />
+				<b>Author:</b>
+				Thomas Appel &lt;<a
+href="mailto:mail&#64;thomas-appel.com">mail&#64;<!---->thomas-appel.com</a>&gt;<br />
+				<b>Version</b>
+				<br />
+				<b>Implements:</b>
+				DriverInterface<br />
+		<b>Located at</b> <a href="source-class-Thapp.JitImage.Driver.GdDriver.html#15-445" title="Go to source code">Driver/GdDriver.php</a><br />
+	</div>
+
+
+
+		<h2>Methods summary</h2>
+		<table class="summary table table-bordered table-striped" id="methods">
+		<tr data-order="__construct" id="___construct">
+
+			<td class="attributes"><code>
+				 public 
+				mixed
+				
+				</code>
+			</td>
+
+			<td class="name"><div>
+			<a class="anchor" href="#___construct">#</a>
+			<code><a href="source-class-Thapp.JitImage.Driver.GdDriver.html#70-80" title="Go to source code">__construct</a>( <span><code><a href="class-Thapp.JitImage.Driver.SourceLoaderInterface.html">Thapp\JitImage\Driver\SourceLoaderInterface</a></code> <var>$loader</var></span> )</code>
+
+			<div class="description short">
+				
+<p>__construct</p>
+
+			</div>
+
+			<div class="description detailed hidden">
+				
+<p>__construct</p>
+
+
+
+					<h4>Parameters</h4>
+					<div class="list"><dl>
+						<dt><var>$loader</var></dt>
+						<dd><code><code><a href="class-Thapp.JitImage.Driver.SourceLoaderInterface.html">Thapp\JitImage\Driver\SourceLoaderInterface</a></code></code><br>$loader</dd>
+					</dl></div>
+
+					<h4>Returns</h4>
+					<div class="list">
+						<code>mixed</code><br />
+					</div>
+
+
+
+
+			</div>
+			</div></td>
+		</tr>
+		<tr data-order="load" id="_load">
+
+			<td class="attributes"><code>
+				 public 
+				
+				
+				</code>
+			</td>
+
+			<td class="name"><div>
+			<a class="anchor" href="#_load">#</a>
+			<code><a href="source-class-Thapp.JitImage.Driver.GdDriver.html#82-95" title="Go to source code">load</a>( <span>string <var>$source</var></span> )</code>
+
+			<div class="description short">
+				
+<p>load the imagefile resource</p>
+
+			</div>
+
+			<div class="description detailed hidden">
+				
+<p>load the imagefile resource</p>
+
+
+
+					<h4>Parameters</h4>
+					<div class="list"><dl>
+						<dt><var>$source</var></dt>
+						<dd><code>string</code><br>$source</dd>
+					</dl></div>
+
+
+
+
+
+			</div>
+			</div></td>
+		</tr>
+		<tr data-order="setTargetSize" id="_setTargetSize">
+
+			<td class="attributes"><code>
+				 public 
+				
+				
+				</code>
+			</td>
+
+			<td class="name"><div>
+			<a class="anchor" href="#_setTargetSize">#</a>
+			<code><a href="source-class-Thapp.JitImage.Driver.GdDriver.html#97-108" title="Go to source code">setTargetSize</a>( <span>mixed <var>$width</var></span>, <span>mixed <var>$height</var></span> )</code>
+
+			<div class="description short">
+				
+<p>setTargetSize</p>
+
+			</div>
+
+			<div class="description detailed hidden">
+				
+<p>setTargetSize</p>
+
+
+
+					<h4>Parameters</h4>
+					<div class="list"><dl>
+						<dt><var>$width</var></dt>
+						<dd><code>mixed</code><br>$width</dd>
+						<dt><var>$height</var></dt>
+						<dd><code>mixed</code><br>$height</dd>
+					</dl></div>
+
+
+
+
+					<h4>Overrides</h4>
+					<div class="list"><code><a href="class-Thapp.JitImage.Driver.AbstractDriver.html#_setTargetSize">Thapp\JitImage\Driver\AbstractDriver::setTargetSize</a></code></div>
+
+			</div>
+			</div></td>
+		</tr>
+		<tr data-order="setQuality" id="_setQuality">
+
+			<td class="attributes"><code>
+				 public 
+				mixed
+				
+				</code>
+			</td>
+
+			<td class="name"><div>
+			<a class="anchor" href="#_setQuality">#</a>
+			<code><a href="source-class-Thapp.JitImage.Driver.GdDriver.html#110-120" title="Go to source code">setQuality</a>( <span>mixed <var>$quality</var></span> )</code>
+
+			<div class="description short">
+				
+<p>setQuality</p>
+
+			</div>
+
+			<div class="description detailed hidden">
+				
+<p>setQuality</p>
+
+
+
+					<h4>Parameters</h4>
+					<div class="list"><dl>
+						<dt><var>$quality</var></dt>
+						<dd><code>mixed</code><br>$quality</dd>
+					</dl></div>
+
+					<h4>Returns</h4>
+					<div class="list">
+						<code>mixed</code><br />
+					</div>
+
+
+
+
+			</div>
+			</div></td>
+		</tr>
+		<tr data-order="getImageBlob" id="_getImageBlob">
+
+			<td class="attributes"><code>
+				 public 
+				string
+				
+				</code>
+			</td>
+
+			<td class="name"><div>
+			<a class="anchor" href="#_getImageBlob">#</a>
+			<code><a href="source-class-Thapp.JitImage.Driver.GdDriver.html#122-141" title="Go to source code">getImageBlob</a>( )</code>
+
+			<div class="description short">
+				
+<p>get the file contents of the image</p>
+
+			</div>
+
+			<div class="description detailed hidden">
+				
+<p>get the file contents of the image</p>
+
+
+
+
+					<h4>Returns</h4>
+					<div class="list">
+						<code>string</code><br />
+					</div>
+
+
+
+
+			</div>
+			</div></td>
+		</tr>
+		<tr data-order="filter" id="_filter">
+
+			<td class="attributes"><code>
+				 public 
+				mixed
+				
+				</code>
+			</td>
+
+			<td class="name"><div>
+			<a class="anchor" href="#_filter">#</a>
+			<code><a href="source-class-Thapp.JitImage.Driver.GdDriver.html#157-171" title="Go to source code">filter</a>( <span>mixed <var>$name</var></span>, <span>array <var>$options</var> = []</span> )</code>
+
+			<div class="description short">
+				
+<p>filter</p>
+
+			</div>
+
+			<div class="description detailed hidden">
+				
+<p>filter</p>
+
+
+
+					<h4>Parameters</h4>
+					<div class="list"><dl>
+						<dt><var>$name</var></dt>
+						<dd><code>mixed</code><br>$name</dd>
+						<dt><var>$options</var></dt>
+						<dd><code>mixed</code><br>$options</dd>
+					</dl></div>
+
+					<h4>Returns</h4>
+					<div class="list">
+						<code>mixed</code><br />
+					</div>
+
+
+
+					<h4>Overrides</h4>
+					<div class="list"><code><a href="class-Thapp.JitImage.Driver.AbstractDriver.html#_filter">Thapp\JitImage\Driver\AbstractDriver::filter</a></code></div>
+
+			</div>
+			</div></td>
+		</tr>
+		<tr data-order="clean" id="_clean">
+
+			<td class="attributes"><code>
+				 public 
+				
+				
+				</code>
+			</td>
+
+			<td class="name"><div>
+			<a class="anchor" href="#_clean">#</a>
+			<code><a href="source-class-Thapp.JitImage.Driver.GdDriver.html#202-215" title="Go to source code">clean</a>( )</code>
+
+			<div class="description short">
+				
+			</div>
+
+			<div class="description detailed hidden">
+				
+
+
+
+
+
+
+
+			</div>
+			</div></td>
+		</tr>
+		<tr data-order="getResource" id="_getResource">
+
+			<td class="attributes"><code>
+				 public 
+				
+				
+				</code>
+			</td>
+
+			<td class="name"><div>
+			<a class="anchor" href="#_getResource">#</a>
+			<code><a href="source-class-Thapp.JitImage.Driver.GdDriver.html#216-226" title="Go to source code">getResource</a>( )</code>
+
+			<div class="description short">
+				
+<p>swapResource</p>
+
+			</div>
+
+			<div class="description detailed hidden">
+				
+<p>swapResource</p>
+
+
+
+
+
+
+
+
+			</div>
+			</div></td>
+		</tr>
+		<tr data-order="swapResource" id="_swapResource">
+
+			<td class="attributes"><code>
+				 public 
+				
+				
+				</code>
+			</td>
+
+			<td class="name"><div>
+			<a class="anchor" href="#_swapResource">#</a>
+			<code><a href="source-class-Thapp.JitImage.Driver.GdDriver.html#228-242" title="Go to source code">swapResource</a>( <span>mixed <var>$resource</var></span> )</code>
+
+			<div class="description short">
+				
+<p>swapResource</p>
+
+			</div>
+
+			<div class="description detailed hidden">
+				
+<p>swapResource</p>
+
+
+
+					<h4>Parameters</h4>
+					<div class="list"><dl>
+						<dt><var>$resource</var></dt>
+						<dd><code>mixed</code><br>$resource</dd>
+					</dl></div>
+
+
+
+
+
+			</div>
+			</div></td>
+		</tr>
+		<tr data-order="resize" id="_resize">
+
+			<td class="attributes"><code>
+				 protected 
+				mixed
+				
+				</code>
+			</td>
+
+			<td class="name"><div>
+			<a class="anchor" href="#_resize">#</a>
+			<code><a href="source-class-Thapp.JitImage.Driver.GdDriver.html#244-298" title="Go to source code">resize</a>( <span>mixed <var>$width</var></span>, <span>mixed <var>$height</var></span>, <span>mixed <var>$flag</var> = <span class="php-keyword1">null</span></span> )</code>
+
+			<div class="description short">
+				
+<p>resize</p>
+
+			</div>
+
+			<div class="description detailed hidden">
+				
+<p>resize</p>
+
+
+
+					<h4>Parameters</h4>
+					<div class="list"><dl>
+						<dt><var>$width</var></dt>
+						<dd><code>mixed</code><br>$width</dd>
+						<dt><var>$height</var></dt>
+						<dd><code>mixed</code><br>$height</dd>
+						<dt><var>$flag</var></dt>
+						<dd><code>mixed</code><br>$flag</dd>
+					</dl></div>
+
+					<h4>Returns</h4>
+					<div class="list">
+						<code>mixed</code><br />
+					</div>
+
+
+
+
+			</div>
+			</div></td>
+		</tr>
+		<tr data-order="gravity" id="_gravity">
+
+			<td class="attributes"><code>
+				 protected 
+				mixed
+				
+				</code>
+			</td>
+
+			<td class="name"><div>
+			<a class="anchor" href="#_gravity">#</a>
+			<code><a href="source-class-Thapp.JitImage.Driver.GdDriver.html#300-311" title="Go to source code">gravity</a>( <span>mixed <var>$gravity</var></span>, <span>string <var>$flag</var> = <span class="php-quote">''</span></span> )</code>
+
+			<div class="description short">
+				
+<p>gravity</p>
+
+			</div>
+
+			<div class="description detailed hidden">
+				
+<p>gravity</p>
+
+
+
+					<h4>Parameters</h4>
+					<div class="list"><dl>
+						<dt><var>$gravity</var></dt>
+						<dd><code>mixed</code><br>$gravity</dd>
+						<dt><var>$flag</var></dt>
+						<dd><code>string</code><br>$flag</dd>
+					</dl></div>
+
+					<h4>Returns</h4>
+					<div class="list">
+						<code>mixed</code><br />
+					</div>
+
+
+
+
+			</div>
+			</div></td>
+		</tr>
+		<tr data-order="background" id="_background">
+
+			<td class="attributes"><code>
+				 protected 
+				mixed
+				
+				</code>
+			</td>
+
+			<td class="name"><div>
+			<a class="anchor" href="#_background">#</a>
+			<code><a href="source-class-Thapp.JitImage.Driver.GdDriver.html#313-332" title="Go to source code">background</a>( <span>mixed <var>$color</var> = <span class="php-keyword1">null</span></span> )</code>
+
+			<div class="description short">
+				
+<p>background</p>
+
+			</div>
+
+			<div class="description detailed hidden">
+				
+<p>background</p>
+
+
+
+					<h4>Parameters</h4>
+					<div class="list"><dl>
+						<dt><var>$color</var></dt>
+						<dd><code>mixed</code><br>$color</dd>
+					</dl></div>
+
+					<h4>Returns</h4>
+					<div class="list">
+						<code>mixed</code><br />
+					</div>
+
+
+
+
+			</div>
+			</div></td>
+		</tr>
+		<tr data-order="process" id="_process">
+
+			<td class="attributes"><code>
+				 public 
+				
+				
+				</code>
+			</td>
+
+			<td class="name"><div>
+			<a class="anchor" href="#_process">#</a>
+			<code><a href="source-class-Thapp.JitImage.Driver.GdDriver.html#334-351" title="Go to source code">process</a>( )</code>
+
+			<div class="description short">
+				
+<p>post process background color if any</p>
+
+			</div>
+
+			<div class="description detailed hidden">
+				
+<p>post process background color if any</p>
+
+
+
+
+
+
+
+					<h4>Overrides</h4>
+					<div class="list"><code><a href="class-Thapp.JitImage.Driver.AbstractDriver.html#_process">Thapp\JitImage\Driver\AbstractDriver::process</a></code></div>
+
+			</div>
+			</div></td>
+		</tr>
+		<tr data-order="extent" id="_extent">
+
+			<td class="attributes"><code>
+				 protected 
+				mixed
+				
+				</code>
+			</td>
+
+			<td class="name"><div>
+			<a class="anchor" href="#_extent">#</a>
+			<code><a href="source-class-Thapp.JitImage.Driver.GdDriver.html#369-394" title="Go to source code">extent</a>( <span>mixed <var>$width</var></span>, <span>mixed <var>$height</var></span>, <span>mixed <var>$flag</var> = <span class="php-keyword1">null</span></span> )</code>
+
+			<div class="description short">
+				
+<p>extent</p>
+
+			</div>
+
+			<div class="description detailed hidden">
+				
+<p>extent</p>
+
+
+
+					<h4>Parameters</h4>
+					<div class="list"><dl>
+						<dt><var>$width</var></dt>
+						<dd><code>mixed</code><br>$width</dd>
+						<dt><var>$height</var></dt>
+						<dd><code>mixed</code><br>$height</dd>
+						<dt><var>$flag</var></dt>
+						<dd><code>mixed</code><br>$flag</dd>
+					</dl></div>
+
+					<h4>Returns</h4>
+					<div class="list">
+						<code>mixed</code><br />
+					</div>
+
+
+
+
+			</div>
+			</div></td>
+		</tr>
+		<tr data-order="getGravity" id="_getGravity">
+
+			<td class="attributes"><code>
+				 protected 
+				integer
+				
+				</code>
+			</td>
+
+			<td class="name"><div>
+			<a class="anchor" href="#_getGravity">#</a>
+			<code><a href="source-class-Thapp.JitImage.Driver.GdDriver.html#396-405" title="Go to source code">getGravity</a>( )</code>
+
+			<div class="description short">
+				
+<p>get the current image gravity, defaults to 1</p>
+
+			</div>
+
+			<div class="description detailed hidden">
+				
+<p>get the current image gravity, defaults to 1</p>
+
+
+
+
+					<h4>Returns</h4>
+					<div class="list">
+						<code>integer</code><br>the gravity value [1 - 9]<br />
+					</div>
+
+
+
+
+			</div>
+			</div></td>
+		</tr>
+		</table>
+
+		<h3>Methods inherited from <a href="class-Thapp.JitImage.Driver.AbstractDriver.html#methods">Thapp\JitImage\Driver\AbstractDriver</a></h3>
+		<p class="elementList">
+			<code><a href="class-Thapp.JitImage.Driver.AbstractDriver.html#___destruct">__destruct()</a></code>, 
+			<code><a href="class-Thapp.JitImage.Driver.AbstractDriver.html#_filterCrop">filterCrop()</a></code>, 
+			<code><a href="class-Thapp.JitImage.Driver.AbstractDriver.html#_filterCropScale">filterCropScale()</a></code>, 
+			<code><a href="class-Thapp.JitImage.Driver.AbstractDriver.html#_filterPercentualScale">filterPercentualScale()</a></code>, 
+			<code><a href="class-Thapp.JitImage.Driver.AbstractDriver.html#_filterResize">filterResize()</a></code>, 
+			<code><a href="class-Thapp.JitImage.Driver.AbstractDriver.html#_filterResizePixelCount">filterResizePixelCount()</a></code>, 
+			<code><a href="class-Thapp.JitImage.Driver.AbstractDriver.html#_filterResizeToFit">filterResizeToFit()</a></code>, 
+			<code><a href="class-Thapp.JitImage.Driver.AbstractDriver.html#_formatType">formatType()</a></code>, 
+			<code><a href="class-Thapp.JitImage.Driver.AbstractDriver.html#_getDriverType">getDriverType()</a></code>, 
+			<code><a href="class-Thapp.JitImage.Driver.AbstractDriver.html#_getError">getError()</a></code>, 
+			<code><a href="class-Thapp.JitImage.Driver.AbstractDriver.html#_getImageSize">getImageSize()</a></code>, 
+			<code><a href="class-Thapp.JitImage.Driver.AbstractDriver.html#_getInfo">getInfo()</a></code>, 
+			<code><a href="class-Thapp.JitImage.Driver.AbstractDriver.html#_getOutputMimeType">getOutputMimeType()</a></code>, 
+			<code><a href="class-Thapp.JitImage.Driver.AbstractDriver.html#_getOutputType">getOutputType()</a></code>, 
+			<code><a href="class-Thapp.JitImage.Driver.AbstractDriver.html#_getSource">getSource()</a></code>, 
+			<code><a href="class-Thapp.JitImage.Driver.AbstractDriver.html#_getSourceAttributes">getSourceAttributes()</a></code>, 
+			<code><a href="class-Thapp.JitImage.Driver.AbstractDriver.html#_getTargetSize">getTargetSize()</a></code>, 
+			<code><a href="class-Thapp.JitImage.Driver.AbstractDriver.html#_isProcessed">isProcessed()</a></code>, 
+			<code><a href="class-Thapp.JitImage.Driver.AbstractDriver.html#_registerFilter">registerFilter()</a></code>, 
+			<code><a href="class-Thapp.JitImage.Driver.AbstractDriver.html#_setOutputType">setOutputType()</a></code>
+		</p>
+		<h3>Methods inherited from <a href="class-Thapp.JitImage.Driver.DriverInterface.html#methods">Thapp\JitImage\Driver\DriverInterface</a></h3>
+		<p class="elementList">
+			<code><a href="class-Thapp.JitImage.Driver.DriverInterface.html#_setOutPutType">setOutPutType()</a></code>
+		</p>
+
+		<h3>Methods used from <a href="class-Thapp.JitImage.Driver.Scaling.html#methods">Thapp\JitImage\Driver\Scaling</a></h3>
+		<p class="elementList">
+			<code><a href="class-Thapp.JitImage.Driver.Scaling.html#_fillArea">fillArea()</a></code>, 
+			<code><a href="class-Thapp.JitImage.Driver.Scaling.html#_fitInBounds">fitInBounds()</a></code>, 
+			<code><a href="class-Thapp.JitImage.Driver.Scaling.html#_getCropCoordinates">getCropCoordinates()</a></code>, 
+			<code><a href="class-Thapp.JitImage.Driver.Scaling.html#_percentualScale">percentualScale()</a></code>, 
+			<code><a href="class-Thapp.JitImage.Driver.Scaling.html#_pixelLimit">pixelLimit()</a></code>, 
+			<code><a href="class-Thapp.JitImage.Driver.Scaling.html#_ratio">ratio()</a></code>
+		</p>
+
+		<h3>Magic methods summary</h3>
+
+
+
+
+
+		<h2>Constants summary</h2>
+
+		<h3>Constants inherited from <a href="class-Thapp.JitImage.Driver.AbstractDriver.html#constants">Thapp\JitImage\Driver\AbstractDriver</a></h3>
+		<p class="elementList">
+			<code><a href="class-Thapp.JitImage.Driver.AbstractDriver.html#EXT_FILTER"><b>EXT_FILTER</b></a></code>, 
+			<code><a href="class-Thapp.JitImage.Driver.AbstractDriver.html#FL_FILL_AREA"><b>FL_FILL_AREA</b></a></code>, 
+			<code><a href="class-Thapp.JitImage.Driver.AbstractDriver.html#FL_IGNR_ASPR"><b>FL_IGNR_ASPR</b></a></code>, 
+			<code><a href="class-Thapp.JitImage.Driver.AbstractDriver.html#FL_OENL_SML"><b>FL_OENL_SML</b></a></code>, 
+			<code><a href="class-Thapp.JitImage.Driver.AbstractDriver.html#FL_OSRK_LGR"><b>FL_OSRK_LGR</b></a></code>, 
+			<code><a href="class-Thapp.JitImage.Driver.AbstractDriver.html#FL_PIXL_CLMT"><b>FL_PIXL_CLMT</b></a></code>, 
+			<code><a href="class-Thapp.JitImage.Driver.AbstractDriver.html#FL_RESZ_PERC"><b>FL_RESZ_PERC</b></a></code>, 
+			<code><a href="class-Thapp.JitImage.Driver.AbstractDriver.html#INT_FILTER"><b>INT_FILTER</b></a></code>
+		</p>
+
+
+
+		<h2>Properties summary</h2>
+		<table class="summary table table-bordered table-striped" id="properties">
+		<tr data-order="resource" id="$resource">
+			<td class="attributes"><code>
+				protected  
+				mixed
+			</code></td>
+
+			<td class="name">
+					<a href="source-class-Thapp.JitImage.Driver.GdDriver.html#29-34" title="Go to source code"><var>$resource</var></a>
+			</td>
+			<td class="description"><div>
+				<a href="#$resource" class="anchor">#</a>
+
+				<div class="description short">
+					
+<p>resource</p>
+
+				</div>
+
+				<div class="description detailed hidden">
+					
+<p>resource</p>
+
+
+				</div>
+			</div></td>
+		</tr>
+		<tr data-order="source" id="$source">
+			<td class="attributes"><code>
+				protected  
+				mixed
+			</code></td>
+
+			<td class="name">
+					<a href="source-class-Thapp.JitImage.Driver.GdDriver.html#36-41" title="Go to source code"><var>$source</var></a>
+			</td>
+			<td class="description"><div>
+				<a href="#$source" class="anchor">#</a>
+
+				<div class="description short">
+					
+<p>source</p>
+
+				</div>
+
+				<div class="description detailed hidden">
+					
+<p>source</p>
+
+
+				</div>
+			</div></td>
+		</tr>
+		<tr data-order="gravity" id="$gravity">
+			<td class="attributes"><code>
+				protected  
+				mixed
+			</code></td>
+
+			<td class="name">
+					<a href="source-class-Thapp.JitImage.Driver.GdDriver.html#43-48" title="Go to source code"><var>$gravity</var></a>
+			</td>
+			<td class="description"><div>
+				<a href="#$gravity" class="anchor">#</a>
+
+				<div class="description short">
+					
+<p>gravity</p>
+
+				</div>
+
+				<div class="description detailed hidden">
+					
+<p>gravity</p>
+
+
+				</div>
+			</div></td>
+		</tr>
+		<tr data-order="outputType" id="$outputType">
+			<td class="attributes"><code>
+				protected  
+				string
+			</code></td>
+
+			<td class="name">
+					<a href="source-class-Thapp.JitImage.Driver.GdDriver.html#50-55" title="Go to source code"><var>$outputType</var></a>
+			</td>
+			<td class="description"><div>
+				<a href="#$outputType" class="anchor">#</a>
+
+				<div class="description short">
+					
+<p>outputType</p>
+
+				</div>
+
+				<div class="description detailed hidden">
+					
+<p>outputType</p>
+
+
+				</div>
+			</div></td>
+		</tr>
+		<tr data-order="quality" id="$quality">
+			<td class="attributes"><code>
+				protected  
+				integer
+			</code></td>
+
+			<td class="name">
+					<a href="source-class-Thapp.JitImage.Driver.GdDriver.html#57-62" title="Go to source code"><var>$quality</var></a>
+			</td>
+			<td class="description"><div>
+				<a href="#$quality" class="anchor">#</a>
+
+				<div class="description short">
+					
+<p>quality</p>
+
+				</div>
+
+				<div class="description detailed hidden">
+					
+<p>quality</p>
+
+
+				</div>
+			</div></td>
+		</tr>
+		</table>
+
+		<h3>Properties inherited from <a href="class-Thapp.JitImage.Driver.AbstractDriver.html#properties">Thapp\JitImage\Driver\AbstractDriver</a></h3>
+		<p class="elementList">
+			<code><a href="class-Thapp.JitImage.Driver.AbstractDriver.html#$error"><var>$error</var></a></code>, 
+			<code><a href="class-Thapp.JitImage.Driver.AbstractDriver.html#$filters"><var>$filters</var></a></code>, 
+			<code><a href="class-Thapp.JitImage.Driver.AbstractDriver.html#$processed"><var>$processed</var></a></code>, 
+			<code><a href="class-Thapp.JitImage.Driver.AbstractDriver.html#$sourceAttributes"><var>$sourceAttributes</var></a></code>, 
+			<code><a href="class-Thapp.JitImage.Driver.AbstractDriver.html#$targetSize"><var>$targetSize</var></a></code>
+		</p>
+
+
+
+
+
+</div>
+	</div>
+
+	<div id="footer">
+		 API documentation generated by <a href="http://apigen.org">ApiGen 2.8.0</a>
+	</div>
+</div>
+</body>
+</html>
