@@ -14,14 +14,8 @@ Add thapp/jitimage as a requirement to composer.json:
 {
     "require": {
         "php":">=5.4.0",
-        "thapp/jitimage": "dev-development"
-    },
-    "repositories": [
-    	{
-    		"type":"vcs",
-    		"url":"https://github.com/iwyg/jitimage.git"
-    	}
-    ]
+        "thapp/jitimage": "dev-master"
+    }
 }
 ```
 
@@ -332,7 +326,7 @@ Event::listen('jitimage.registerfilter', function ($driverName) {
 There's really just one command right now. `php artisan jitimage:clearcache` will clear the whole image cache. 
 
 
-### Deleting a cached images if its source file got replaced
+### Deleting a cached image if its source file got replaced
 
 It is possible to just delete cached images that have been created from
 a certain source. So lets assume you have to replace an image called `myimage.jpg` in `uploads/images`, 
