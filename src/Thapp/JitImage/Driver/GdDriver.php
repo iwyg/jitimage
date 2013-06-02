@@ -204,14 +204,12 @@ class GdDriver extends AbstractDriver
      */
     public function clean()
     {
+
         if (is_resource($this->resource)) {
             imagedestroy($this->resource);
         }
 
-        $this->source           = null;
-        $this->processed        = false;
-        $this->targetSize       = null;
-        $this->sourceAttributes = null;
+        parent::clean();
     }
     /**
      * swapResource

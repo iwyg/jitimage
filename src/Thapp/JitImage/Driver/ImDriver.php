@@ -82,6 +82,20 @@ class ImDriver extends AbstractDriver
     protected $tmpFile;
 
     /**
+     * intermediate
+     *
+     * @var mixed
+     */
+    protected $intermediate;
+
+    /**
+     * imageFrames
+     *
+     * @var int
+     */
+    protected $imageFrames;
+
+    /**
      * path to convert binary
      *
      * @var string
@@ -127,14 +141,13 @@ class ImDriver extends AbstractDriver
         parent::process();
 
         $cmd = $this->compile();
-        $this->cmd = $cmd;
 
         $this->runCmd($cmd, '\Thapp\JitImage\Exception\ImageProcessException',
             function ($stderr)
             {
                 $this->clean();
             },
-            ['#']
+            ['#', PHP_EOL]
         );
     }
 
@@ -147,12 +160,14 @@ class ImDriver extends AbstractDriver
             @unlink($this->tmpFile);
         }
 
-        $this->processed  = false;
-        $this->targetSize = null;
-        $this->loader->clean();
-        $this->source = null;
-        $this->sourceAttributes = null;
+        if (file_exists($this->intermediate)) {
+            @unlink($this->intermediate);
+        }
+
         $this->commands = [];
+        $this->loader->clean();
+
+        parent::clean();
     }
 
     /**
@@ -251,10 +266,6 @@ class ImDriver extends AbstractDriver
             $cmd = '-resize %s%s%s';
             break;
         case static::FL_IGNR_ASPR:
-            // if one value is zero, imagmagick will
-            // replace that value with the max. image size instead of the
-            // scaled valiue. so removeing the ignore ascpect ration flag will
-            // fix it
         default:
             // compensating some imagick /im differences:
             if (0 === $width) {
@@ -371,6 +382,39 @@ class ImDriver extends AbstractDriver
     }
 
     /**
+     * isMultipartImage
+     *
+     * @access protected
+     * @return mixed
+     */
+    protected function isMultipartImage()
+    {
+        if (!is_int($this->imageFrames)) {
+
+            $type = $this->getInfo('type');
+
+            if ('image/gif' !== $type and 'image/png' !== $type) {
+
+                $this->imageFrames = 1;
+
+            } else {
+
+                $identify = dirname($this->converter) . '/identify';
+                $cmd = sprintf('%s -format %s %s', $identify, '%n', $this->source);
+                $this->imageFrames = (int)$this->runCmd($cmd, '\Thapp\JitImage\Exception\ImageProcessException',
+                    function ($stderr)
+                    {
+                        $this->clean();
+                    },
+                    ['#']
+                );
+
+            }
+        }
+        return $this->imageFrames > 1;
+    }
+
+    /**
      * compile the convert command
      *
      * @access protected
@@ -381,22 +425,40 @@ class ImDriver extends AbstractDriver
         $commands = array_keys($this->commands);
         $values = $this->getArrayValues(array_values($this->commands));
 
+        $origSource = $this->source;
+
         $vs = '%s';
         $bin = $this->converter;
+        $type = preg_replace('#^image/#', null, $this->getInfo('type'));
 
         $this->tmpFile = $this->getTempFile();
 
-        array_unshift($values, sprintf('%s:%s', preg_replace('#^image/#', null, $this->getInfo('type')), $this->source));
+        if ($this->isMultipartImage()) {
+
+            $this->intermediate = $this->getTempFile();
+            $this->source = $this->intermediate;
+
+        }
+
+        array_unshift($values, sprintf('%s:%s', $type, $this->source));
 
         array_unshift($values, $bin);
 
         array_unshift($commands, $vs);
         array_unshift($commands, $vs);
 
+        if ($this->isMultipartImage()) {
+
+            array_unshift($values, sprintf('%s %s:%s -coalesce %s %s', $this->converter, $type, $origSource, $this->intermediate, PHP_EOL));
+            array_unshift($commands, $vs);
+        }
+
         array_push($values, sprintf('%s:%s', $this->getOutputType(), $this->tmpFile));
         array_push($commands, $vs);
 
         $cmd = implode(' ', $commands);
+
+        $this->source = $origSource;
 
         return vsprintf($cmd, $values);
     }

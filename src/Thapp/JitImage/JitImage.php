@@ -170,7 +170,6 @@ class JitImage
      */
     protected function callPixel($pixel)
     {
-        var_dump($pixel); die;
         $this->mode = 'resizePixelCount';
         $this->targetSize = [$pixel, null];
         $this->arguments = [];
@@ -364,7 +363,7 @@ class JitImage
             return 4;
         case 'percentualScale':
             return 5;
-        case 'pixelLimit':
+        case 'resizePixelCount':
             return 6;
         default:
             return 0;

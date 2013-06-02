@@ -12,7 +12,7 @@
 namespace Thapp\JitImage\Driver;
 
 /**
- * Class: AbstractDriver
+ * Abstract processing driver
  *
  * @implements DriverInterface
  * @abstract
@@ -162,6 +162,20 @@ abstract class AbstractDriver implements DriverInterface
     {
         $this->processed = true;
     }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function clean()
+    {
+        $this->source           = null;
+        $this->resource         = null;
+        $this->processed        = false;
+        $this->targetSize       = null;
+        $this->outputType       = null;
+        $this->sourceAttributes = null;
+    }
+
 
     /**
      * Retrurns the driver type name.
