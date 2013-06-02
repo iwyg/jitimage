@@ -71,16 +71,16 @@ class JitImageServiceProvider extends ServiceProvider
      */
     protected function registerDriver()
     {
-        $config = $this->app['config'];
+        $config  = $this->app['config'];
+        $storage = $config->get('jitimage::cache.path');
 
         $driver = sprintf('\Thapp\JitImage\Driver\%sDriver', $driverName = ucfirst($config->get('jitimage::driver', 'gd')));
-        $this->app->bind('Thapp\JitImage\Cache\CacheInterface', function ()
+        $this->app->bind('Thapp\JitImage\Cache\CacheInterface', function () use ($storage)
             {
-                $path = storage_path() . '/jit';
                 $cache = new \Thapp\JitImage\Cache\ImageCache(
                     $this->app['Thapp\JitImage\ImageInterface'],
                     $this->app['files'],
-                    $path
+                    $storage . '/jit'
                 );
                 return $cache;
             }
@@ -138,11 +138,11 @@ class JitImageServiceProvider extends ServiceProvider
 
                 $conf = [
                     'trusted_sites' => $this->extractDomains($config->get('jitimage::trusted-sites', [])),
-                    'cache_prefix'  => $config->get('jitimage::cacheprefix', 'jit_'),
+                    'cache_prefix'  => $config->get('jitimage::cache.prefix', 'jit_'),
                     'base_route'    => $config->get('jitimage::route', 'images'),
-                    'cache_route'   => $config->get('jitimage::cacheroute', 'jit/storage'),
+                    'cache_route'   => $config->get('jitimage::cache.route', 'jit/storage'),
                     'base'          => $config->get('jitimage::base', public_path()),
-                    'cache'         => in_array($config->getEnvironment(), $config->get('jitimage::cache', []))
+                    'cache'         => in_array($config->getEnvironment(), $config->get('jitimage::cache.environments', []))
                 ];
                 return new \Thapp\JitImage\JitResolveConfiguration($conf);
         });
