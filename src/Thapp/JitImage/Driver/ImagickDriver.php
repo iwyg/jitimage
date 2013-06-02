@@ -158,9 +158,14 @@ class ImagickDriver extends ImDriver
     {
         $result = static::INT_FILTER;
 
+        if ($this->isMultipartImage()) {
+            $this->resource = $this->resource->coalesceImages();
+        }
+
         foreach ($this->resource as $frame) {
             $result = $this->callParentFilter($name, $options);
         }
+
 
         if (static::EXT_FILTER === $result and isset($this->filters[$name])) {
 
@@ -170,6 +175,7 @@ class ImagickDriver extends ImDriver
                 $filter->run();
             }
         }
+
     }
 
     /**
@@ -187,7 +193,12 @@ class ImagickDriver extends ImDriver
         if ($this->isMultipartImage()) {
 
             $this->tmpFile = tempnam($this->tmp, 'jitim_');
-            $this->resource->writeImages($this->tmpFile, true);
+
+            $image = $this->resource->deconstructImages();
+            $image->writeImages($this->tmpFile, true);
+
+            $image->clear();
+            $image->destroy();
 
             return file_get_contents($this->tmpFile);
 
@@ -237,11 +248,11 @@ class ImagickDriver extends ImDriver
      */
     public function clean()
     {
-        parent::clean();
-
         if ($this->resource instanceof Imagick) {
             $this->resource->destroy();
         }
+
+        parent::clean();
     }
 
     /**
@@ -344,7 +355,7 @@ class ImagickDriver extends ImDriver
             break;
         // No scaling for larger images.
         // Would be easier to just set `bestfit`, but its behaviour changed
-        // with imagemagick 3.0, so we have to calculate the best fit ou selfs.
+        // with imagemagick 3.0, so we have to calculate the best fit our selfs.
         case static::FL_OSRK_LGR:
             extract($this->fitInBounds($width, $height, $this->getInfo('width'), $this->getInfo('height')));
             break;
