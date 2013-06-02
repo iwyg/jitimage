@@ -47,9 +47,6 @@ php artisan config:publish thapp/jitimage
 ##### `route (string)`  
 
 The base route for dynamic image processing   
-##### `cacheroute (string)`:    
-
-The base route for retrieving images by their cache id
 ##### `base (string)`:    
 
 The filesystem base path to where your images are stored.
@@ -57,9 +54,18 @@ The filesystem base path to where your images are stored.
 ##### `driver (string)`   
 
 The processing driver. Available drivers are `im`, `gd` and `ìmagick`
-##### `cache (array)`  
+##### `cache.route (string)`:    
+
+The base route for retrieving images by their cache id
+##### `cache.path (string)`:  
+
+Cache directory
+##### `cache.environments (array)`  
 
 An array of environments were imagecache should be enabled
+##### `cache.prefix (string)`  
+
+Name prefix for cached images
 ##### `quality (string)`
 
 compression quality, 0 - 100 (higher is better but also larger)
