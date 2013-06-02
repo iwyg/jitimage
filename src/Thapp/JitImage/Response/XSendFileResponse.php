@@ -32,13 +32,14 @@ class XsendFileResponse extends AbstractFileResponse
     protected function setHeaders(Response $response, Image $image)
     {
         $this->image = $image;
-
+        $response->setPublic();
 
         // return normal by setting image contents;
         if ($image->isProcessed()) {
 
             $response->setContent($image->getContents());
             $response->header('Content-type', $image->getMimeType());
+            $response->setEtag(hash('md5', $response->getContent()));
 
             return;
         }

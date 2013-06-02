@@ -34,5 +34,7 @@ class GenericFileResponse extends AbstractFileResponse
     {
         $response->setContent($image->getContents());
         $response->header('Content-type', $image->getMimeType());
+        $response->setEtag(hash('md5', $response->getContent()));
+        $response->setPublic();
     }
 }
