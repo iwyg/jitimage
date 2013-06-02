@@ -147,7 +147,7 @@ To apply additional filters, the filter url segment is appended. The filter segm
 #### Examples
 
 
-Example URIs (assuming you have set `route` to `'images'` and you images are
+Example URIs (assuming you have set `route` to `'images'` and your images are
 stored in `public/uploads/images`.   
 
 
@@ -182,7 +182,7 @@ Proportionally crop and resize an image to 200px * 200px with a gravity of
 ### Prefined image processing 
 (will disable dynamic processing)
 
-You alias your image processing with predefined recipes. 
+You can alias your image processing with predefined recipes. 
 
 #### Examples
 
