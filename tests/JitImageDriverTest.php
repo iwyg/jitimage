@@ -13,7 +13,9 @@ namespace Thapp\Tests\JitImage;
 
 use Mockery as m;
 use org\bovigo\vfs\vfsStream;
+use Thapp\JitImage\Driver\Scaling;
 use Thapp\JitImage\Driver\DriverInterface;
+use Thapp\Test\JitImage\Providers\DriverTestProvider;
 
 /**
  * Class: JitImageDriverTest
@@ -28,6 +30,7 @@ use Thapp\JitImage\Driver\DriverInterface;
  */
 abstract class JitImageDriverTest extends TestCase
 {
+    use DriverTestProvider;
     /**
      * driver
      *
@@ -97,6 +100,45 @@ abstract class JitImageDriverTest extends TestCase
         if (file_exists($this->testFile)) {
             @unlink($this->testFile);
         }
+    }
+
+    /**
+     * @test
+     */
+    public function testDriverClean()
+    {
+        $this->driver->load($this->createTestImage(400, 400));
+        $this->driver->setTargetSize(200, 200);
+        $this->driver->process();
+        $this->driver->clean();
+
+        $this->assertNull($this->getPropertyValue('source', $this->driver));
+        $this->assertNull($this->getPropertyValue('resource', $this->driver));
+        $this->assertNull($this->getPropertyValue('targetSize', $this->driver));
+        $this->assertNull($this->getPropertyValue('outputType', $this->driver));
+        $this->assertNull($this->getPropertyValue('sourceAttributes', $this->driver));
+        $this->assertFalse($this->getPropertyValue('processed', $this->driver));
+
+    }
+
+    /**
+     * @test
+     */
+    public function testGetImageData()
+    {
+        $this->driver->load($file = $this->getTestPattern());
+        $this->assertEquals(file_get_contents($file), $this->driver->getImageBlob());
+    }
+
+    /**
+     * @test
+     */
+    public function testImageHasBeenProcesses()
+    {
+        $this->driver->load($file = $this->getTestPattern());
+        $this->assertFalse($this->driver->isProcessed());
+        $this->runImageFilter('resize', 200, 200);
+        $this->assertTrue($this->driver->isProcessed());
     }
 
     /**
@@ -195,8 +237,6 @@ abstract class JitImageDriverTest extends TestCase
             $this->driver->setOutputType($setType);
         }
 
-        //var_dump($this->driver->getOutputType());
-
         $this->assertSame($type, $this->driver->getOutputType());
     }
 
@@ -216,21 +256,51 @@ abstract class JitImageDriverTest extends TestCase
     }
 
     /**
-     * @test
-     * @dataProvider cropFilterParameterProvider
+     * @dataProvider targetColors
      */
-    public function testFilterCrop($w, $h,  $nw, $nh, array $expected)
+    public function testFilterCrop($gravity, $r, $g, $b)
     {
-        $this->markTestIncomplete();
+        $image = $this->getTestPattern();
+
+        $this->driver->load($image);
+        extract($this->driver->getInfo());
+
+        $this->runImageFilter('crop', $width / 3, $height / 3, [$gravity]);
+
+        $asset = $this->loadPatternAsset($this->driver);
+
+        $this->assertSame($this->colorAt($asset, 0, 0), [$r, $g, $b]);
+        $this->assertSame($this->colorAt($asset, 0, 199), [$r, $g, $b]);
+        $this->assertSame($this->colorAt($asset, 199, 0), [$r, $g, $b]);
+        $this->assertSame($this->colorAt($asset, 199, 199), [$r, $g, $b]);
+
+        imagedestroy($asset);
     }
+
 
     /**
      * @test
-     * @dataProvider cropScaleFilterParameterProvider
+     * @dataProvider cropScaleProvider
      */
-    public function testFilterCropScale($w, $h,  $nw, $nh, array $expected)
+    public function testFilterCropScale($gravity, $rgb)
     {
-        $this->markTestIncomplete();
+        $image = $this->getTestPattern();
+
+        $this->driver->load($image);
+
+        $this->runImageFilter('cropScale', 1200, 400, [$gravity]);
+        $asset = $this->loadPatternAsset($this->driver);
+
+        // compensate coordinates for color seaming
+        $this->assertSame($this->colorAt($asset, 1, 1),     $rgb[0]);
+        $this->assertSame($this->colorAt($asset, 1, 398),   $rgb[0]);
+        $this->assertSame($this->colorAt($asset, 401, 1),   $rgb[1]);
+        $this->assertSame($this->colorAt($asset, 401, 398), $rgb[1]);
+        $this->assertSame($this->colorAt($asset, 804, 4),   $rgb[2]);
+        $this->assertSame($this->colorAt($asset, 804, 398), $rgb[2]);
+
+        $this->driver->clean();
+        imagedestroy($asset);
     }
 
     /**
@@ -298,181 +368,6 @@ abstract class JitImageDriverTest extends TestCase
         $this->driver->process();
     }
 
-
-    /**
-     * filterDataProvider
-     */
-    public function filterDataProvider()
-    {
-        return [
-            ['resize'],
-            ['cropResize'],
-            ['crop'],
-            ['resizeToFit'],
-        ];
-    }
-
-    /**
-     * filterDataProvider
-     */
-    public function extFilterDataProvider()
-    {
-        return [
-            ['gs'],
-        ];
-    }
-
-    /**
-     * fileProvider
-     *
-     * @access public
-     * @return mixed
-     */
-    public function imageFileProvider()
-    {
-        return [
-            ['image-1.jpg'],
-            ['image-2.jpg']
-        ];
-    }
-
-    /**
-     * imageTypeProvider
-     *
-     * @access public
-     * @return mixed
-     */
-    public function imageTypeProvider()
-    {
-        return [
-         [null,  'jpeg', 'image/jpeg'],
-         ['jpg', 'jpeg', 'image/jpeg'],
-         ['png', 'png', 'image/png'],
-         ['gif', 'gif', 'image/gif']
-        ];
-    }
-
-    /**
-     * percentualResizeProvider
-     *
-     * @access public
-     * @return array
-     */
-    public function percentualResizeProvider()
-    {
-        return [
-            [200, 200, 100, [200, 200]],
-            [200, 200, 50, [100, 100]],
-            [200, 200, 25, [50, 50]],
-            [500, 325, 20, [100, 65]],
-            [325, 500, 20, [65, 100]]
-        ];
-    }
-
-    /**
-     * sizeRatioProvider
-     *
-     * @access public
-     * @return mixed
-     */
-    public function sizeRatioProvider()
-    {
-        return [
-            [200, 200, 1.0],
-            [200, 144, (float)(200 / 144)],
-            [144, 220, (float)(144 / 220)],
-            [530, 445, (float)(530 / 445)]
-        ];
-    }
-    /**
-     * resizeParameterProvider
-     *
-     * @access public
-     * @return mixed
-     */
-    public function resizeFilterParameterProvider()
-    {
-        return [
-            /*
-             * width, height, scale w, scale h, expected outcome
-             */
-            [200, 200, 100, 0, [100, 100]],
-            [200, 200, 100, 100, [100, 100]],
-            [200, 200, 400, 400, [400, 400]],
-            [200, 200, 400, 600, [400, 600]],
-            [200, 200, 400, 0, [400, 400]],
-            [400, 350, 600, 0, [600, 525]],
-            [400, 350, 0, 600, [685, 600]],
-            [350, 400, 600, 0, [600, 685]]
-        ];
-    }
-
-    public function pixelLimitProvider()
-    {
-        return [
-            /*
-             * width, height, scale w, scale h, expected outcome
-             */
-            [200, 300, 100000],
-            [300, 200, 100000],
-            [200, 200, 100000]
-        ];
-
-    }
-
-    /**
-     * resizeToFitFilterParameterProvider
-     *
-     * @access public
-     * @return mixed
-     */
-    public function resizeToFitFilterParameterProvider()
-    {
-        return [
-            /*
-             * width, height, scale w, scale h, expected outcome
-             */
-            [200, 200, 100, 40,  [40,  40]],
-            [200, 100, 400, 400, [200, 100]],
-            [200, 100, 400, 600, [200, 100]],
-            [200, 100, 600, 400, [200, 100]],
-            [200, 100, 100, 100, [100, 50]],
-            [100, 200, 400, 600, [100, 200]],
-            [100, 200, 100, 100, [50,  100]],
-            [331, 500, 200, 200, [132, 200]],
-            [500, 331, 200, 200, [200, 132]],
-            [750, 500, 200, 200, [200, 133]],
-            [500, 750, 200, 200, [133, 200]],
-        ];
-    }
-
-    /**
-     * cropScaleFilterParameterProvider
-     *
-     * @access public
-     * @return mixed
-     */
-    public function cropScaleFilterParameterProvider()
-    {
-        return [
-            [0, 0, 0, 0, []]
-        ];
-    }
-
-    /**
-     * cropFilterParameterProvider
-     *
-     * @access public
-     * @return mixed
-     */
-    public function cropFilterParameterProvider()
-    {
-        return [
-            [0, 0, 0, 0, []]
-        ];
-    }
-
-
     /**
      * createTestImage
      *
@@ -536,5 +431,33 @@ abstract class JitImageDriverTest extends TestCase
         case preg_match('#gif#', $type):
             return 'imagegif';
         }
+    }
+
+
+    protected function loadPatternAsset(\Thapp\JitImage\Driver\DriverInterface $driver)
+    {
+        return imagecreatefromstring($driver->getImageBlob());
+
+    }
+
+    protected function colorAt($resource, $x, $y)
+    {
+        $rgb = imagecolorat($resource, $x, $y);
+        $col = imagecolorsforindex($resource, $rgb);
+        $colors = array_values($col);
+        array_pop($colors);
+        return $colors;
+    }
+
+    /**
+     * getTestPattern
+     *
+     * @param mixed $image
+     * @access protected
+     * @return resource
+     */
+    protected function getTestPattern()
+    {
+        return __DIR__ . '/assets/pattern.png';
     }
 }

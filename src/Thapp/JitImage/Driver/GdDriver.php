@@ -124,6 +124,10 @@ class GdDriver extends AbstractDriver
      */
     public function getImageBlob()
     {
+        if (!$this->isProcessed()) {
+            return file_get_contents($this->source);
+        }
+
         $fn = sprintf('image%s', $type = $this->getOutputType());
 
         if ('png' === $type) {
