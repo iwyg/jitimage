@@ -230,7 +230,7 @@ class ImageCache extends NamespacedItemResolver implements CacheInterface
     protected function setPath($path, $permission)
     {
         if (true !== $this->files->exists($path)) {
-            $this->files->makeDirectory($path, $permission);
+            $this->files->makeDirectory($path, $permission, true);
         }
         $this->path = $path;
     }
