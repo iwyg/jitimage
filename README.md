@@ -41,19 +41,25 @@ php artisan config:publish thapp/jitimage
 ##### `route (string)`  
 
 The base route for dynamic image processing   
-##### `cacheroute (string)`:    
-
-The base route for retrieving images by their cache id
-##### `base (string)`:    
+##### `base (string)`    
 
 The filesystem base path to where your images are stored.
 
 ##### `driver (string)`   
 
 The processing driver. Available drivers are `im`, `gd` and `ìmagick`
-##### `cache (array)`  
+##### `cache.route (string)`    
+
+The base route for retrieving images by their cache id
+##### `cache.path (string)`  
+
+Cache directory
+##### `cache.environments (array)`  
 
 An array of environments were imagecache should be enabled
+##### `cache.prefix (string)`  
+
+Name prefix for cached images
 ##### `quality (string)`
 
 compression quality, 0 - 100 (higher is better but also larger)
@@ -61,14 +67,13 @@ compression quality, 0 - 100 (higher is better but also larger)
 
 This array takes two values: `path`, the path to the imagick binary, and `bin`, the binary name.  
 Typically the binary name is `convert`.  
-
 ##### `filter (array)`  
 
 An array of available filter that should be enabled by default
-
 ##### `recipes (array)`  
 
 An array of predefined parameters that are aliased to a root, e.g.
+
 
 ```php
 
@@ -79,8 +84,6 @@ An array of predefined parameters that are aliased to a root, e.g.
 
 would create a route thumbs that could be called like `http://example.com/thumbs/path/to/my/image.jpg`.    
 Defining recipes will disable dynamic image processing. 
-
-
 ##### `response-type (string)`  
 
 You can choose `generic` or `xsend`. 
