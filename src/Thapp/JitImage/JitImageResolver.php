@@ -176,7 +176,7 @@ class JitImageResolver implements ResolverInterface
         }
 
         $this->resolve();
-        return $this->resolveFromCache($id = $this->getImageRequestId($this->getInputQuery(), $this->input['source']));
+        return $this->resolveFromCache($this->getImageRequestId($this->getInputQuery(), $this->input['source']));
     }
 
     /**
