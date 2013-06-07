@@ -25,7 +25,7 @@ Next step is to tell laravel to load the serviceprovider. In `app/config/app.php
 
 ```php
   // ...
-  'Thapp\XmlConf\JitImageServiceProvider' 
+  'Thapp\JitImage\JitImageServiceProvider' 
   // ...
 ```
 to the `providers` array.
