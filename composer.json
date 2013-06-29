@@ -1,6 +1,7 @@
 {
     "name": "thapp/jitimage",
-    "description": "Just in time image manipulation",
+    "description": "Just in time image manipulation with support for laravel 4",
+    "keywords": ["image", "gd", "imagemagick", "imagick", "laravel", "filter", "thumbnail", "just in time"],
     "require-dev": {
         "mockery/mockery": "dev-master",
         "mikey179/vfsStream":"dev-master"
