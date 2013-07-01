@@ -147,7 +147,7 @@ To apply additional filters, the filter url segment is appended. The filter segm
 #### Examples
 
 
-Example URIs (assuming you have set `route` to `'images'` and your images are
+Example URLs (assuming you have set `route` to `'images'` and your images are
 stored in `public/uploads/images`.   
 
 
