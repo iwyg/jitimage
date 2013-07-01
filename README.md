@@ -133,7 +133,7 @@ extensions installed but no access to the imagemagick binary.
 
 A word of warning. Dynamic image processing can harm you system and should be disabled in production. 
 
-Anatomy of an image url:
+Anatomy of an image uri:
 
 `{base}/{parameter}/{imagesource}/filter:{filter}`
 
@@ -179,7 +179,7 @@ Proportionally crop and resize an image to 200px * 200px with a gravity of
 `http://example.com/images/2/200/200/5/uploads/images/image.jpg`
 
 
-### Prefined image processing 
+### Predefined image processing 
 (will disable dynamic processing)
 
 You can alias your image processing with predefined recipes. 
