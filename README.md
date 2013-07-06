@@ -28,7 +28,13 @@ Next step is to tell laravel to load the serviceprovider. In `app/config/app.php
   'Thapp\JitImage\JitImageServiceProvider' 
   // ...
 ```
-to the `providers` array.
+to the `providers` array and add `JitImage` to the alias array:
+
+```php
+'aliases' => [
+   'JitImage' => 'Thapp\JitImage\Facades\JitImage'
+ ],
+```
 
 ### Publish configuration
 
