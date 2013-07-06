@@ -60,6 +60,13 @@ abstract class JitImageDriverTest extends TestCase
     protected $sourceFile;
 
     /**
+     * driverClean
+     *
+     * @var bool
+     */
+    protected $driverClean;
+
+    /**
      * @test
      */
     abstract public function testLoad();
@@ -77,9 +84,12 @@ abstract class JitImageDriverTest extends TestCase
 
         $this->loaderMock = m::mock('Thapp\JitImage\Driver\SourceLoaderInterface');
         $this->loaderMock->shouldReceive('load')->andReturnUsing(function ($url) {
+            $this->driverClean = false;
             return $url;
         });
-        $this->loaderMock->shouldReceive('clean')->andReturn(null);
+        $this->loaderMock->shouldReceive('clean')->andReturnUsing(function () {
+            $this->driverClean = true;
+        });
     }
     /**
      * tearDown
@@ -110,7 +120,12 @@ abstract class JitImageDriverTest extends TestCase
         $this->driver->load($this->createTestImage(400, 400));
         $this->driver->setTargetSize(200, 200);
         $this->driver->process();
+
+        $this->assertFalse($this->driverClean);
+
         $this->driver->clean();
+
+        $this->assertTrue($this->driverClean);
 
         $this->assertNull($this->getPropertyValue('source', $this->driver));
         $this->assertNull($this->getPropertyValue('resource', $this->driver));

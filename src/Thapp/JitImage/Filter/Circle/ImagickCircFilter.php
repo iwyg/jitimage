@@ -29,6 +29,10 @@ use Thapp\JitImage\Filter\ImagickFilter;
 class ImagickCircFilter extends ImagickFilter
 {
 
+    protected static $preserveAlpha = [
+        'png', 'ico', 'gif'
+    ];
+
     /**
      * {@inheritdoc}
      */
@@ -54,7 +58,23 @@ class ImagickCircFilter extends ImagickFilter
 
         $image->setImageBackgroundColor('white');
         $image->compositeImage($mask, Imagick::COMPOSITE_DSTIN, 0, 0);
-        $image->setImageFormat('png');
+
+
+        $format = $this->getOption('f', $this->driver->getOutputType());
+
+        if (!in_array($format, static::$preserveAlpha) or false === (bool)$this->getOption('a', false)) {
+
+            $backgroungColor = $this->getOption('b', 'white');
+
+            $backgroung = new Imagick();
+            $backgroung->newImage($width, $height, $backgroungColor);
+            $backgroung->compositeImage($image, Imagick::COMPOSITE_DEFAULT, 0, 0);
+            $backgroung->setImageFormat($format);
+
+            $this->driver->swapResource($backgroung);
+        } else {
+            $image->setImageFormat($format);
+        }
     }
 
     /**

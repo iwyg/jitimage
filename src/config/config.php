@@ -25,7 +25,7 @@ return [
      * ------------------------------------------------
      */
 
-    'driver'      => 'im',
+    'driver'      => 'imagick',
 
     /* ------------------------------------------------
      * cache settings
@@ -52,7 +52,7 @@ return [
      * cache processed images only in this environments
      * ------------------------------------------------
      */
-        'environments' => ['production']
+        'environments' => ['develpment', 'production']
     ],
 
     /* ------------------------------------------------

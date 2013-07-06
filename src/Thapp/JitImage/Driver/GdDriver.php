@@ -41,6 +41,13 @@ class GdDriver extends AbstractDriver
     protected $source;
 
     /**
+     * loader
+     *
+     * @var SourceLoaderInterface
+     */
+    protected $loader;
+
+    /**
      * gravity
      *
      * @var mixed
@@ -212,7 +219,7 @@ class GdDriver extends AbstractDriver
         if (is_resource($this->resource)) {
             imagedestroy($this->resource);
         }
-
+        $this->loader->clean();
         parent::clean();
     }
     /**
