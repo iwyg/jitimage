@@ -218,7 +218,7 @@ class JitImageServiceProvider extends ServiceProvider
                 ->get($route . '/' . $aliasRoute . '/{source}', [
                   'uses' => 'Thapp\JitImage\Controller\JitController@getResource'
                   ])
-                ->where('source', '(([^0-9A-Fa-f]{3}|[^0-9A-Fa-f]{6}).*?(?=\/filter:.*)?)')
+                ->where('source', '(.*)')
                 ->defaults('parameter', $formular);
         }
     }
