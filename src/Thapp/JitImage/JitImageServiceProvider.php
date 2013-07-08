@@ -237,7 +237,7 @@ class JitImageServiceProvider extends ServiceProvider
             // matching different modes:
             ->where('params', '([5|6](\/\d+){1}|[0]|[1|4](\/\d+){2}|[2](\/\d+){3}|[3](\/\d+){3}\/?([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})?)')
             // match the image source:
-            ->where('source', '((([^0-9A-Fa-f]{3}|[^0-9A-Fa-f]{6})?).*?(?=\/filter:.*)?)')
+            ->where('source', '((([^0-9A-Fa-f]{3}|[^0-9A-Fa-f]{6})?).*?.(?=(\/filter:.*)?))')
             // match the filter:
             ->where('filter', '(filter:.*)');
     }
