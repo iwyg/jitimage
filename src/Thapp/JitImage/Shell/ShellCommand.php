@@ -57,7 +57,7 @@ trait ShellCommand
 
             $repl = "\\\\" . implode("|\\\\", $noEscapeChars);
             $cmd = preg_replace_callback(
-                '~$repl~',
+                "~$repl~",
                 function ($found) {
                     return trim($found[0], "\\");
                 },
