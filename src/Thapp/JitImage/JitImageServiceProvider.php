@@ -124,7 +124,7 @@ class JitImageServiceProvider extends ServiceProvider
         $this->app['jitimage'] = $this->app->share(
             function () use ($app) {
                 $resolver = $app->make('Thapp\JitImage\ResolverInterface');
-                $image = new  JitImage($resolver, \URL::to($app['config']->get('jitimage::cache.route')));
+                $image = new  JitImage($resolver, \URL::to('/'));
                 return $image;
             }
         );
