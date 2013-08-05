@@ -83,6 +83,7 @@ class JitImage
     {
         $this->clean();
         $this->source = $source;
+
         return $this;
     }
 
@@ -184,6 +185,21 @@ class JitImage
     }
 
     /**
+     * get the unprocessed image
+     *
+     * @access protected
+     * @return void
+     */
+    protected function callGet()
+    {
+        if ($this->targetSize) {
+            throw new \InvalidArgumentException('can\'t get original iamge if target size is already set');
+        }
+        $this->mode = 'default';
+        $this->arguments = [];
+    }
+
+    /**
      * filter
      *
      * @param mixed $name
@@ -191,9 +207,10 @@ class JitImage
      * @access public
      * @return \Thapp\JitImage\JitImage
      */
-    public function filter($name, $options = null) {
-
+    public function filter($name, $options = null)
+    {
         $this->filters[$name] = $options;
+
         return $this;
     }
 
@@ -205,11 +222,13 @@ class JitImage
      * @access public
      * @return \Thapp\JitImage\JitImage
      */
-    public function filters(array $filters) {
+    public function filters(array $filters)
+    {
 
-        foreach($filters as $name => $options) {
+        foreach ($filters as $name => $options) {
             $this->filter($name, $options);
         }
+
         return $this;
     }
 
@@ -234,6 +253,7 @@ class JitImage
             $src = $this->base.$this->resolver->getCachedUrl($image);
             $this->resolver->close();
             $image->close();
+
             return $src;
         }
 
@@ -241,10 +261,12 @@ class JitImage
             $src = $this->resolver->getImageUrl($image);
             $this->resolver->close();
             $image->close();
+
             return $src;
         }
 
         $this->resolver->close();
+
         return;
     }
 
@@ -261,14 +283,14 @@ class JitImage
         foreach ($this->targetSize as $value) {
 
             if (is_numeric($value)) {
-                $parts[] = (string)$value;
+                $parts[] = (string) $value;
             }
         }
 
         foreach ($this->arguments as $i => $arg) {
 
             if (is_numeric($arg) || ($i === 1 and $this->isColor($arg))) {
-                $parts[] = trim((string)$arg);
+                $parts[] = trim((string) $arg);
             }
         }
 
@@ -294,7 +316,7 @@ class JitImage
 
             if (is_array($options)) {
 
-                foreach  ($options as $option => $value) {
+                foreach ($options as $option => $value) {
                     $opt[] = sprintf('%s=%s', $option, $value);
                 }
             }
@@ -321,7 +343,6 @@ class JitImage
         $this->targetSize = [];
     }
 
-
     /**
      * isColor
      *
@@ -346,6 +367,7 @@ class JitImage
     {
         if (method_exists($this, $m = sprintf('call%s', ucfirst($method)))) {
             call_user_func_array([$this, $m], $arguments);
+
             return $this->process();
         }
 
@@ -361,20 +383,20 @@ class JitImage
     protected function getMode()
     {
         switch ($this->mode) {
-        case 'resize':
-            return 1;
-        case 'cropResize':
-            return 2;
-        case 'crop':
-            return 3;
-        case 'resizeToFit':
-            return 4;
-        case 'percentualScale':
-            return 5;
-        case 'resizePixelCount':
-            return 6;
-        default:
-            return 0;
+            case 'resize':
+                return 1;
+            case 'cropResize':
+                return 2;
+            case 'crop':
+                return 3;
+            case 'resizeToFit':
+                return 4;
+            case 'percentualScale':
+                return 5;
+            case 'resizePixelCount':
+                return 6;
+            default:
+                return 0;
         }
     }
 }

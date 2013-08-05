@@ -278,6 +278,8 @@ Note: this won't work if both caching and dynamic processing are disabled.
 Note: this won't work if both caching and dynamic processing are disabled.
 
 ```php
+// get the original image:
+JitImage::source('path/to/myimage.jpg')->get();
 
 // proportionally resize the image have a width of 200px:
 JitImage::source('path/to/myimage.jpg')->resize(200, 0);
