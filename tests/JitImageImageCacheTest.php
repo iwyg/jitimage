@@ -14,7 +14,7 @@ namespace Thapp\Tests\JitImage;
 use Mockery as m;
 use Thapp\JitImage\ImageInterface;
 use Thapp\JitImage\Cache\ImageCache;
-use Illuminate\Filesystem\Filesystem;
+use Symfony\Component\Filesystem\Filesystem;
 
 /**
  * @class JitImageSegmentCacheTest
@@ -176,7 +176,7 @@ class JitImageCacheTest extends TestCase
         parent::tearDown();
 
         if ($this->files->exists($this->path)) {
-            $this->files->deleteDirectory($this->path);
+            $this->files->remove($this->path);
         }
     }
 }

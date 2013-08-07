@@ -11,8 +11,9 @@
 
 namespace Thapp\JitImage\Cache;
 
+use FilesystemIterator;
 use Thapp\JitImage\ImageInterface;
-use Illuminate\Filesystem\Filesystem;
+use Symfony\Component\Filesystem\Filesystem;
 use Illuminate\Support\NamespacedItemResolver;
 
 /**
@@ -117,9 +118,15 @@ class ImageCache extends NamespacedItemResolver implements CacheInterface
     /**
      * {@inheritdoc}
      */
-    public function createKey($src, $fingerprint = null, $prefix = 'io',  $suffix = 'f')
+    public function createKey($src, $fingerprint = null, $prefix = 'io', $suffix = 'f')
     {
-        return sprintf('%s.%s_%s.%s', substr(hash('sha1', $src), 0, 8), $prefix, $this->pad($src, $fingerprint), $suffix);
+        return sprintf(
+            '%s.%s_%s.%s',
+            substr(hash('sha1', $src), 0, 8),
+            $prefix,
+            $this->pad($src, $fingerprint),
+            $suffix
+        );
     }
 
     /**
@@ -128,7 +135,7 @@ class ImageCache extends NamespacedItemResolver implements CacheInterface
     public function put($key, $contents)
     {
         if (false === $this->has($key)) {
-            $this->files->put($this->realizeDir($key), $contents);
+            $this->files->dumpFile($this->realizeDir($key), $contents);
         }
     }
 
@@ -139,10 +146,11 @@ class ImageCache extends NamespacedItemResolver implements CacheInterface
     public function purge()
     {
         try {
-            foreach ($this->files->directories($this->path) as $directory) {
-                $this->files->deleteDirectory($directory);
+            foreach (new FilesystemIterator($this->path, FilesystemIterator::SKIP_DOTS) as $file) {
+                $this->files->remove($file);
             }
-        } catch (\Exception $e) {}
+        } catch (\Exception $e) {
+        }
     }
 
     /**
@@ -154,7 +162,7 @@ class ImageCache extends NamespacedItemResolver implements CacheInterface
         $dir = substr($id, 0, strpos($id, '.'));
 
         if ($this->files->exists($dir = $this->path . '/' . $dir)) {
-            $this->files->deleteDirectory($dir);
+            $this->files->remove($dir);
         }
     }
 
@@ -184,7 +192,7 @@ class ImageCache extends NamespacedItemResolver implements CacheInterface
         $path = $this->getPath($key);
 
         if (!$this->files->exists($dir = dirname($path))) {
-            $this->files->makeDirectory($dir);
+            $this->files->mkdir($dir);
         }
 
         return $path;
@@ -230,7 +238,7 @@ class ImageCache extends NamespacedItemResolver implements CacheInterface
     protected function setPath($path, $permission)
     {
         if (true !== $this->files->exists($path)) {
-            $this->files->makeDirectory($path, $permission, true);
+            $this->files->mkdir($path, $permission, true);
         }
         $this->path = $path;
     }

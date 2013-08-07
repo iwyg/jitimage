@@ -12,6 +12,7 @@
 namespace Thapp\JitImage;
 
 use Illuminate\Support\ServiceProvider;
+use Symfony\Component\Filesystem\Filesystem;
 
 /**
  * Class: JitImageServiceProvider
@@ -84,7 +85,7 @@ class JitImageServiceProvider extends ServiceProvider
             function () use ($storage) {
                 $cache = new \Thapp\JitImage\Cache\ImageCache(
                     $this->app['Thapp\JitImage\ImageInterface'],
-                    $this->app['files'],
+                    new Filesystem,
                     $storage . '/jit'
                 );
                 return $cache;
