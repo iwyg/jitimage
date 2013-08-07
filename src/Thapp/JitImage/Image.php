@@ -114,29 +114,28 @@ class Image implements ImageInterface
         $this->driver->setTargetSize($width, $height);
 
         switch($mode) {
-
-        case static::IM_NOSCALE:
-            break;
-        case static::IM_RESIZE:
-            $this->resize();
-            break;
-        case static::IM_SCALECROP:
-            $this->cropScale($gravity);
-            break;
-        case static::IM_CROP:
-            $this->crop($gravity, $background);
-            break;
-        case static::IM_RSIZEFIT:
-            $this->resizeToFit();
-            break;
-        case static::IM_RSIZEPERCENT:
-            $this->resizePercentual($width);
-            break;
-        case static::IM_RSIZEPXCOUNT:
-            $this->resizePixelCount($width);
-            break;
-        default:
-            break;
+            case static::IM_NOSCALE:
+                break;
+            case static::IM_RESIZE:
+                $this->resize();
+                break;
+            case static::IM_SCALECROP:
+                $this->cropScale($gravity);
+                break;
+            case static::IM_CROP:
+                $this->crop($gravity, $background);
+                break;
+            case static::IM_RSIZEFIT:
+                $this->resizeToFit();
+                break;
+            case static::IM_RSIZEPERCENT:
+                $this->resizePercentual($width);
+                break;
+            case static::IM_RSIZEPXCOUNT:
+                $this->resizePixelCount($width);
+                break;
+            default:
+                break;
         }
 
         foreach ($filter as $f => $parameter) {
@@ -292,5 +291,4 @@ class Image implements ImageInterface
     {
         return $this->driver->filter('resizePixelCount', func_get_args());
     }
-
 }
