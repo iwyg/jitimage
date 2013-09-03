@@ -54,7 +54,7 @@ class ImagickCircFilter extends ImagickFilter
 
         $image->setImageBackgroundColor('white');
         $image->compositeImage($mask, Imagick::COMPOSITE_DSTIN, 0, 0);
-        $image->setImageFormat('png');
+        $image->setImageFormat('gif' === $this->driver->getOutputType() ? 'gif' : 'png');
     }
 
     /**

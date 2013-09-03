@@ -141,7 +141,6 @@ class ImDriver extends AbstractDriver
         parent::process();
 
         $cmd = $this->compile();
-
         $this->runCmd(
             $cmd,
             '\Thapp\JitImage\Exception\ImageProcessException',
@@ -379,9 +378,10 @@ class ImDriver extends AbstractDriver
      * @access protected
      * @return string
      */
-    protected function getTempFile()
+    protected function getTempFile($extenstion = null)
     {
-        return tempnam($this->tmp, 'jitim_');
+        $extenstion = is_null($extenstion) ? '' : '.'.$extenstion;
+        return tempnam($this->tmp, 'jitim_'.$extenstion);
     }
 
     /**
@@ -439,7 +439,7 @@ class ImDriver extends AbstractDriver
 
         if ($this->isMultipartImage()) {
 
-            $this->intermediate = $this->getTempFile();
+            $this->intermediate = $this->getTempFile($type);
             $this->source = $this->intermediate;
 
         }
@@ -455,7 +455,14 @@ class ImDriver extends AbstractDriver
 
             array_unshift(
                 $values,
-                sprintf('%s %s:%s -coalesce %s %s', $this->converter, $type, $origSource, $this->intermediate, PHP_EOL)
+                sprintf(
+                    '%s %s:%s -coalesce %s %s',
+                    $this->converter,
+                    $type,
+                    $origSource,
+                    $this->intermediate,
+                    PHP_EOL
+                )
             );
             array_unshift($commands, $vs);
         }
