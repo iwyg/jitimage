@@ -25,7 +25,7 @@ return [
      * ------------------------------------------------
      */
 
-    'driver'      => 'im',
+    'driver'      => 'gd',
 
     /* ------------------------------------------------
      * cache settings
@@ -52,7 +52,7 @@ return [
      * cache processed images only in this environments
      * ------------------------------------------------
      */
-        'environments' => ['production']
+        'environments' => ['foo']
     ],
 
     /* ------------------------------------------------
@@ -61,7 +61,7 @@ return [
      * ------------------------------------------------
      */
 
-    'quality'     => 60,
+    'quality'     => 80,
 
     /* ------------------------------------------------
      * imagemagick specific settings:
@@ -80,7 +80,9 @@ return [
 
     'filter' => [
         'Circle'    => 'circ',
-        'GreyScale' => 'gs'
+        'GreyScale' => 'gs',
+        'Overlay'   => 'ovly',
+        'Colorize'  => 'clrz',
     ],
 
     /* ------------------------------------------------
@@ -103,7 +105,6 @@ return [
      *
      * ------------------------------------------------
      */
-
     'recipes' => [
     ],
 
@@ -121,4 +122,3 @@ return [
      */
     'response-type' => 'generic'
 ];
-

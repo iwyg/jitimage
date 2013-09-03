@@ -118,7 +118,7 @@ class ImageCache extends NamespacedItemResolver implements CacheInterface
     /**
      * {@inheritdoc}
      */
-    public function createKey($src, $fingerprint = null, $prefix = 'io', $suffix = 'f')
+    public function createKey($src, $fingerprint = null, $prefix = 'io', $suffix = 'file')
     {
         return sprintf(
             '%s.%s_%s.%s',
@@ -138,7 +138,6 @@ class ImageCache extends NamespacedItemResolver implements CacheInterface
             $this->files->dumpFile($this->realizeDir($key), $contents);
         }
     }
-
 
     /**
      * {@inheritdoc}
