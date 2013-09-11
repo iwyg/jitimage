@@ -35,11 +35,23 @@ abstract class AbstractFileResponse implements FileResponseInterface
     protected $headers = [];
 
     /**
+     * etags
+     *
+     * @var mixed
+     */
+    protected $etags = [];
+
+    /**
      * response
      *
      * @var mixed
      */
     protected $response;
+
+    public function __construct(array $etags = [])
+    {
+        $this->etags = $etags;
+    }
 
     /**
      * Creates a new response.
@@ -55,6 +67,12 @@ abstract class AbstractFileResponse implements FileResponseInterface
         $this->setHeaders($this->response, $image);
     }
 
+    public function getResponse()
+    {
+        return $this->response;
+    }
+
+
     /**
      * Send response.
      *
@@ -65,6 +83,10 @@ abstract class AbstractFileResponse implements FileResponseInterface
     {
         if (!isset($this->response)) {
             throw new \Exception('response not created yet. Create a response before calling send.');
+        }
+
+        if (in_array($this->response->getEtag(), $this->etags)) {
+            $this->abort(304);
         }
 
         $this->response->send();
@@ -104,5 +126,19 @@ abstract class AbstractFileResponse implements FileResponseInterface
     public function notFound()
     {
         throw new NotFoundHttpException;
+    }
+
+    /**
+     * __call
+     *
+     * @param mixed $method
+     * @param mixed $arguments
+     *
+     * @access public
+     * @return mixed
+     */
+    public function __call($method, $arguments)
+    {
+        return call_user_func_array($this->response, $arguments);
     }
 }
