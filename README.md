@@ -361,4 +361,4 @@ Event::listen('image.upload', function ($event) use ($app) {
 
 ### API
 
-API documentation can be found [here](http://iwyg.github.io/jitimage/api/).
+API documentation will be updated shortly.
