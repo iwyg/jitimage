@@ -179,11 +179,15 @@ class JitImageServiceProvider extends ServiceProvider
      */
     protected function registerResponse()
     {
+        $app = $this->app;
         $type = $this->app['config']->get('jitimage::response-type', 'generic');
 
+        $response = sprintf('Thapp\JitImage\Response\%sFileResponse', ucfirst($type));
         $this->app->bind(
             'Thapp\JitImage\Response\FileResponseInterface',
-            sprintf('Thapp\JitImage\Response\%sFileResponse', ucfirst($type))
+            function () use ($response, $app) {
+                return new $response($app['request']->getEtags());
+            }
         );
     }
 
@@ -300,7 +304,9 @@ class JitImageServiceProvider extends ServiceProvider
             'Thapp\JitImage\Driver\DriverInterface',
             function ($driver) use ($driverName, $filters) {
 
+                //Typo, will be remove in next version
                 $addFilters = $this->app['events']->fire('jitimage.registerfitler', [$driverName]);
+                $addFilters = $this->app['events']->fire('jitimage.registerfilter', [$driverName]);
 
                 foreach ($addFilters as $filter) {
                     foreach ($filter as $name => $class) {
