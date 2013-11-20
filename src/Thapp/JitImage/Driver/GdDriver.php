@@ -182,20 +182,20 @@ class GdDriver extends AbstractDriver
     private function loadResourceFromType($source)
     {
 
-        $type = getimagesize($source);
+        $mime = null;
+        extract(getimagesize($source));
 
-        $fn = sprintf('imagecreatefrom%s', $type = substr($type['mime'], strpos($type['mime'], '/') + 1));
+        $fn = sprintf('imagecreatefrom%s', $type = substr($mime, strpos($mime, '/') + 1));
 
         if (!function_exists($fn)) {
-
-            $this->error = sprintf('%s is not a supported image type', $type['mime']);
+            $this->error = sprintf('%s is not a supported image type', $mime);
             $this->clean();
-            return false;
 
+            throw new \InvalidArgumentException(sprintf('Unsupported image format %s', $mime));
         }
 
         $this->source = $this->loader->load($source);
-        $this->outputType = $type;
+        $this->outputType = $mime;
 
         return call_user_func($fn, $this->source);
     }

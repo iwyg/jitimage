@@ -106,8 +106,10 @@ class ImagickDriver extends ImDriver
      */
     public function setOutputType($type)
     {
-        if (preg_match('/(png|gif|webp|jpe?g|tiff)/i', $type)) {
+        if (preg_match('/(png|gif|jpe?g|tif?f|webp)/i', $type)) {
             $this->resource->setImageFormat($type);
+        } else {
+            throw new \InvalidArgumentException(sprintf('Invalid output format %s', $type));
         }
     }
 

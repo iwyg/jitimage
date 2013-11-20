@@ -33,21 +33,18 @@ class XsendFileResponse extends AbstractFileResponse
     {
         $this->image = $image;
         $response->setPublic();
+        $response->header('Content-type', $image->getMimeType());
 
         // return normal by setting image contents;
         if ($image->isProcessed()) {
-
             $response->setContent($image->getContents());
-            $response->header('Content-type', $image->getMimeType());
             $response->setEtag(hash('md5', $response->getContent()));
-
             return;
         }
 
         // set the xsend header:
         $file = $image->getSource();
 
-        $response->header('Content-type', $image->getMimeType());
         $response->header('Content-Disposition', sprintf('inline; filename="%s"', basename($file)));
         $response->header('X-Sendfile', $file);
     }

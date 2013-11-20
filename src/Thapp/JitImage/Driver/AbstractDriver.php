@@ -288,8 +288,11 @@ abstract class AbstractDriver implements DriverInterface
      */
     public function setOutputType($type)
     {
-        if (preg_match('/(png|gif|webp|jpe?g|tiff)/i', $type)) {
+        if (preg_match('/(png|gif|jpe?g|tif?f|webp)/i', $type)) {
             $this->outputType = sprintf('image/%s', strtolower($type));
+            return;
+        } else {
+            throw new \InvalidArgumentException(sprintf('Invalid output format %s', $type));
         }
     }
 

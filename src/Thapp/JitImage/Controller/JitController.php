@@ -11,20 +11,19 @@
 
 namespace Thapp\JitImage\Controller;
 
-use Illuminate\Http\Response;
-use Illuminate\Routing\Router;
-use Thapp\JitImage\ImageInterface;
-use Illuminate\Container\Container;
-use Thapp\JitImage\ResolverInterface;
-use Illuminate\Routing\Controllers\Controller;
-use Thapp\JitImage\Response\FileResponseInterface;
+use \Illuminate\Http\Response;
+use \Illuminate\Routing\Router;
+use \Thapp\JitImage\ImageInterface;
+use \Illuminate\Container\Container;
+use \Thapp\JitImage\ResolverInterface;
+use \Illuminate\Routing\Controllers\Controller;
+use \Thapp\JitImage\Response\FileResponseInterface;
 
 /**
- * Class: JitController
+ * @class JitController extends Controller JitController
+ * @see Controller
  *
- * @uses Controller
- *
- * @package Thapp\JitImage
+ * @package Thapp\JitImage\Controller
  * @version $Id$
  * @author Thomas Appel <mail@thomas-appel.com>
  * @license MIT
@@ -163,11 +162,8 @@ class JitController extends Controller
      */
     protected function render(ImageInterface $image)
     {
-
         $this->response->make($image);
-
         $image->close();
-
         $this->response->send();
     }
 }

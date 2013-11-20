@@ -83,6 +83,7 @@ return [
         'GreyScale' => 'gs',
         'Overlay'   => 'ovly',
         'Colorize'  => 'clrz',
+        'Convert'   => 'conv',
     ],
 
     /* ------------------------------------------------

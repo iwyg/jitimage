@@ -304,14 +304,14 @@ class JitImageServiceProvider extends ServiceProvider
             'Thapp\JitImage\Driver\DriverInterface',
             function ($driver) use ($driverName, $filters) {
 
-                //Typo, will be remove in next version
-                $addFilters = $this->app['events']->fire('jitimage.registerfitler', [$driverName]);
                 $addFilters = $this->app['events']->fire('jitimage.registerfilter', [$driverName]);
 
                 foreach ($addFilters as $filter) {
-                    foreach ($filter as $name => $class) {
+                    foreach ((array)$filter as $name => $class) {
                         if (class_exists($class)) {
                             $driver->registerFilter($name, $class);
+                        } else {
+                            throw new \InvalidArgumentException(sprintf('Filterclass %s for %s driver does not exists', $class, $driverName));
                         }
                     }
                 }
