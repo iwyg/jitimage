@@ -11,7 +11,6 @@
 
 namespace Thapp\JitImage\Controller;
 
-//use \Illuminate\Http\Response;
 use \Illuminate\Routing\Router;
 use \Thapp\JitImage\ImageInterface;
 use \Illuminate\Container\Container;
@@ -85,7 +84,7 @@ class JitController extends Controller
         $this->imageResolver->setFilter($filter);
 
         if ($image = $this->imageResolver->resolve()) {
-            $this->render($image);
+            return $this->render($image);
         }
 
         return $this->notFound();

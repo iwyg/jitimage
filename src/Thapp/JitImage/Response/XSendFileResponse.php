@@ -12,7 +12,6 @@
 namespace Thapp\JitImage\Response;
 
 use Thapp\JitImage\Image;
-//use Illuminate\Http\Response;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
@@ -27,6 +26,7 @@ use Symfony\Component\HttpFoundation\Response;
  */
 class XsendFileResponse extends GenericFileResponse
 {
+    private $xsend;
     /**
      * {@inheritdoc}
      */
@@ -34,27 +34,35 @@ class XsendFileResponse extends GenericFileResponse
     {
         $response->headers->set('Content-type', $image->getMimeType());
 
-        $response->setContent($content = $image->getContents());
-
         $response->setLastModified($lastMod);
 
-        $response->setEtag(hash('md5', $response->getContent()));
 
         $response->headers->set('Accept-ranges', 'bytes');
         $response->headers->set('Keep-Alive', 'timeout=5, max=99');
         $response->headers->set('Connection', 'keep-alive', true);
+        $response->setEtag(hash('md5', $content = $response->getContent()));
 
         // return normal by setting image contents;
         if ($image->isProcessed()) {
-            $response->setContent($image->getContents());
-            $response->setEtag(hash('md5', $response->getContent()));
-            return;
+            $this->xsend = false;
+            $response->setContent($content);
+        } else {
+
+            // set the xsend header:
+            $this->xsend = true;
+
+            $file = $image->getSource();
+            $response->headers->set('Content-Disposition', sprintf('inline; filename="%s"', basename($file)));
+            $response->headers->set('X-Sendfile', $file);
         }
+    }
 
-        // set the xsend header:
-        $file = $image->getSource();
-
-        $response->headers->set('Content-Disposition', sprintf('inline; filename="%s"', basename($file)));
-        $response->headers->set('X-Sendfile', $file);
+    public function send()
+    {
+        if ($this->xsend) {
+            $this->response->sendHeaders();
+            exit(0);
+        }
+        $this->response->send();
     }
 }

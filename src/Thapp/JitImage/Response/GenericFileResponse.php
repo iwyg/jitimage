@@ -39,8 +39,6 @@ class GenericFileResponse extends AbstractFileResponse
 
         $response->setEtag(hash('md5', $response->getContent()));
 
-        $file = $image->getSource();
-
         $response->headers->set('Accept-ranges', 'bytes');
         $response->headers->set('Keep-Alive', 'timeout=15, max=200');
         $response->headers->set('Connection', 'Keep-Alive', true);
