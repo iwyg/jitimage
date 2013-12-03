@@ -26,7 +26,6 @@ use Symfony\Component\HttpFoundation\Response;
  */
 class XsendFileResponse extends GenericFileResponse
 {
-    private $xsend;
     /**
      * {@inheritdoc}
      */
@@ -36,22 +35,21 @@ class XsendFileResponse extends GenericFileResponse
 
         $response->setLastModified($lastMod);
 
-
         $response->headers->set('Accept-ranges', 'bytes');
         $response->headers->set('Keep-Alive', 'timeout=5, max=99');
         $response->headers->set('Connection', 'keep-alive', true);
-        $response->setEtag(hash('md5', $content = $response->getContent()));
 
         // return normal by setting image contents;
         if ($image->isProcessed()) {
-            $this->xsend = false;
-            $response->setContent($content);
+            $response->setContent($content = $image->getContents());
+            $response->setEtag(hash('md5', $content));
         } else {
 
             // set the xsend header:
-            $this->xsend = true;
-
             $file = $image->getSource();
+
+            $response->setEtag(md5_file($file));
+            $response->headers->set('Content-Length', filesize($file));
             $response->headers->set('Content-Disposition', sprintf('inline; filename="%s"', basename($file)));
             $response->headers->set('X-Sendfile', $file);
         }
@@ -59,10 +57,6 @@ class XsendFileResponse extends GenericFileResponse
 
     public function send()
     {
-        if ($this->xsend) {
-            $this->response->sendHeaders();
-            exit(0);
-        }
         $this->response->send();
     }
 }
