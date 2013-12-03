@@ -6,6 +6,12 @@
         "mockery/mockery": "dev-master",
         "mikey179/vfsStream":"dev-master"
     },
+    "require": {
+        "php":">=5.4.0",
+        "illuminate/support":"4.*",
+        "symfony/filesystem":"2.3.*",
+        "symfony/http-foundation": "2.3.*"
+    },
     "license": "MIT",
     "authors": [
         {
@@ -14,11 +20,6 @@
         }
     ],
     "minimum-stability": "dev",
-    "require": {
-        "php":">=5.4.0",
-        "illuminate/support":"4.*",
-        "symfony/filesystem":"2.3.*"
-    },
     "autoload": {
         "psr-0":{"Thapp":"src/"},
         "classmap":["tests/"]

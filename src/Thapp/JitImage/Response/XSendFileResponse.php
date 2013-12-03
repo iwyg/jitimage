@@ -42,6 +42,12 @@ class XsendFileResponse extends GenericFileResponse
 
         $response->setEtag(hash('md5', $response->getContent()));
 
+        $response->headers->set('Accept-ranges', 'bytes');
+        $response->headers->set('Content-Transfer-Encoding', 'binary');
+        $response->headers->set('Keep-Alive', 'timeout=5, max=99');
+        $response->headers->set('Connection', 'keep-alive', true);
+        $response->headers->set('Content-Transfer-Encoding', 'binary');
+
         // return normal by setting image contents;
         if ($image->isProcessed()) {
             $response->setContent($image->getContents());
