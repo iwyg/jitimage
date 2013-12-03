@@ -40,7 +40,7 @@ abstract class AbstractFileResponse implements FileResponseInterface
      *
      * @var mixed
      */
-    protected $etags = [];
+    protected $request = [];
 
     /**
      * response
@@ -49,6 +49,12 @@ abstract class AbstractFileResponse implements FileResponseInterface
      */
     protected $response;
 
+    /**
+     * @param Request $request
+     *
+     * @access public
+     * @return mixed
+     */
     public function __construct(Request $request)
     {
         $this->request = $request;
@@ -64,12 +70,11 @@ abstract class AbstractFileResponse implements FileResponseInterface
      */
     final public function make(Image $image)
     {
-        $this->response = new Response;
+        $this->response = $response = new Response(null, 200);
         $this->response->setPublic();
 
         $modDate = $image->getLastModTime();
         $mod = strtotime($this->request->headers->get('if-modified-since', time()));
-
         $lastMod = (new \DateTime)->setTimestamp($modDate);
 
         if (!$image->isProcessed() && $mod === $modDate) {
@@ -79,11 +84,16 @@ abstract class AbstractFileResponse implements FileResponseInterface
         }
     }
 
+    /**
+     * getResponse
+     *
+     * @access public
+     * @return Response
+     */
     public function getResponse()
     {
         return $this->response;
     }
-
 
     /**
      * Send response.
@@ -94,10 +104,10 @@ abstract class AbstractFileResponse implements FileResponseInterface
     public function send()
     {
         if (!isset($this->response)) {
-            throw new \Exception('response not created yet. Create a response before calling send.');
+            throw new \RuntimeException('response not created yet. Create a response before calling send.');
         }
 
-        $this->response->send();
+        return $this->response->send();
     }
 
     /**

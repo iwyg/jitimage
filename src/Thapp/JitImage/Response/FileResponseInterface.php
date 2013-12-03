@@ -44,6 +44,7 @@ interface FileResponseInterface
     /**
      * abort
      *
+     * @deprecated will be removed with next version
      * @param int $status
      * @access public
      * @return void

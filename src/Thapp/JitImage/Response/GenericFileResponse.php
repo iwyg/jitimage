@@ -33,10 +33,7 @@ class GenericFileResponse extends AbstractFileResponse
     protected function setHeaders(Response $response, Image $image, \DateTime $lastMod)
     {
         $response->headers->set('Content-type', $image->getMimeType());
-
-        $response->headers->set('max-age', 600, true);
         $response->setContent($content = $image->getContents());
-        $response->headers->set('Content-Length', strlen($content));
 
         $response->setLastModified($lastMod);
 
@@ -45,10 +42,8 @@ class GenericFileResponse extends AbstractFileResponse
         $file = $image->getSource();
 
         $response->headers->set('Accept-ranges', 'bytes');
-        $response->headers->set('Content-Transfer-Encoding', 'binary');
-        $response->headers->set('Keep-Alive', 'timeout=5, max=99');
-        $response->headers->set('Connection', 'keep-alive', true);
-        $response->headers->set('Content-Transfer-Encoding', 'binary');
+        $response->headers->set('Keep-Alive', 'timeout=15, max=200');
+        $response->headers->set('Connection', 'Keep-Alive', true);
     }
 
     /**

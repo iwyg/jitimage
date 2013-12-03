@@ -164,7 +164,6 @@ class ImageSourceLoader implements SourceLoaderInterface
      */
     protected function fetchFile($handle, $url, &$message = null)
     {
-
         $curl = curl_init($url);
 
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, false);
@@ -174,12 +173,11 @@ class ImageSourceLoader implements SourceLoaderInterface
         $status = curl_exec($curl);
         $info = curl_getinfo($curl);
 
-        if (!in_array($info['http_code'], [200, 302])) {
+        if (!in_array($info['http_code'], [200, 302, 304])) {
             $status = false;
         }
 
         if (0 !== strlen($msg = curl_error($curl))) {
-
             $message = $msg;
             $status = false;
         }
