@@ -11,13 +11,15 @@
 
 namespace Thapp\JitImage\Controller;
 
-use \Illuminate\Http\Response;
+//use \Illuminate\Http\Response;
 use \Illuminate\Routing\Router;
 use \Thapp\JitImage\ImageInterface;
 use \Illuminate\Container\Container;
 use \Thapp\JitImage\ResolverInterface;
 use \Illuminate\Routing\Controllers\Controller;
 use \Thapp\JitImage\Response\FileResponseInterface;
+use \Symfony\Component\HttpFoundation\Response;
+use \Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 /**
  * @class JitController extends Controller JitController

@@ -12,7 +12,8 @@
 namespace Thapp\JitImage\Response;
 
 use Thapp\JitImage\Image;
-use Illuminate\Http\Response;
+//use Illuminate\Http\Response;
+use Symfony\Component\HttpFoundation\Response;
 
 /**
  * X-Sendfile response handler
@@ -24,16 +25,22 @@ use Illuminate\Http\Response;
  * @author Thomas Appel <mail@thomas-appel.com>
  * @license MIT
  */
-class XsendFileResponse extends AbstractFileResponse
+class XsendFileResponse extends GenericFileResponse
 {
     /**
      * {@inheritdoc}
      */
-    protected function setHeaders(Response $response, Image $image)
+    protected function setHeaders(Response $response, Image $image, \DateTime $lastMod)
     {
-        $this->image = $image;
-        $response->setPublic();
-        $response->header('Content-type', $image->getMimeType());
+        $response->headers->set('Content-type', $image->getMimeType());
+
+        $response->headers->set('max-age', 600, true);
+        $response->setContent($content = $image->getContents());
+        $response->headers->set('Content-Length', strlen($content));
+
+        $response->setLastModified($lastMod);
+
+        $response->setEtag(hash('md5', $response->getContent()));
 
         // return normal by setting image contents;
         if ($image->isProcessed()) {
@@ -45,7 +52,7 @@ class XsendFileResponse extends AbstractFileResponse
         // set the xsend header:
         $file = $image->getSource();
 
-        $response->header('Content-Disposition', sprintf('inline; filename="%s"', basename($file)));
-        $response->header('X-Sendfile', $file);
+        $response->headers->set('Content-Disposition', sprintf('inline; filename="%s"', basename($file)));
+        $response->headers->set('X-Sendfile', $file);
     }
 }

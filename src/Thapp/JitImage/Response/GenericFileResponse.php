@@ -12,7 +12,7 @@
 namespace Thapp\JitImage\Response;
 
 use Thapp\JitImage\Image;
-use Illuminate\Http\Response;
+use Symfony\Component\HttpFoundation\Response;
 
 /**
  * Generic response handler
@@ -30,11 +30,39 @@ class GenericFileResponse extends AbstractFileResponse
     /**
      * {@inheritdoc}
      */
-    protected function setHeaders(Response $response, Image $image)
+    protected function setHeaders(Response $response, Image $image, \DateTime $lastMod)
     {
-        $response->setContent($image->getContents());
-        $response->header('Content-type', $image->getMimeType());
+        $response->headers->set('Content-type', $image->getMimeType());
+
+        $response->headers->set('max-age', 600, true);
+        $response->setContent($content = $image->getContents());
+        $response->headers->set('Content-Length', strlen($content));
+
+        $response->setLastModified($lastMod);
+
         $response->setEtag(hash('md5', $response->getContent()));
-        $response->setPublic();
+
+        $file = $image->getSource();
+
+        $response->headers->set('Accept-ranges', 'bytes');
+        $response->headers->set('Content-Transfer-Encoding', 'binary');
+        $response->headers->set('Keep-Alive', 'timeout=5, max=99');
+        $response->headers->set('Connection', 'keep-alive', true);
+        $response->headers->set('Content-Transfer-Encoding', 'binary');
+    }
+
+    /**
+     * setHeadersIfNotProcessed
+     *
+     * @param Response $response
+     * @param Image $image
+     *
+     * @access protected
+     * @return mixed
+     */
+    protected function setHeadersIfNotProcessed(Response $response, Image $image, \DateTime $lastMod)
+    {
+        $response->setNotModified();
+        $response->setLastModified($lastMod);
     }
 }

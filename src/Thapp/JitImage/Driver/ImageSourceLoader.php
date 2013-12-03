@@ -85,10 +85,16 @@ class ImageSourceLoader implements SourceLoaderInterface
     private function validate($url)
     {
         if (@getimagesize($url)) {
+            $this->source = $url;
             return $url;
         }
 
         return false;
+    }
+
+    public function getSource()
+    {
+        return $this->source;
     }
 
     /**

@@ -276,7 +276,7 @@ abstract class AbstractDriver implements DriverInterface
      */
     public function getSource()
     {
-        return $this->source;
+        return $this->loader->getSource();
     }
 
     /**

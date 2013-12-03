@@ -186,7 +186,7 @@ class JitImageServiceProvider extends ServiceProvider
         $this->app->bind(
             'Thapp\JitImage\Response\FileResponseInterface',
             function () use ($response, $app) {
-                return new $response($app['request']->getEtags());
+                return new $response($app['request']);
             }
         );
     }

@@ -211,6 +211,21 @@ class Image implements ImageInterface
     }
 
     /**
+     * getLastModTime
+     *
+     * @access public
+     * @return mixed
+     */
+    public function getLastModTime()
+    {
+        if ($this->isProcessed()) {
+            return time();
+        }
+
+        return filemtime($this->driver->getSource());
+    }
+
+    /**
      * addFilter
      *
      * @access public
