@@ -282,6 +282,17 @@ abstract class JitImageDriverTest extends TestCase
     }
 
     /**
+     * @test
+     */
+    public function testGetSourceSouldReturnOriginalSourceFile()
+    {
+        $image = $this->createTestImage();
+        $this->loaderMock->shouldReceive('getSource')->andReturn($image);
+        $this->driver->load($image);
+        $this->assertSame($image, $this->driver->getSource());
+    }
+
+    /**
      * runImageFilter
      *
      * @param mixed $name
