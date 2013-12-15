@@ -9,8 +9,8 @@
     "require": {
         "php":">=5.4.0",
         "illuminate/support":"4.*",
-        "symfony/filesystem":"2.3.*",
-        "symfony/http-foundation": "2.3.*"
+        "symfony/filesystem":">=2.3.0",
+        "symfony/http-foundation": ">=2.3.0"
     },
     "license": "MIT",
     "authors": [
