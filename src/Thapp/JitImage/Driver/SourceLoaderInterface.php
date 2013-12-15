@@ -25,4 +25,6 @@ interface SourceLoaderInterface
     public function load($url);
 
     public function clean();
+
+    public function getSource();
 }

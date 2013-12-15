@@ -11,7 +11,7 @@
 
 namespace Thapp\JitImage\Facades;
 
-use Illuminate\Support\Facades\Facade;
+use \Illuminate\Support\Facades\Facade;
 
 /**
  * Class: JitImage

@@ -11,6 +11,8 @@
 
 namespace Thapp\JitImage\Driver;
 
+use Symfony\Component\Process\Process;
+use Symfony\Component\Process\ProcessBuilder;
 use Thapp\JitImage\Shell\ShellCommand;
 use Thapp\JitImage\Exception\ImageProcessException;
 
