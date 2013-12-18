@@ -156,7 +156,7 @@ class JitImageServiceProvider extends ServiceProvider
             function () use ($config) {
 
                 $conf = [
-                    'trusted_sites' => $this->extractDomains($config->get('jitimage::trusted-sites', [])),
+                    'trusted_sites' => $config->get('jitimage::trusted-sites', []),
                     'cache_prefix'  => $config->get('jitimage::cache.prefix', 'jit_'),
                     'base_route'    => $config->get('jitimage::route', 'images'),
                     'cache_route'   => $config->get('jitimage::cache.route', 'jit/storage'),
@@ -350,23 +350,5 @@ class JitImageServiceProvider extends ServiceProvider
     private function getFilters()
     {
         return $this->app['config']->get('jitimage::filter', []);
-    }
-
-    /**
-     * extractDomains
-     *
-     * @access private
-     * @return mixed
-     */
-    private function extractDomains($sites)
-    {
-        $trustedSites = [];
-
-        foreach ($sites as $site) {
-            extract(parse_url($site));
-            $trustedSites[] = $host;
-        }
-
-        return $trustedSites;
     }
 }
