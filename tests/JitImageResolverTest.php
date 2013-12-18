@@ -98,6 +98,48 @@ class JitImageResolverTest extends TestCase
 
         $this->assertSame($image, $resolver->resolve());
     }
+
+    /**
+     * @dataProvider domainProvider
+     */
+    public function testResolveRemote($domain, $url, $matches)
+    {
+        $resolver = new JitImageResolver(new JitResolveConfiguration(['trusted_sites' => [$domain]]), $image = $this->getImageMock(function (&$mock) {
+            $mock->shouldReceive('load')->andReturn(true);
+            $mock->shouldReceive('process');
+            $mock->shouldReceive('getContents')->andReturn('foo');
+            $mock->shouldReceive('close');
+        }), $this->getCacheMock(function (&$mock) use ($image) {
+            $mock->shouldReceive('put');
+            $mock->shouldReceive('has')->andReturn(false);
+        }));
+
+        $resolver->setParameter('0');
+        $resolver->setSource($url);
+        $resolver->setFilter(null);
+
+        if ($matches) {
+            $this->assertSame($image, $resolver->resolve());
+        } else {
+            $this->assertFalse($resolver->resolve());
+        }
+    }
+
+    public function domainProvider()
+    {
+        return [
+            ['http://foo.bar.com', 'http://foo.bar.com/someimage.jpg', true],
+            ['http://bar.com', 'http://foo.bar.com/someimage.jpg', false],
+            ['https?://foo.bar.com', 'http://foo.bar.com/someimage.jpg', true],
+            ['https?://foo.bar.com', 'https://foo.bar.com/someimage.jpg', true],
+            ['https?://foo.bar.(de|com)', 'https://foo.bar.com/someimage.jpg', true],
+            ['https?://foo.bar.(de|net)', 'https://foo.bar.com/someimage.jpg', false],
+            ['http://[0-9]+.bar.com', 'http://foo.bar.com/someimage.jpg', false],
+            ['http://[a-zA-Z]+.bar.com', 'http://23.bar.com/someimage.jpg', false],
+            ['http://[0-9]+.bar.com', 'http://23.bar.com/someimage.jpg', true]
+        ];
+    }
+
     /**
      * @test
      */
@@ -200,6 +242,4 @@ class JitImageResolverTest extends TestCase
 
         return $cache;
     }
-
-
 }

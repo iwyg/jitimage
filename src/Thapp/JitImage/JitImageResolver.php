@@ -132,7 +132,11 @@ class JitImageResolver implements ResolverInterface
 
         $this->parseAll();
 
-        if ($this->config->cache and $image = $this->resolveFromCache($id = $this->getImageRequestId($this->getInputQuery(), $this->input['source']))) {
+        if ($this->config->cache &&
+            $image = $this->resolveFromCache(
+                $id = $this->getImageRequestId($this->getInputQuery(), $this->input['source'])
+            )
+        ) {
             return $image;
         }
 
@@ -184,7 +188,11 @@ class JitImageResolver implements ResolverInterface
      */
     public function getCachedUrl(ImageInterface $cachedImage)
     {
-        return sprintf('/%s/%s', $this->config->cache_route, $this->processCache->getRelPath($cachedImage->getSource()));
+        return sprintf(
+            '/%s/%s',
+            $this->config->cache_route,
+            $this->processCache->getRelPath($cachedImage->getSource())
+        );
     }
 
     /**
@@ -196,7 +204,11 @@ class JitImageResolver implements ResolverInterface
             $base = substr($image->getSource(), strlen($this->config->base));
             $input = $this->input;
 
-            return sprintf('/%s', trim(implode('/', [$this->config->base_route, $input['parameter'], trim($base, '/'), $input['filter']]), '/'));
+            return sprintf(
+                '/%s',
+                trim(implode('/', [$this->config->base_route, $input['parameter'], trim($base, '/'),
+                $input['filter']]), '/')
+            );
         }
     }
 
@@ -292,8 +304,15 @@ class JitImageResolver implements ResolverInterface
     protected function parseParameter()
     {
         list ($mode, $width, $height, $gravity, $background) = array_pad(
-            preg_split('%/%', $this->input['parameter'], -1, PREG_SPLIT_NO_EMPTY),
-        5, null);
+            preg_split(
+                '%/%',
+                $this->input['parameter'],
+                -1,
+                PREG_SPLIT_NO_EMPTY
+            ),
+            5,
+            null
+        );
 
         return $this->setParameterValues(
             (int)$mode,
@@ -482,14 +501,13 @@ class JitImageResolver implements ResolverInterface
     {
         extract($parameter);
 
-        if (preg_match('#^(https?://|spdy://|file://)#', $source)) {
+        if (null !== parse_url($source, PHP_URL_SCHEME)) {
             return $this->isValidDomain($source);
         }
 
         if (is_file($file = $this->config->base . '/' . $source)) {
             return realpath($file);
         }
-
         return false;
     }
 
@@ -501,17 +519,38 @@ class JitImageResolver implements ResolverInterface
      */
     protected function isValidDomain($url)
     {
-
         $trusted = $this->config->trusted_sites;
 
-        if (false === empty($trusted)) {
 
+        if (!empty($trusted)) {
             extract(parse_url($url));
 
-            if (!in_array($host, $trusted)) {
+            $host = substr($url, 0, strpos($url, $host)).$host;
+
+            if (!$this->matchHost($host, $scheme, $trusted)) {
                 return false;
             }
         }
         return $url;
+    }
+
+    /**
+     * matchHosts
+     *
+     * @param mixed $host
+     * @param array $hosts
+     *
+     * @access protected
+     * @return boolean
+     */
+    protected function matchHost($host, $scheme, array $hosts)
+    {
+
+        foreach ($hosts as $trusted) {
+            if (0 === strcmp($host, $trusted) || preg_match('#^'. $trusted .'#s', $host)) {
+                return true;
+            }
+        }
+        return false;
     }
 }

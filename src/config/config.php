@@ -112,8 +112,13 @@ return [
     /* ------------------------------------------------
      * a list of trusted sites that deliver assets:
      *  e.g. 'http://25.media.tumblr.com'
+     *
+     *  or as a regexp:
+     *
+     *  'http://[0-9]+.media.tumblr.(com|de|net)',
      * ------------------------------------------------
      */
+
     'trusted-sites' => [
     ],
 
