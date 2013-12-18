@@ -241,15 +241,26 @@ class JitImageServiceProvider extends ServiceProvider
             return false;
         }
 
+        $ctrl = 'Thapp\JitImage\Controller\JitController';
+
         foreach ($recipes as $aliasRoute => $formular) {
+
+            $param = str_replace('/', '_', $aliasRoute);
+
             $this->app['router']
                 ->get(
-                    $route . '/' . $aliasRoute . '/{source}',
-                    ['uses' => 'Thapp\JitImage\Controller\JitController@getResource']
+                    $route . '/{' . $param . '}/{source}',
+                    ['uses' => $ctrl . '@getResource']
                 )
-                ->where('source', '(.*)')
-                ->defaults('parameter', $formular);
+                ->where($param, $aliasRoute)
+                ->where('source', '(.*)');
         }
+
+        $this->app->bind($ctrl);
+        $this->app->extend($ctrl, function ($controller) use ($recipes) {
+            $controller->setRecieps(new \Thapp\JitImage\RecipeResolver($recipes));
+            return $controller;
+        });
     }
 
     /**
@@ -311,7 +322,9 @@ class JitImageServiceProvider extends ServiceProvider
                         if (class_exists($class)) {
                             $driver->registerFilter($name, $class);
                         } else {
-                            throw new \InvalidArgumentException(sprintf('Filterclass %s for %s driver does not exists', $class, $driverName));
+                            throw new \InvalidArgumentException(
+                                sprintf('Filterclass %s for %s driver does not exists', $class, $driverName)
+                            );
                         }
                     }
                 }

@@ -13,9 +13,9 @@ namespace Thapp\JitImage\Controller;
 
 use \Illuminate\Routing\Router;
 use \Thapp\JitImage\ImageInterface;
+use \Illuminate\Routing\Controller;
 use \Illuminate\Container\Container;
 use \Thapp\JitImage\ResolverInterface;
-use \Illuminate\Routing\Controllers\Controller;
 use \Thapp\JitImage\Response\FileResponseInterface;
 use \Symfony\Component\HttpFoundation\Response;
 use \Symfony\Component\HttpFoundation\BinaryFileResponse;
@@ -98,14 +98,10 @@ class JitController extends Controller
      * @access public
      * @return mixed
      */
-    public function getResource($source)
+    public function getResource($parameter, $source)
     {
-        extract($this->defaults);
-
-        if (is_string($parameter) and strlen($parameter) > 0) {
-
-            list($parameters, $filter) = array_pad(explode(',', str_replace(' ', null, $parameter)), 2, null);
-
+        if ($params = $this->recipes->resolve($parameter)) {
+            extract($params);
             return $this->getImage($parameters, $source, $filter);
         }
 
@@ -129,16 +125,16 @@ class JitController extends Controller
     }
 
     /**
-     * Set the bound defaul values and execute the parent callAction() method.
+     * setRecieps
      *
-     * @see \Illuminate\Routing\Controller\Controller#callAction()
+     * @param \Thapp\JitImage\RecipeResolver $recipes
+     *
      * @access public
      * @return void
      */
-    public function callAction(Container $container, Router $router, $method, $parameters)
+    public function setRecieps(\Thapp\JitImage\RecipeResolver $recipes)
     {
-        $this->defaults = $router->getCurrentRoute()->getDefaults();
-        parent::callAction($container, $router, $method, $parameters);
+        $this->recipes = $recipes;
     }
 
     /**
