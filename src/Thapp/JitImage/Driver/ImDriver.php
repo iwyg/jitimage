@@ -449,7 +449,7 @@ class ImDriver extends AbstractDriver
 
         }
 
-        array_unshift($values, sprintf('%s:%s', $type, $this->source));
+        array_unshift($values, sprintf('%s:%s', $type, escapeshellarg($this->source)));
 
         array_unshift($values, $bin);
 
