@@ -506,7 +506,7 @@ class JitImageResolver implements ResolverInterface
         }
 
         if (is_file($file = $this->config->base . '/' . $source)) {
-            return realpath($file);
+            return $file;
         }
         return false;
     }
