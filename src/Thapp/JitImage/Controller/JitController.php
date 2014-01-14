@@ -161,6 +161,7 @@ class JitController extends Controller
     {
         $this->response->make($image);
         $image->close();
-        $this->response->send();
+
+        return $this->response->getResponse();
     }
 }
