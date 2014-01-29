@@ -121,7 +121,7 @@ class ImageCache extends NamespacedItemResolver implements CacheInterface
     public function createKey($src, $fingerprint = null, $prefix = 'io', $suffix = 'file')
     {
         return sprintf(
-            '%s.%s_%s.%s',
+            '%s.%s%s.%s',
             substr(hash('sha1', $src), 0, 8),
             $prefix,
             $this->pad($src, $fingerprint),
