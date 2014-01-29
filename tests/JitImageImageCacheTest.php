@@ -19,7 +19,6 @@ use Symfony\Component\Filesystem\Filesystem;
 /**
  * @class JitImageSegmentCacheTest
  */
-
 class JitImageCacheTest extends TestCase
 {
     /**
@@ -144,7 +143,7 @@ class JitImageCacheTest extends TestCase
      */
     public function testCreateKey()
     {
-        $key = $this->cache->createKey('path/image.jpg', 'somevals', 'foo', 'bar');
+        $key = $this->cache->createKey('path/image.jpg', 'somevals', 'foo_', 'bar');
 
         $this->assertEquals(8, strpos($key, '.'));
         $this->assertEquals(25 + strlen('foo_bar.'), strlen($key));
