@@ -34,7 +34,6 @@ class ImCircFilter extends ImFilter
     public function run()
     {
         $this->driver->setOutPutType('png');
-
         extract($this->driver->getTargetSize());
 
         return [

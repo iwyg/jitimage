@@ -58,21 +58,11 @@ class JitImageImDriverTest extends JitImageDriverTest
         $this->assertEquals($this->sourceFile, $source);
     }
 
-
-    /**
-     * @test
-     * @dataProvider filterDataProvider
-     */
-    public function testOwnFilter($filter, $expectation = null)
-    {
-        return null;
-    }
-
     /**
      * locateConvertBinary
      *
      * @access private
-     * @return mixed
+     * @return string
      */
     private function locateConvertBinary()
     {
