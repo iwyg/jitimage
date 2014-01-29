@@ -242,6 +242,8 @@ class JitImage
         }
         $this->mode = 'default';
         $this->arguments = [];
+
+        return $this->process();
     }
 
     /**
@@ -296,9 +298,11 @@ class JitImage
 
         if ($image = $this->resolver->getCached()) {
             $src = $this->base.$this->resolver->getCachedUrl($image);
+
             $extension = $image->getSourceFormat(true);
             $this->resolver->close();
             $image->close();
+
             return $src.'.'.$extension;
         }
 
