@@ -41,7 +41,6 @@ class JitImageImDriverTest extends JitImageDriverTest
 
         $locator = m::mock('Thapp\JitImage\Driver\BinLocatorInterface');
         $locator->shouldReceive('getConverterPath')->andReturn($this->locateConvertBinary());
-
         $this->driver = new ImDriver($locator, $this->loaderMock);
     }
 
@@ -58,11 +57,21 @@ class JitImageImDriverTest extends JitImageDriverTest
         $this->assertEquals($this->sourceFile, $source);
     }
 
+
+    /**
+     * @test
+     * @dataProvider filterDataProvider
+     */
+    public function testOwnFilter($filter, $expectation = null)
+    {
+        return null;
+    }
+
     /**
      * locateConvertBinary
      *
      * @access private
-     * @return string
+     * @return mixed
      */
     private function locateConvertBinary()
     {

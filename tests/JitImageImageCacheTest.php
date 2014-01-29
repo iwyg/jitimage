@@ -129,17 +129,6 @@ class JitImageCacheTest extends TestCase
 
     /**
      * @test
-     */
-    public function testCacheGet()
-    {
-        $key = $this->cache->createKey('path/image.jpg', 'somevals');
-        $this->cache->put($key, 'foo');
-
-        $this->assertSame($this->image, $this->cache->get($key, false));
-    }
-
-    /**
-     * @test
      * @dataProvider keyDataProvider
      */
     public function testCreateKey($src, $vars, $prefix, $suffix)
@@ -159,6 +148,7 @@ class JitImageCacheTest extends TestCase
             ['path/image.jpg', 'somevals', 'bar', 'somesonnnn']
         ];
     }
+
 
     protected function setUp()
     {
