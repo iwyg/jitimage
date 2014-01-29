@@ -26,6 +26,8 @@ use Thapp\JitImage\Filter\GdFilter;
 class GdCircFilter extends GdFilter
 {
 
+    protected $availableOptions = ['o'];
+
     /**
      * {@inheritdoc}
      */

@@ -164,7 +164,8 @@ class JitImageServiceProvider extends ServiceProvider
                     'cache'         => in_array(
                         $config->getEnvironment(),
                         $config->get('jitimage::cache.environments', [])
-                    )
+                    ),
+                    'format_filter'  => $config->get('jitimage::filter.Convert', 'conv')
                 ];
                 return new \Thapp\JitImage\JitResolveConfiguration($conf);
             }

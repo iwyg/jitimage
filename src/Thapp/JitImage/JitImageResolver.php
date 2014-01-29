@@ -132,9 +132,10 @@ class JitImageResolver implements ResolverInterface
 
         $this->parseAll();
 
+
         if ($this->config->cache &&
             $image = $this->resolveFromCache(
-                $id = $this->getImageRequestId($this->getInputQuery(), $this->input['source'])
+                $id = $this->getImageRequestId($this->getInputQuery(), $source = $this->input['source'])
             )
         ) {
             return $image;
@@ -152,7 +153,10 @@ class JitImageResolver implements ResolverInterface
 
         $this->image->process($this);
 
-        $this->config->cache and $this->processCache->put($id, $this->image->getContents());
+
+        if ($this->config->cache) {
+            $this->processCache->put($id, $this->image->getContents());
+        }
 
         return $this->image;
     }
@@ -228,7 +232,7 @@ class JitImageResolver implements ResolverInterface
      */
     public function resolveFromCache($id)
     {
-        $id = $this->processCache->getIdFromUrl($id);
+        $id = preg_replace('~(\.(jpe?g|gif|png|webp))$~', null, $this->processCache->getIdFromUrl($id));
 
         if ($this->processCache->has($id)) {
             $this->image->close();
@@ -256,9 +260,9 @@ class JitImageResolver implements ResolverInterface
     protected function canResolve()
     {
         return is_array($this->input)
-            and array_key_exists('parameter', $this->input)
-            and array_key_exists('source', $this->input)
-            and array_key_exists('filter', $this->input);
+            && array_key_exists('parameter', $this->input)
+            && array_key_exists('source', $this->input)
+            && array_key_exists('filter', $this->input);
     }
 
     /**
@@ -316,8 +320,8 @@ class JitImageResolver implements ResolverInterface
 
         return $this->setParameterValues(
             (int)$mode,
-            ((int)$mode !== 1 and (int)$mode !== 2) ? $this->getIntVal($width) : (int)$this->getIntVal($width),
-            ((int)$mode !== 1 and (int)$mode !== 2) ? $this->getIntVal($height) : (int)$this->getIntVal($height),
+            ((int)$mode !== 1 && (int)$mode !== 2) ? $this->getIntVal($width) : (int)$this->getIntVal($width),
+            ((int)$mode !== 1 && (int)$mode !== 2) ? $this->getIntVal($height) : (int)$this->getIntVal($height),
             $this->getIntVal($gravity),
             $background
         );
@@ -456,7 +460,7 @@ class JitImageResolver implements ResolverInterface
 
         $length = strpos($parameter['source'], '/');
 
-        $hasColor = (6 === $length or 3 === $length) and $length === strlen(current($color));
+        $hasColor = (6 === $length && 3 === $length) && $length === strlen(current($color));
 
         if (!empty($color)) {
             $parameter['source'] = substr($parameter['source'], strlen(current($color)));
@@ -481,7 +485,7 @@ class JitImageResolver implements ResolverInterface
         if (!isset($this->cachedNames[$requestString])) {
 
             $this->cachedNames[$requestString] = $this->processCache->createKey(
-                $source,
+                $source,//.($suffix = $this->getOutputTypeFromFilter($source)),
                 $requestString,
                 $this->config->cache_prefix,
                 pathinfo($source, PATHINFO_EXTENSION)
@@ -489,6 +493,44 @@ class JitImageResolver implements ResolverInterface
         }
 
         return $this->cachedNames[$requestString];
+    }
+
+    /**
+     * getProcessedCacheName
+     *
+     * @param ImageInterface $image
+     * @param string $requestString
+     * @param string $srouce
+     *
+     * @access protected
+     * @return string
+     */
+    protected function getProcessedCacheId(ImageInterface $image, $requestString, $source)
+    {
+
+        $osuffix = $image->getSourceFormat();
+        $psuffix = $image->getFileFormat();
+
+        unset($this->cachedNames[$requestString]);
+
+        $this->cachedNames[$requestString] = $this->processCache->createKey(
+            $source.$osuffix.$psuffix,
+            $requestString,
+            $this->config->cache_prefix,
+            $psuffix
+        );
+
+        return $this->cachedNames[$requestString];
+    }
+
+    protected function getOutputTypeFromFilter($source)
+    {
+        if (($filter = $this->getParameter('filter')) && isset($filter[$format = $this->config->format_filter])) {
+            return current(array_values($filter[$format]));
+        }
+
+        return pathinfo($source, PATHINFO_EXTENSION);
+;
     }
 
     /**

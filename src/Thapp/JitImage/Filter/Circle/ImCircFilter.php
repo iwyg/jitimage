@@ -26,6 +26,8 @@ use Thapp\JitImage\Filter\ImFilter;
 class ImCircFilter extends ImFilter
 {
 
+    protected $availableOptions = ['o'];
+
     /**
      * {@inheritdoc}
      */

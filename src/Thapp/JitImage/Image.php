@@ -109,36 +109,36 @@ class Image implements ImageInterface
      */
     public function process(ResolverInterface $resolver)
     {
-        extract($resolver->getParameter());
+        $params = $resolver->getParameter();
 
-        $this->driver->setTargetSize($width, $height);
+        $this->driver->setTargetSize($params['width'], $params['height']);
 
-        switch($mode) {
+        switch($params['mode']) {
             case static::IM_NOSCALE:
                 break;
             case static::IM_RESIZE:
                 $this->resize();
                 break;
             case static::IM_SCALECROP:
-                $this->cropScale($gravity);
+                $this->cropScale($params['gravity']);
                 break;
             case static::IM_CROP:
-                $this->crop($gravity, $background);
+                $this->crop($params['gravity'], $params['background']);
                 break;
             case static::IM_RSIZEFIT:
                 $this->resizeToFit();
                 break;
             case static::IM_RSIZEPERCENT:
-                $this->resizePercentual($width);
+                $this->resizePercentual($params['width']);
                 break;
             case static::IM_RSIZEPXCOUNT:
-                $this->resizePixelCount($width);
+                $this->resizePixelCount($params['width']);
                 break;
             default:
                 break;
         }
 
-        foreach ($filter as $f => $parameter) {
+        foreach ($params['filter'] as $f => $parameter) {
             $this->addFilter($f, $parameter);
         }
 
@@ -154,6 +154,9 @@ class Image implements ImageInterface
         $this->compression = $quality;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function setFileFormat($format)
     {
         return $this->driver->setOutputType($format);
@@ -173,6 +176,22 @@ class Image implements ImageInterface
     public function getFileFormat()
     {
         return $this->driver->getOutputType();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function getSourceFormat()
+    {
+        return $this->driver->getSourceType(true);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function getSourceMimeTime()
+    {
+        return $this->driver->getSourceType(false);
     }
 
     /**
@@ -257,7 +276,7 @@ class Image implements ImageInterface
      * @access public
      * @return mixed
      */
-    protected function cropScale($gravity)
+    protected function cropScale()
     {
         return $this->driver->filter('cropScale', func_get_args());
     }
@@ -269,7 +288,7 @@ class Image implements ImageInterface
      * @access public
      * @return mixed
      */
-    protected function crop($gravity, $background = null)
+    protected function crop()
     {
         return $this->driver->filter('crop', func_get_args());
     }

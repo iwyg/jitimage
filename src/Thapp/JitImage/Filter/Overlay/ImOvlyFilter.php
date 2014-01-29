@@ -20,6 +20,8 @@ use Thapp\JitImage\Filter\ImFilter;
  */
 class ImOvlyFilter extends ImFilter
 {
+    protected $availableOptions = ['c', 'a'];
+
     public function run()
     {
         return ['( +clone -fill rgba(%s,%s) -colorize 100 ) -compose Over -composite' => [

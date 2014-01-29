@@ -20,6 +20,8 @@ use Thapp\JitImage\Filter\ImFilter;
  */
 class ImClrzFilter extends ImFilter
 {
+    protected $availableOptions = ['c'];
+
     public function run()
     {
         return ['( +clone -fill rgb(%s) -colorize 100 ) -compose Colorize -composite' => [

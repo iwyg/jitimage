@@ -20,6 +20,8 @@ use \Thapp\JitImage\Filter\ImagickFilter;
  */
 class ImagickConvFilter extends ImagickFilter
 {
+    protected $availableOptions = ['f'];
+
     public function run()
     {
         $type = $this->getOption('f', 'jpg');

@@ -22,4 +22,5 @@ namespace Thapp\JitImage\Filter\Convert;
  */
 class GdConvFilter extends ImagickConvFilter
 {
+    protected static $driverType = 'gd';
 }

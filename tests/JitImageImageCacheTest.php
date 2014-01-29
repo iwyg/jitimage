@@ -140,15 +140,25 @@ class JitImageCacheTest extends TestCase
 
     /**
      * @test
+     * @dataProvider keyDataProvider
      */
-    public function testCreateKey()
+    public function testCreateKey($src, $vars, $prefix, $suffix)
     {
-        $key = $this->cache->createKey('path/image.jpg', 'somevals', 'foo_', 'bar');
+        $key = $this->cache->createKey($src, $vars, $prefix, $suffix);
 
         $this->assertEquals(8, strpos($key, '.'));
-        $this->assertEquals(25 + strlen('foo_bar.'), strlen($key));
+        $this->assertEquals(8 + strlen($prefix) + 20, strlen($key));
     }
 
+    public function keyDataProvider()
+    {
+        return [
+            ['path/image.jpg', 'somevals', 'prefix', 'jpg'],
+            ['path/image.jpg', 'somevals', 'jit', 'png'],
+            ['path/image.jpg', 'somevals', 'foo', 'gif'],
+            ['path/image.jpg', 'somevals', 'bar', 'somesonnnn']
+        ];
+    }
 
     protected function setUp()
     {

@@ -26,6 +26,8 @@ use Thapp\JitImage\Filter\ImagickFilter;
 class ImagickGsFilter extends ImagickFilter
 {
 
+    protected $availableOptions = ['h', 's', 'b', 'c'];
+
     /**
      * {@inheritdoc}
      */

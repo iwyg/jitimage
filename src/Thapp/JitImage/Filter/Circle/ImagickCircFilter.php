@@ -29,6 +29,7 @@ use Thapp\JitImage\Filter\ImagickFilter;
 class ImagickCircFilter extends ImagickFilter
 {
 
+    protected $availableOptions = ['o'];
     /**
      * {@inheritdoc}
      */

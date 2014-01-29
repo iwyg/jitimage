@@ -26,6 +26,8 @@ use Thapp\JitImage\Filter\ImFilter;
 class ImGsFilter extends ImFilter
 {
 
+    protected $availableOptions = ['h', 's', 'b', 'c'];
+
     /**
      * {@inheritdoc}
      */

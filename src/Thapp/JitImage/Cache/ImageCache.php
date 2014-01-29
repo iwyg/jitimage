@@ -121,11 +121,11 @@ class ImageCache extends NamespacedItemResolver implements CacheInterface
     public function createKey($src, $fingerprint = null, $prefix = 'io', $suffix = 'file')
     {
         return sprintf(
-            '%s.%s%s.%s',
+            '%s.%s%s%s',
             substr(hash('sha1', $src), 0, 8),
             $prefix,
             $this->pad($src, $fingerprint),
-            $suffix
+            $this->pad($src, $suffix, 3)
         );
     }
 
@@ -173,7 +173,7 @@ class ImageCache extends NamespacedItemResolver implements CacheInterface
      * @access protected
      * @return string
      */
-    protected function getFilePath($key)
+    protected function getFilePath($id)
     {
         return sprintf('%s/%s', $this->path, $id);
     }
@@ -207,7 +207,11 @@ class ImageCache extends NamespacedItemResolver implements CacheInterface
      */
     protected function getPath($key)
     {
-        list ($ns, $dir, $file) = $this->parseKey($key);
+        $parsed = $this->parseKey($key);
+
+        array_shift($parsed);
+
+        list ($dir, $file) = $parsed;
         return sprintf('%s/%s/%s', $this->path, $dir, $file);
     }
 
@@ -216,13 +220,14 @@ class ImageCache extends NamespacedItemResolver implements CacheInterface
      *
      * @param string $src
      * @param string $pad
+     * @param int    $len
      *
      * @access protected
      * @return string
      */
-    protected function pad($src, $pad)
+    protected function pad($src, $pad, $len = 16)
     {
-        return substr(hash('sha1', sprintf('%s%s', $src, $pad)), 0, 16);
+        return substr(hash('sha1', sprintf('%s%s', $src, $pad)), 0, $len);
     }
 
     /**

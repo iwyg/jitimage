@@ -95,6 +95,16 @@ interface DriverInterface
     public function setOutPutType($type);
 
     /**
+     * getSoruceType
+     *
+     * @param bool $assSuffix
+     *
+     * @access public
+     * @return string
+     */
+    public function getSourceType($assSuffix = false);
+
+    /**
      * get the file contents of the image
      *
      * @access public

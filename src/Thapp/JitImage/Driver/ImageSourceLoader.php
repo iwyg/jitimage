@@ -41,6 +41,13 @@ class ImageSourceLoader implements SourceLoaderInterface
     protected $file;
 
     /**
+     * src
+     *
+     * @var mixed
+     */
+    protected $source;
+
+    /**
      * __construct
      *
      * @access public

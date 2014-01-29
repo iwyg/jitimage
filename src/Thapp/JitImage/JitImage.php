@@ -88,6 +88,39 @@ class JitImage
     }
 
     /**
+     * Convert source to jpg
+     *
+     * @access public
+     * @return JitImage
+     */
+    public function toJpeg()
+    {
+        return $this->filter('conv', ['f' => 'jpg']);
+    }
+
+    /**
+     * Convert source to png
+     *
+     * @access public
+     * @return JitImage
+     */
+    public function toPng()
+    {
+        return $this->filter('conv', ['f' => 'png']);
+    }
+
+    /**
+     * Convert source to gif
+     *
+     * @access public
+     * @return JitImage
+     */
+    public function toGif()
+    {
+        return $this->filter('conv', ['f' => 'gif']);
+    }
+
+    /**
      * callResize
      *
      * @param int $width
@@ -96,11 +129,13 @@ class JitImage
      * @access protected
      * @return void
      */
-    protected function callResize($width, $height)
+    public function resize($width, $height)
     {
         $this->mode = 'resize';
         $this->targetSize = [$width, $height];
         $this->arguments = [];
+
+        return $this->process();
     }
 
     /**
@@ -114,11 +149,13 @@ class JitImage
      * @access protected
      * @return void
      */
-    protected function callCrop($width, $height, $gravity, $background = null)
+    public function crop($width, $height, $gravity, $background = null)
     {
         $this->mode = 'crop';
         $this->targetSize = [$width, $height];
         $this->arguments = [$gravity, $background];
+
+        return $this->process();
     }
 
     /**
@@ -131,11 +168,13 @@ class JitImage
      * @access protected
      * @return void
      */
-    protected function callCropAndResize($width, $height, $gravity)
+    public function cropAndResize($width, $height, $gravity)
     {
         $this->mode = 'cropResize';
         $this->targetSize = [$width, $height];
         $this->arguments = [$gravity];
+
+        return $this->process();
     }
 
     /**
@@ -147,11 +186,13 @@ class JitImage
      * @access protected
      * @return void
      */
-    protected function callFit($width, $height)
+    public function fit($width, $height)
     {
         $this->mode = 'resizeToFit';
         $this->targetSize = [$width, $height];
         $this->arguments = [];
+
+        return $this->process();
     }
 
     /**
@@ -162,11 +203,13 @@ class JitImage
      * @access protected
      * @return void
      */
-    protected function callScale($percent)
+    public function scale($percent)
     {
         $this->mode = 'percentualScale';
         $this->targetSize = [$percent, null];
         $this->arguments = [];
+
+        return $this->process();
     }
 
     /**
@@ -177,11 +220,13 @@ class JitImage
      * @access protected
      * @return void
      */
-    protected function callPixel($pixel)
+    public function pixel($pixel)
     {
         $this->mode = 'resizePixelCount';
         $this->targetSize = [$pixel, null];
         $this->arguments = [];
+
+        return $this->process();
     }
 
     /**
@@ -190,7 +235,7 @@ class JitImage
      * @access protected
      * @return void
      */
-    protected function callGet()
+    public function get()
     {
         if ($this->targetSize) {
             throw new \InvalidArgumentException('can\'t get original iamge if target size is already set');
@@ -251,10 +296,10 @@ class JitImage
 
         if ($image = $this->resolver->getCached()) {
             $src = $this->base.$this->resolver->getCachedUrl($image);
+            $extension = $image->getSourceFormat(true);
             $this->resolver->close();
             $image->close();
-
-            return $src;
+            return $src.'.'.$extension;
         }
 
         if ($image = $this->resolver->resolve($image)) {
@@ -353,25 +398,6 @@ class JitImage
     private function isColor($color)
     {
         return preg_match('#^[0-9a-fA-F]{3}|^[0-9a-fA-F]{6}#', $color);
-    }
-
-    /**
-     * __call
-     *
-     * @param mixed $method
-     * @param mixed $arguments
-     * @access public
-     * @return string
-     */
-    public function __call($method, $arguments)
-    {
-        if (method_exists($this, $m = sprintf('call%s', ucfirst($method)))) {
-            call_user_func_array([$this, $m], $arguments);
-
-            return $this->process();
-        }
-
-        throw new \BadMethodCallException(sprintf('call to undefined method [%s]', $method));
     }
 
     /**

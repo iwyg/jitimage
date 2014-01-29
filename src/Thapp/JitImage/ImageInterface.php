@@ -80,6 +80,23 @@ interface ImageInterface
     public function getFileFormat();
 
     /**
+     * getSourceFormat
+     *
+     * @access public
+     * @return string
+     */
+    public function getSourceFormat();
+
+    /**
+     * getSourceMimeTime
+     *
+     *
+     * @access public
+     * @return string
+     */
+    public function getSourceMimeTime();
+
+    /**
      * get the image output MimeType
      *
      * @access public

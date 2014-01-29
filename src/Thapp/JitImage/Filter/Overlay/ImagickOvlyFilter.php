@@ -22,6 +22,8 @@ use Thapp\JitImage\Filter\ImagickFilter;
  */
 class ImagickOvlyFilter extends ImagickFilter
 {
+    protected $availableOptions = ['c', 'a'];
+
     public function run()
     {
         extract($this->driver->getTargetSize());

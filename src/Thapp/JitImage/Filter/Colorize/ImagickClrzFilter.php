@@ -23,6 +23,8 @@ use Thapp\JitImage\Filter\ImagickFilter;
  */
 class ImagickClrzFilter extends ImagickFilter
 {
+    protected $availableOptions = ['c'];
+
     public function run()
     {
         extract($this->driver->getTargetSize());

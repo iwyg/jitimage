@@ -20,6 +20,8 @@ use Thapp\JitImage\Filter\GdFilter;
  */
 class GdOvlyFilter extends GdFilter
 {
+    protected $availableOptions = ['c', 'a'];
+
     public function run()
     {
         list($r, $g, $b) = $this->hexToRgb($this->getOption('c', 'fff'));

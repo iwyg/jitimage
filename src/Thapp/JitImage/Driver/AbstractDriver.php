@@ -297,6 +297,20 @@ abstract class AbstractDriver implements DriverInterface
     }
 
     /**
+     * getSourceFormat
+     *
+     * @param mixed $assSuffix
+     *
+     * @access public
+     * @return string
+     */
+    public function getSourceType($assSuffix = false)
+    {
+        $type = $this->getInfo('type');
+        return (bool)$assSuffix ? strtr(preg_replace('~image/~', null, $this->formatType($type)), ['jpeg' => 'jpg']) : $type;
+    }
+
+    /**
      * getOutputType
      *
      * @access public

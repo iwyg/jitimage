@@ -26,19 +26,23 @@ use Thapp\JitImage\Driver\DriverInterface;
  */
 abstract class AbstractFilter implements FilterInterface
 {
+    use ProcessingTrait;
+
     /**
      * driver
      *
      * @var mixed
      */
-    protected $driver = [];
+    protected $driver;
 
     /**
      * options
      *
      * @var array
      */
-    protected $options = [];
+    protected $options;
+
+    protected $availableOptions = [];
 
     /**
      * Exeecute the filter processing.
@@ -58,9 +62,33 @@ abstract class AbstractFilter implements FilterInterface
     final public function __construct(DriverInterface $driver, $options)
     {
         $this->driver  = $driver;
-        $this->options = $options;
+        $this->setOptions($options);
 
         $this->ensureCompat();
+    }
+
+    /**
+     * setOptions
+     *
+     * @param array $options
+     *
+     * @access protected
+     * @return void
+     */
+    protected function setOptions(array $options)
+    {
+        $this->options = [];
+
+        foreach ($options as $option => $value) {
+
+            if (!in_array($option, (array)$this->availableOptions)) {
+                throw new \InvalidArgumentException(
+                    sprintf('filter %s has no option "%s"', get_class($this), $option)
+                );
+            }
+
+            $this->options[$option] = $value;
+        }
     }
 
     /**
@@ -79,21 +107,6 @@ abstract class AbstractFilter implements FilterInterface
         return $default;
     }
 
-    public function hexToRgb($hex)
-    {
-        if (3 === ($len = strlen($hex))) {
-            $rgb = str_split($hex);
-            list($r, $g, $b) = $rgb;
-            $rgb = [hexdec($r.$r), hexdec($g.$g), hexdec($b.$b)];
-        } elseif (6 === $len) {
-            $rgb = str_split($hex, 2);
-            list($r, $g, $b) = $rgb;
-            $rgb = [hexdec($r), hexdec($g), hexdec($b)];
-        } else {
-            throw new \InvalidArgumentException(sprintf('invalid hex value %s', $hex));
-        }
-        return $rgb;
-    }
 
     /**
      * Ensure driver compatibility.

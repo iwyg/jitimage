@@ -36,7 +36,7 @@ class JitResolveConfiguration implements ResolverConfigInterface
      * @var mixed
      */
     protected static $allowedAttributes = [
-        'cache', 'base', 'trusted_sites', 'cache_prefix', 'cache_route', 'base_route'
+        'cache', 'base', 'trusted_sites', 'cache_prefix', 'cache_route', 'base_route', 'format_filter'
     ];
 
     /**
