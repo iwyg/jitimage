@@ -91,7 +91,6 @@ class JitImageServiceProvider extends ServiceProvider
             'Thapp\JitImage\Cache\CacheInterface',
             function () use ($storage) {
                 $cache = new \Thapp\JitImage\Cache\ImageCache(
-                    new CachedImage,
                     //$this->app['Thapp\JitImage\ImageInterface'],
                     new Filesystem,
                     $storage . '/jit'

@@ -11,30 +11,28 @@
 
 namespace Thapp\JitImage\Cache;
 
-use FilesystemIterator;
-use Thapp\JitImage\ImageInterface;
-use Symfony\Component\Filesystem\Filesystem;
-use Illuminate\Support\NamespacedItemResolver;
+use \FilesystemIterator;
+use \Thapp\JitImage\ImageInterface;
+use \Symfony\Component\Filesystem\Filesystem;
 
 /**
  * Class: ImageCache
  *
  * @implements CacheInterface
- * @uses NamespacedItemResolver
  *
  * @package Thapp\JitImage
  * @version $Id$
  * @author Thomas Appel <mail@thomas-appel.com>
  * @license MIT
  */
-class ImageCache extends NamespacedItemResolver implements CacheInterface
+class ImageCache implements CacheInterface
 {
     /**
      * pool
      *
      * @var array
      */
-    protected $pool = [];
+    protected $pool;
 
     /**
      * path
@@ -53,16 +51,16 @@ class ImageCache extends NamespacedItemResolver implements CacheInterface
     /**
      * create a new instance of \Thapp\JitImage\Cache\ImageCache
      *
-     * @param \Thapp\JitImage\ImageInterface    $image
      * @param \Illuminate\Filesystem\Filesystem $files
      * @param string                            $path       cache directory
      * @param int                               $permission octal r/w permssion
      *
      * @access public
      */
-    public function __construct(ImageInterface $image, Filesystem $files, $path, $permission = 0777)
+    public function __construct(Filesystem $files, $path, $permission = 0777)
     {
-        $this->image = $image;
+        $this->pool = [];
+
         $this->files = $files;
         $this->setPath($path, $permission);
     }
@@ -73,11 +71,8 @@ class ImageCache extends NamespacedItemResolver implements CacheInterface
     public function get($key, $raw = false)
     {
         if ($this->has($key)) {
-
-            $this->image->close();
-            $this->image->load($this->pool[$key]);
-
-            return $raw ? $this->image->getImageBlob() : $this->image;
+            $image = new CachedImage($this->pool[$key]);
+            return $raw ? $image->getContents() : $image;
         }
     }
 
@@ -207,13 +202,11 @@ class ImageCache extends NamespacedItemResolver implements CacheInterface
      */
     protected function getPath($key)
     {
-        $parsed = $this->parseKey($key);
+        list ($dir, $file) = explode('.', $key);
 
-        array_shift($parsed);
-
-        list ($dir, $file) = $parsed;
         return sprintf('%s/%s/%s', $this->path, $dir, $file);
     }
+
 
     /**
      * Appends and hash a string with another string.
