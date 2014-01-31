@@ -94,16 +94,24 @@ Defining recipes will disable dynamic image processing.
 
 You can choose `generic` or `xsend`. 
 
-Note: your server must be capable to handle [x-send headers](https://www.google.com/search?q=x-send+headers&oq=x-send+headers&aqs=chrome.0.57&sourceid=chrome&ie=UTF-8) when using the
+**Note:** your server must be capable to handle [x-send headers](https://www.google.com/search?q=x-send+headers&oq=x-send+headers&aqs=chrome.0.57&sourceid=chrome&ie=UTF-8) when using the
 `xsend` response type.
 
 ```php
 'response-type' => 'generic'
 ```
 
-##### `trusted_sites (array)`  
+##### `trusted-sites (array)`  
 
-An array of trusted sites for processing remote files  
+A list of trusted sites that deliver assets, e.g. 
+```
+http://25.media.tumblr.com
+```  
+or as a regexp 
+
+```  
+http://[0-9]+.media.tumblr.(com|de|net)
+```  
 
 
 
@@ -137,7 +145,7 @@ extensions installed but no access to the imagemagick binary.
 
 ### Dynamic image processing
 
-A word of warning. Dynamic image processing can harm you system and should be disabled in production. 
+**A word of warning:** Dynamic image processing can <span class="danger" style="color:red;"><b>harm</b></span> you system and should be disabled in production. 
 
 Anatomy of an image uri:
 
@@ -249,33 +257,84 @@ Percrentual scale.
 **mode 6** `< pixelcount >`  
 Pixel limit.
 
+#### Converting image formats (since v0.1.4)
+
+You may utilize [the `Convert` filter](#filter) (`conv`) to convert an image to
+a different fileformat.  
+
+As uri:
+
+```php
+// convert png to jpg:
+'/images/<params>/<source>/filter:conf;f=jpg'
+```
+
+The [`JitImage`](#the-facade-class) class also provides some shortcut methods for this: `toJpeg`,
+`toPng`, and `toGif`
+
+```php
+// convert png to jpg:
+JitImage::source($filePNG)toJpeg()->get();
+JitImage::source($fileJPP)->toPng()->scale(50);
+```
+
 #### Filters
 
-JitImage comes with 2 predfined filters, `GreyScale` and `Cirlce`:
+JitImage comes with 4 predfined filters, `GreyScale`, `Cirlce`, `Overlay`,
+`Colorize`, and `Convert` (since v0.1.3):
+
+(**Note:** since v0.1.4. calling invalid arguments on a filter will throw an
+[`\InvalidArgumentException`](http://php.net/manual/en/class.invalidargumentexception.php))
 
 ##### GreyScale
+```
+- alias `gs`  
+- options (not available for the `gd` driver) 
+	- `b` (Brightness){integer}, 0-100
+	- `s` (Satturation){integer}, 0-100
+	- `h` (Hue){integer}, 0-100
+	- `c` (Contrast){integer} 0 or 1 
+```
 
-- **alias** `gs`  
-- **options** (not available for the `gd` driver) 
-	- `b` Brightness, 0-100
-	- `s` Satturation, 0-100
-	- `h` Hue, 0-100
-	- `c` Contrast 0 or 1 
-  
 ##### Circle
 
-- **alias** `circ`  
-- **options** 
-	- `o` offset, any positive integer value
+```
+- alias `circ`  
+- options 
+	- `o` {integer} offset, any positive integer value
+```
 
+##### Overlay
+
+```
+- alias `ovly`  
+- options 
+	- `a` (alpha) {float} a float value between 0 and 1
+	- `c` (color) {string} hex representation of an rgb value
+```
+
+##### Colorize
+
+```
+- alias `clrz`  
+- options 
+	- `c` (color){string} hex representation of an rgb value
+```
+
+##### Convert
+
+```
+- alias `conv`  
+- options 
+	- `f` (file format){string} a valid image file extension such as `png`, `jpg`, etc.
+```
 
 ### The facade class
 
-
 This is a convenient way to scale images within your blade templates. It will create an imageurl similar to `/jit/storage/2egf4gfg/jit_139e2ead8b71b8c7e.jpg`
 
-Note: this won't work if both caching and dynamic processing are disabled.
-Note: this won't work if both caching and dynamic processing are disabled.
+**Note**: this won't work if both caching and dynamic processing are disabled.  
+**Note**: Filters (including the convert shorthands) must be called **before** any other maipulation method, as `resize`, `scale`, etc. will immediately return the computed filesource as string.
 
 ```php
 // get the original image:
@@ -308,6 +367,8 @@ JitImage::source('path/to/myimage.jpg')->scale(50);
 // Limit the image to max. 200000px:
 JitImage::source('path/to/myimage.jpg')->pixel(200000);
 
+// Convert png to jpg:
+JitImage::source('path/to/myimage.png')->toJpeg()->get();
 
 ```
 
