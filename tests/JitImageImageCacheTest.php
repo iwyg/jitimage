@@ -167,7 +167,7 @@ class JitImageCacheTest extends TestCase
 
         $this->image = $image;
 
-        $this->cache = new ImageCache($this->image, $this->files, $this->path);
+        $this->cache = new ImageCache($this->files, $this->path);
     }
 
     protected function tearDown()
