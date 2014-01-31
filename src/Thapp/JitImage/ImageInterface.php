@@ -119,4 +119,20 @@ interface ImageInterface
      * @return bool
      */
     public function isProcessed();
+
+    /**
+     * getLastModTime
+     *
+     * @access public
+     * @return integet
+     */
+    public function getLastModTime();
+
+    /**
+     * close
+     *
+     * @access public
+     * @return void
+     */
+    public function close();
 }

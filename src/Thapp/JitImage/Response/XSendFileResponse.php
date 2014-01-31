@@ -11,7 +11,7 @@
 
 namespace Thapp\JitImage\Response;
 
-use Thapp\JitImage\Image;
+use Thapp\JitImage\ImageInterface;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
@@ -29,7 +29,7 @@ class XsendFileResponse extends GenericFileResponse
     /**
      * {@inheritdoc}
      */
-    protected function setHeaders(Response $response, Image $image, \DateTime $lastMod)
+    protected function setHeaders(Response $response, ImageInterface $image, \DateTime $lastMod)
     {
         $response->headers->set('Content-type', $image->getMimeType());
 

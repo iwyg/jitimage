@@ -11,7 +11,8 @@
 
 namespace Thapp\JitImage;
 
-use Thapp\JitImage\Cache\CacheInterface;
+use \Thapp\JitImage\Cache\CachedImage;
+use \Thapp\JitImage\Cache\CacheInterface;
 
 /**
  * Image resolver
@@ -132,10 +133,9 @@ class JitImageResolver implements ResolverInterface
 
         $this->parseAll();
 
-
         if ($this->config->cache &&
             $image = $this->resolveFromCache(
-                $id = $this->getImageRequestId($this->getInputQuery(), $source = $this->input['source'])
+                $id = $this->getImageRequestId($this->getInputQuery(), $this->input['source'])
             )
         ) {
             return $image;
@@ -204,7 +204,7 @@ class JitImageResolver implements ResolverInterface
      */
     public function getImageUrl(ImageInterface $image)
     {
-        if (false !== ($strpos = strpos($image->getSource(), $this->config->base))) {
+        if (false !== (strpos($image->getSource(), $this->config->base))) {
             $base = substr($image->getSource(), strlen($this->config->base));
             $input = $this->input;
 
@@ -217,17 +217,6 @@ class JitImageResolver implements ResolverInterface
     }
 
     /**
-     * getBaseUrl
-     *
-     * @access private
-     * @return mixed
-     */
-    private function getBaseUrl($image)
-    {
-
-    }
-
-    /**
      * {@inheritDoc}
      */
     public function resolveFromCache($id)
@@ -235,9 +224,9 @@ class JitImageResolver implements ResolverInterface
         $id = preg_replace('~(\.(jpe?g|gif|png|webp))$~', null, $this->processCache->getIdFromUrl($id));
 
         if ($this->processCache->has($id)) {
-            $this->image->close();
-            $this->image = $this->processCache->get($id);
-            return $this->image;
+            //$image->close();
+            $image = $this->processCache->get($id);
+            return $image;
         }
 
         return false;
@@ -485,7 +474,7 @@ class JitImageResolver implements ResolverInterface
         if (!isset($this->cachedNames[$requestString])) {
 
             $this->cachedNames[$requestString] = $this->processCache->createKey(
-                $source,//.($suffix = $this->getOutputTypeFromFilter($source)),
+                $source,
                 $requestString,
                 $this->config->cache_prefix,
                 pathinfo($source, PATHINFO_EXTENSION)
@@ -530,7 +519,6 @@ class JitImageResolver implements ResolverInterface
         }
 
         return pathinfo($source, PATHINFO_EXTENSION);
-;
     }
 
     /**
@@ -569,7 +557,7 @@ class JitImageResolver implements ResolverInterface
 
             $host = substr($url, 0, strpos($url, $host)).$host;
 
-            if (!$this->matchHost($host, $scheme, $trusted)) {
+            if (!$this->matchHost($host, $trusted)) {
                 return false;
             }
         }
@@ -585,9 +573,8 @@ class JitImageResolver implements ResolverInterface
      * @access protected
      * @return boolean
      */
-    protected function matchHost($host, $scheme, array $hosts)
+    protected function matchHost($host, array $hosts)
     {
-
         foreach ($hosts as $trusted) {
             if (0 === strcmp($host, $trusted) || preg_match('#^'. $trusted .'#s', $host)) {
                 return true;

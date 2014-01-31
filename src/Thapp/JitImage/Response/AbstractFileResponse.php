@@ -11,7 +11,8 @@
 
 namespace Thapp\JitImage\Response;
 
-use Thapp\JitImage\Image;
+use Thapp\JitImage\ImageInterface;
+use \Thapp\JitImage\Cache\CachedImage;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -68,17 +69,16 @@ abstract class AbstractFileResponse implements FileResponseInterface
      * @final
      * @return void
      */
-    final public function make(Image $image)
+    final public function make(ImageInterface $image)
     {
-        $this->response = $response = new Response(null, 200);
+        $this->response = new Response(null, 200);
         $this->response->setPublic();
 
-        $modDate = $image->getLastModTime();
+        $lastMod = (new \DateTime)->setTimestamp($modDate = $image->getLastModTime());
         $mod = strtotime($this->request->headers->get('if-modified-since', time()));
-        $lastMod = (new \DateTime)->setTimestamp($modDate);
 
-        if (!$image->isProcessed() && $mod === $modDate) {
-            $this->setHeadersIfNotProcessed($this->response, $image, $lastMod);
+        if (($image instanceof CachedImage || !$image->isProcessed()) && $mod === $modDate) {
+            $this->setHeadersIfNotProcessed($this->response, $lastMod);
         } else {
             $this->setHeaders($this->response, $image, $lastMod);
         }
@@ -119,7 +119,7 @@ abstract class AbstractFileResponse implements FileResponseInterface
      * @abstract
      * @return void
      */
-    abstract protected function setHeaders(Response $response, Image $image, \DateTime $lastMod);
+    abstract protected function setHeaders(Response $response, ImageInterface $image, \DateTime $lastMod);
 
     /**
      * setHeadersIfNotProcessed
@@ -132,7 +132,7 @@ abstract class AbstractFileResponse implements FileResponseInterface
      * @abstract
      * @return void
      */
-    abstract protected function setHeadersIfNotProcessed(Response $response, Image $image, \DateTime $lastMod);
+    abstract protected function setHeadersIfNotProcessed(Response $response, \DateTime $lastMod);
 
     /**
      * Abort with given status code.
@@ -170,6 +170,6 @@ abstract class AbstractFileResponse implements FileResponseInterface
      */
     public function __call($method, $arguments)
     {
-        return call_user_func_array($this->response, $arguments);
+        return call_user_func_array([$this->response, $method], $arguments);
     }
 }

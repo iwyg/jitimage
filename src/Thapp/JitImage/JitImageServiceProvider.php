@@ -11,8 +11,10 @@
 
 namespace Thapp\JitImage;
 
-use Illuminate\Support\ServiceProvider;
-use Symfony\Component\Filesystem\Filesystem;
+use \Thapp\JitImage\Proxy\ProxyImage;
+use \Thapp\JitImage\Cache\CachedImage;
+use \Illuminate\Support\ServiceProvider;
+use \Symfony\Component\Filesystem\Filesystem;
 
 /**
  * Class: JitImageServiceProvider
@@ -26,6 +28,8 @@ use Symfony\Component\Filesystem\Filesystem;
  */
 class JitImageServiceProvider extends ServiceProvider
 {
+    protected $deferred = true;
+
     /**
      * register
      *
@@ -72,7 +76,10 @@ class JitImageServiceProvider extends ServiceProvider
      */
     protected function registerDriver()
     {
-        $config  = $this->app['config'];
+        $app = $this->app;
+
+        $config  = $app['config'];
+
         $storage = $config->get('jitimage::cache.path');
 
         $driver = sprintf(
@@ -80,11 +87,12 @@ class JitImageServiceProvider extends ServiceProvider
             $driverName = ucfirst($config->get('jitimage::driver', 'gd'))
         );
 
-        $this->app->bind(
+        $app->bind(
             'Thapp\JitImage\Cache\CacheInterface',
             function () use ($storage) {
                 $cache = new \Thapp\JitImage\Cache\ImageCache(
-                    $this->app['Thapp\JitImage\ImageInterface'],
+                    new CachedImage,
+                    //$this->app['Thapp\JitImage\ImageInterface'],
                     new Filesystem,
                     $storage . '/jit'
                 );
@@ -93,10 +101,10 @@ class JitImageServiceProvider extends ServiceProvider
         );
 
 
-        $this->app->bind('Thapp\JitImage\Driver\BinLocatorInterface', 'Thapp\JitImage\Driver\ImBinLocator');
-        $this->app->bind('Thapp\JitImage\Driver\SourceLoaderInterface', 'Thapp\JitImage\Driver\ImageSourceLoader');
+        $app->bind('Thapp\JitImage\Driver\BinLocatorInterface', 'Thapp\JitImage\Driver\ImBinLocator');
+        $app->bind('Thapp\JitImage\Driver\SourceLoaderInterface', 'Thapp\JitImage\Driver\ImageSourceLoader');
 
-        $this->app->extend(
+        $app->extend(
             'Thapp\JitImage\Driver\BinLocatorInterface',
             function ($locator) use ($config) {
                 extract($config->get('jitimage::imagemagick', ['path' => '/usr/local/bin', 'bin' => 'convert']));
@@ -109,23 +117,28 @@ class JitImageServiceProvider extends ServiceProvider
             }
         );
 
-        $this->app->bind('Thapp\JitImage\ImageInterface', 'Thapp\JitImage\Image');
+
         $this->app->bind('Thapp\JitImage\Driver\DriverInterface', $driver);
-
-        $this->app->extend(
-            'Thapp\JitImage\ImageInterface',
-            function ($image) {
-                $image->setQuality($this->app['config']->get('jitimage::quality', 80));
+        $this->app->bind('Thapp\JitImage\ImageInterface', function () use ($app) {
+            return new ProxyImage(function () use ($app) {
+                $image = new Image($app->make('Thapp\JitImage\Driver\DriverInterface'));
+                $image->setQuality($app['config']->get('jitimage::quality', 80));
                 return $image;
-            }
-        );
+            });
+        });
 
-        $app = $this->app;
+        //$this->app->extend(
+        //    'Thapp\JitImage\ImageInterface',
+        //    function ($image) {
+        //        $image->setQuality($this->app['config']->get('jitimage::quality', 80));
+        //        return $image;
+        //    }
+        //);
 
         $this->app['jitimage'] = $this->app->share(
             function () use ($app) {
                 $resolver = $app->make('Thapp\JitImage\ResolverInterface');
-                $image = new  JitImage($resolver, \URL::to('/'));
+                $image = new JitImage($resolver, \URL::to('/'));
                 return $image;
             }
         );

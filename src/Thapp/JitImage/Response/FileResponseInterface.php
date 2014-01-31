@@ -11,7 +11,7 @@
 
 namespace Thapp\JitImage\Response;
 
-use Thapp\JitImage\Image;
+use Thapp\JitImage\ImageInterface;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
@@ -31,7 +31,7 @@ interface FileResponseInterface
      * @access public
      * @return void
      */
-    public function make(Image $image);
+    public function make(ImageInterface $image);
 
     /**
      * send the response
