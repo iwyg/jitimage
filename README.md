@@ -274,7 +274,7 @@ The [`JitImage`](#the-facade-class) class also provides some shortcut methods fo
 
 ```php
 // convert png to jpg:
-JitImage::source($filePNG)toJpeg()->get();
+JitImage::source($filePNG)->toJpeg()->get();
 JitImage::source($fileJPP)->toPng()->scale(50);
 ```
 
