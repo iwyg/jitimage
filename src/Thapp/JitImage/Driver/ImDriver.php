@@ -232,22 +232,21 @@ class ImDriver extends AbstractDriver
      */
     public function getImageBlob()
     {
-        if ($this->tmpFile) {
-            return file_get_contents($this->tmpFile);
-        }
-        return file_get_contents($this->source);
+        
+        return file_get_contents($this->tmpFile ?: $this->source);
+        
     }
 
     /**
      * background
      *
-     * @param mixed $color
+     * @param string $color
      * @access protected
      * @return \Thapp\JitImage\Driver\ImagickDriver
      */
     protected function background($color = null)
     {
-        if (!is_null($color)) {
+        if (is_string($color)) {
             $this->commands['-background "#%s"'] = [trim($color, '#')];
         }
         return $this;
