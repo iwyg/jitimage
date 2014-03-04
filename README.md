@@ -21,7 +21,7 @@ Add thapp/jitimage as a requirement to composer.json:
 
 Then run `composer update` or `composer install`
 
-Next step is to tell laravel to load the serviceprovider. In `app/config/app.php` add
+Next step is to tell laravel to load the service provider. In `app/config/app.php` add
 
 ```php
   // ...
@@ -122,14 +122,14 @@ http://[0-9]+.media.tumblr.(com|de|net)
 [GD](http://www.php.net/manual/en/book.image.php) is the standard php image processing library. Choose `gd` if you have either
 no access to imagemagick or to the imagick php extension. 
 
-There're a few downsides when using gd though, e.g. colorprofiles are not preserved, there's no support for preserving imagesequences when processing an animated gif file. 
+There're a few downsides when using gd though, e.g. color profiles are not preserved, there's no support for preserving image sequences when processing an animated gif file. 
 It also has a larger memory footprint so can become impossible in some cases (memory limitations on shared hosting
-patforms, etc.).
+platforms, etc.).
 
 ### ImageMagick
 
-Imagemagick is an incredible fast and versatile image processing libraray. Choose `im`
- in your `config.php`, if you have access to the `convert` binray. 
+Imagemagick is an incredible fast and versatile image processing library. Choose `im`
+ in your `config.php`, if you have access to the `convert` binary. 
 
  For further information on imagemagick please visit the [official website](http://www.imagemagick.org/)
 
@@ -223,7 +223,7 @@ Map mode 4 best fit, with a resize of max 800px width and 600px height, to `http
 #### Modes
 
 **mode 0**  
-Passthrough, no processing. 
+Pass through, no processing. 
 
 **mode 1** `< width/height >`  
 Resizes the image with the given width and height values and ignores aspect
@@ -260,7 +260,7 @@ Pixel limit.
 #### Converting image formats (since v0.1.4)
 
 You may utilize [the `Convert` filter](#filter) (`conv`) to convert an image to
-a different fileformat.  
+a different file format.  
 
 As uri:
 
