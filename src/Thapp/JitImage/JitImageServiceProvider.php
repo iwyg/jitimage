@@ -270,11 +270,17 @@ class JitImageServiceProvider extends ServiceProvider
                 ->where('source', '(.*)');
         }
 
-        $this->app->bind($ctrl);
-        $this->app->extend($ctrl, function ($controller) use ($recipes) {
+        //$this->app->bind($ctrl);
+        //$this->app->extend($ctrl, function ($controller) use ($recipes) {
+        //    $controller->setRecieps(new \Thapp\JitImage\RecipeResolver($recipes));
+        //    return $controller;
+        //});
+        
+        $this->app->bind($ctrl, function () use ($ctrl, $recipes) {
+            $controller = $this->app->make($controller);
             $controller->setRecieps(new \Thapp\JitImage\RecipeResolver($recipes));
             return $controller;
-        });
+        }); 
     }
 
     /**
