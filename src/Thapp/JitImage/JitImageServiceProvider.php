@@ -277,7 +277,7 @@ class JitImageServiceProvider extends ServiceProvider
         //});
         
         $this->app->bind($ctrl, function () use ($ctrl, $recipes) {
-            $controller = $this->app->make($controller);
+            $controller = $this->app->make($ctrl);
             $controller->setRecieps(new \Thapp\JitImage\RecipeResolver($recipes));
             return $controller;
         }); 
