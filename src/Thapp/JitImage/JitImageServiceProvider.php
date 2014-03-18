@@ -101,24 +101,24 @@ class JitImageServiceProvider extends ServiceProvider
         );
 
 
-        $app->bind('Thapp\JitImage\Driver\BinLocatorInterface', 'Thapp\JitImage\Driver\ImBinLocator');
         $app->bind('Thapp\JitImage\Driver\SourceLoaderInterface', 'Thapp\JitImage\Driver\ImageSourceLoader');
 
-        $app->extend(
-            'Thapp\JitImage\Driver\BinLocatorInterface',
-            function ($locator) use ($config) {
-                extract($config->get('jitimage::imagemagick', ['path' => '/usr/local/bin', 'bin' => 'convert']));
+        $app->bind('Thapp\JitImage\Driver\BinLocatorInterface', function () use ($config) {
+            $locator = new \Thapp\JitImage\Driver\ImBinLocator;
+            extract($config->get('jitimage::imagemagick', ['path' => '/usr/local/bin', 'bin' => 'convert']));
 
-                $locator->setConverterPath(
-                    sprintf('%s%s%s', rtrim($path, DIRECTORY_SEPARATOR), DIRECTORY_SEPARATOR, $bin)
-                );
+            $locator->setConverterPath(
+                sprintf('%s%s%s', rtrim($path, DIRECTORY_SEPARATOR), DIRECTORY_SEPARATOR, $bin)
+            );
 
-                return $locator;
-            }
-        );
+            return $locator;
+        });
 
 
-        $this->app->bind('Thapp\JitImage\Driver\DriverInterface', $driver);
+        $this->app->bind('Thapp\JitImage\Driver\DriverInterface', function () use ($driver) {
+            return $this->app->make($driver);
+        });
+        
         $this->app->bind('Thapp\JitImage\ImageInterface', function () use ($app) {
             return new ProxyImage(function () use ($app) {
                 $image = new Image($app->make('Thapp\JitImage\Driver\DriverInterface'));
