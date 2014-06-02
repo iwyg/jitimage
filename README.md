@@ -14,7 +14,7 @@ Add thapp/jitimage as a requirement to composer.json:
 {
     "require": {
         "php":">=5.4.0",
-        "thapp/jitimage": "dev-master"
+        "thapp/jitimage": "~0.1"
     }
 }
 ```
