@@ -13,6 +13,7 @@ namespace Thapp\JitImage\Resolver;
 
 use \Thapp\Image\ProcessorInterface;
 use \Thapp\JitImage\Resource\ImageResource;
+use \Thapp\JitImage\Cache\CacheAwareInterface;
 use \Thapp\JitImage\Validator\ValidatorInterface;
 use \Thapp\JitImage\Response\GenericFileResponse as Response;
 
@@ -48,11 +49,13 @@ class ImageResolver implements ParameterResolverInterface
     private $constraintValidator;
 
     /**
+     * Create a new ImageResolver instance.
+     *
      * @param ProcessorInterface $processor
      */
     public function __construct(
         ProcessorInterface $processor,
-        ResolverInterface $cacheResolver = null,
+        CacheAwareInterface $cacheResolver = null,
         ValidatorInterface $constraintValidator = null
     ) {
         $this->processor = $processor;
@@ -61,23 +64,23 @@ class ImageResolver implements ParameterResolverInterface
     }
 
     /**
-     * resolve
+     * Resolve the url parameters to a image resource.
      *
-     * @param mixed $params
+     * @param array $params
      *
-     * @access public
-     * @return mixed
+     * @return ResourceInterface
      */
     public function resolveParameters(array $parameters)
     {
-        list ($path, $params, $source, $filter) = array_pad($parameters, 4, null);
+        list ($path, $params, $source, $filter, $alias) = array_pad($parameters, 4, null);
 
+        $cache = $this->cacheResolver->resolve(trim($alias, '/'));
         $path = $this->getPath($path, $source);
 
         $key = null;
 
-        if (null !== $this->cacheResolver &&
-            $resource = $this->cacheResolver->resolve($key = $this->getCacheKey($path, $params, $filter))
+        if (null !== $cache && $cache->has($key = $this->getCacheKey($cache, $path, $params, $filter)) &&
+            $resource = $cache->get($key)
         ) {
             return $resource;
         }
@@ -86,7 +89,27 @@ class ImageResolver implements ParameterResolverInterface
 
         $this->validateParams($params);
 
-        return $this->applyProcessor($path, $params, $key);
+        return $this->applyProcessor($path, $params, $cache, $key);
+    }
+
+    public function resolveCached(array $parameters)
+    {
+        $prefix = trim(substr($parameters[0], 0, strrpos($parameters[0], '/')), '/');
+
+        if (null === ($cache = $this->cacheResolver->resolve($prefix))) {
+            return;
+        }
+
+        $pos = strrpos($parameters[1], '.');
+
+        $key = strtr($parameters[1], ['/' => '.']);
+        $key = false !== $pos ? substr($key, 0, $pos) : $key;
+
+        if (!$cache->has($key)) {
+            return;
+        }
+
+        return $cache->get($key);
     }
 
     /**
@@ -109,18 +132,19 @@ class ImageResolver implements ParameterResolverInterface
     }
 
     /**
-     * @param string $path
-     * @param string $parameters
-     * @param string $filters
+     * Return the cache key derived from the url parameters.
+     *
+     * @param string $path the image source
+     * @param string $parameters the parameters as string
+     * @param string $filters the filters as string
      *
      * @return string
      */
-    private function getCacheKey($path, $parameters, $filters)
+    private function getCacheKey($cache, $path, $parameters, $filters)
     {
-        return $this->cacheResolver->getCache()->createKey(
+        return $cache->createKey(
             $path,
             $parameters.'/'.$filters,
-            null,
             pathinfo($path, PATHINFO_EXTENSION)
         );
     }
@@ -128,30 +152,41 @@ class ImageResolver implements ParameterResolverInterface
     /**
      * applyProcessor
      *
-     * @access private
-     * @return Response
+     * @return ResourceInterface
      */
-    private function applyProcessor($source, array $params, $key = null)
+    private function applyProcessor($source, array $params, $cache = null, $key = null)
     {
         $this->processor->load($source);
         $this->processor->process($params);
 
-        if (null !== $key) {
-            $this->cacheResolver->getCache()->set($key, $this->processor->getContents());
+        if (null !== $cache) {
+            $cache->set($key, $this->processor->getContents());
 
-            return $this->cacheResolver->getCache()->get($key);
+            return $cache->get($key);
         }
 
+        return $this->createResource($this->processor);
+    }
+
+    /**
+     * createResource
+     *
+     * @param mixed $processor
+     *
+     * @return ResourceInterface
+     */
+    private function createResource($processor)
+    {
         $resource = new ImageResource;
 
-        $resource->setContents($this->processor->getContents());
-        $resource->setFresh(!$this->processor->isProcessed());
-        $resource->setLastModified($this->processor->getLastModTime());
-        $resource->setMimeType($this->processor->getMimeType());
+        $resource->setContents($processor->getContents());
+        $resource->setFresh(!$processor->isProcessed());
+        $resource->setLastModified($processor->getLastModTime());
+        $resource->setMimeType($processor->getMimeType());
 
         // if the image was passed through, we can set a source path
-        if (!$this->processor->isProcessed()) {
-            $resource->setPath($this->processor->getSource());
+        if (!$processor->isProcessed()) {
+            $resource->setPath($processor->getSource());
         }
 
         return $resource;
@@ -177,23 +212,10 @@ class ImageResolver implements ParameterResolverInterface
     }
 
     /**
-     * getIntVal
-     *
-     * @param mixed $value
-     * @access protected
-     * @return int|null
-     */
-    private function getIntVal($value = null)
-    {
-        return null === $value ? $value : (int)$value;
-    }
-
-    /**
      * extractFilters
      *
      * @param mixed $filters
      *
-     * @access private
      * @return mixed
      */
     private function extractFilters($filterStr = null)
@@ -204,7 +226,7 @@ class ImageResolver implements ParameterResolverInterface
             return $filters;
         }
 
-        foreach (explode(',', substr($filterStr, 1+strpos($filterStr, ':'))) as $filter) {
+        foreach (explode(',', substr($filterStr, 1 + strpos($filterStr, ':'))) as $filter) {
             list ($key, $value) = $this->extractFilterParams($filter);
             $filters[$key] = $value;
         }
@@ -259,13 +281,14 @@ class ImageResolver implements ParameterResolverInterface
      */
     private function getPath($path, $source)
     {
-        if (null !== parse_url($source, PHP_URL_SCHEME)) {
+        if (null === $path || null !== parse_url($source, PHP_URL_SCHEME)) {
             return $source;
         };
 
         if (null !== parse_url($path, PHP_URL_PATH)) {
-            return rtrim($path, '\\\/') . DIRECTORY_SEPARATOR .
-                strtr($source, ['/' => DIRECTORY_SEPARATOR]);
+            $slash = DIRECTORY_SEPARATOR;
+
+            return rtrim($path, '\\\/') . $slash . strtr($source, ['/' => $slash]);
         }
 
         return $path . '/' . $source;

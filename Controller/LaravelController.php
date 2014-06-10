@@ -88,7 +88,6 @@ class LaravelController extends Controller
      * @param string $source
      * @param string $filter
      *
-     * @access public
      * @return Response
      */
     public function getImage($alias, $params = null, $source = null, $filter = null)
@@ -98,9 +97,27 @@ class LaravelController extends Controller
                 $this->pathResolver->resolve($alias),
                 $params,
                 $source,
-                $filter
+                $filter,
+                $alias
             ]
         );
+
+        return $this->processResource($resource);
+    }
+
+    /**
+     * getCached
+     *
+     * @param string $path
+     * @param string $id
+     *
+     * @return Response
+     */
+    public function getCached($path, $id)
+    {
+        if (!$resource = $this->imageResolver->resolveCached([$path, $id])) {
+            return $this->notFound();
+        }
 
         return $this->processResource($resource);
     }
@@ -111,7 +128,7 @@ class LaravelController extends Controller
      * @param mixed $resource
      *
      * @access private
-     * @return void
+     * @return Response
      */
     private function processResource(ResourceInterface $resource)
     {
@@ -121,6 +138,17 @@ class LaravelController extends Controller
         $response->send();
 
         return $response;
+    }
+
+    /**
+     * notFournd
+     *
+     * @access private
+     * @return void
+     */
+    private function notFournd()
+    {
+        return new Response('Resource not found', 404);
     }
 
     /**

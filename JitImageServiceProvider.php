@@ -127,6 +127,21 @@ class JitImageServiceProvider extends ServiceProvider
     }
 
     /**
+     * registeImaDriver
+     *
+     * @return void
+     */
+    protected function registerGdDriver()
+    {
+        $this->app['image.driver'] = $this->app->share(function () {
+            $driver = $this->app->make('Thapp\Image\Driver\GdDriver');
+            $driver->setQuality(80);
+
+            return $driver;
+        });
+    }
+
+    /**
      * registerLoaders
      *
      * @return void
@@ -155,13 +170,24 @@ class JitImageServiceProvider extends ServiceProvider
                 ->where('filter', $filter);
         }
 
+        $router
+            ->get('/image/cached/{id}', 'Thapp\JitImage\Controller\LaravelController@getCached')
+            ->where('id', '(.*\/){1}.*');
+
         $this->app->singleton('Thapp\JitImage\Controller\LaravelController', function () use ($routes) {
+
+            $caches = [];
+
+            foreach (array_keys($routes) as $route) {
+                $caches[$route] = new \Thapp\Image\Cache\FilesystemCache(public_path(). '/cache');
+            }
+
             $controller = new \Thapp\JitImage\Controller\LaravelController(
                 new \Thapp\JitImage\Resolver\PathResolver($routes),
                 new \Thapp\JitImage\Resolver\ImageResolver(
                     $this->app->make('Thapp\Image\Processor'),
                     $this->app['config']['jitimage::cache']['enabled'] ? new \Thapp\JitImage\Resolver\CacheResolver(
-                        new \Thapp\Image\Cache\FilesystemCache(public_path(). '/cache')
+                        $caches
                     ) : null,
                     new \Thapp\JitImage\Validator\ModeConstraints(
                         $this->app['config']['jitimage::mode_constraints'] ?: []

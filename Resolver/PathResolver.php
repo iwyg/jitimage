@@ -55,7 +55,7 @@ class PathResolver implements ResolverInterface
 
     private function hasAlias($alias)
     {
-        return isset($this->mappings[$alias]);
+        return array_key_exists($alias, $this->mappings);
     }
 
     /**

@@ -22,11 +22,28 @@ use \Thapp\JitImage\Cache\CacheAwareInterface;
  */
 class CacheResolver implements ResolverInterface, CacheAwareInterface
 {
+    private $caches;
     private $cache;
 
-    public function __construct(CacheInterface $cache)
+    public function __construct(array $caches = [])
     {
-        $this->cache = $cache;
+        $this->set($caches);
+    }
+
+    /**
+     * @return void
+     */
+    public function add($path, CacheInterface $cache)
+    {
+        $this->caches[$path] = $cache;
+    }
+
+    public function set(array $caches)
+    {
+        $this->caches = [];
+        foreach ($caches as $path => $cache) {
+            $this->add($path, $cache);
+        }
     }
 
     /**
@@ -37,21 +54,10 @@ class CacheResolver implements ResolverInterface, CacheAwareInterface
      * @access public
      * @return void
      */
-    public function resolve($key)
+    public function resolve($path)
     {
-        if ($this->cache->has($key)) {
-            return $this->cache->get($key, false);
+        if (array_key_exists($path, $this->caches)) {
+            return $this->caches[$path];
         }
-    }
-
-    /**
-     * getCache
-     *
-     * @access public
-     * @return void
-     */
-    public function getCache()
-    {
-        return $this->cache;
     }
 }

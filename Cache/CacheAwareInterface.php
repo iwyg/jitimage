@@ -18,5 +18,5 @@ namespace Thapp\JitImage\Cache;
  */
 interface CacheAwareInterface
 {
-    public function getCache();
+    //public function getCache();
 }

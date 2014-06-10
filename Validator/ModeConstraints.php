@@ -72,13 +72,13 @@ class ModeConstraints implements ValidatorInterface
         list ($a,  $b)  = array_pad($parameters, 2, null);
         list ($cA, $cB) = array_pad($constraint, 2, null);
 
-        if (5 > $mode) {
-            return $this->validateValue($a, $cA) && $this->validateValue($b, $cB);
-        }
+        //if (5 > $mode) {
+        //    return $this->validateValue($a, $cA) && $this->validateValue($b, $cB);
+        //}
 
-        if (4 < $mode && 7 > $mode) {
-            return $this->validateValue($a, $cA);
-        }
+        //if (4 < $mode && 7 > $mode) {
+        //    return $this->validateValue($a, $cA);
+        //}
 
         switch ($mode) {
             case 1:

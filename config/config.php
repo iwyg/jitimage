@@ -25,6 +25,7 @@ return [
     'loaders' => [
         'Thapp\Image\Loader\FilesystemLoader',
         'Thapp\Image\Loader\RemoteLoader',
+        'Thapp\JitImage\Adapter\FlysystemLoader',
     ],
 
     /*
@@ -54,7 +55,7 @@ return [
     'routes' => [
         'image'   => public_path() . '/test',
         'thumb'   => public_path() . '/thumbs',
-        'foo/bar' => public_path() . '/test',
+        'foo/bar' => null,
     ],
 
     /*
@@ -103,6 +104,20 @@ return [
     */
 
     'cache' => [
-        'enabled' => true
+
+        //enable cache by default
+        'enabled' => true,
+
+        'path' => storage_path() . '/jitimage',
+
+        // specify cache adapter for different routes
+        'routes' => [
+            'foo/bar' => [
+                'class' => 'Thapp\JitImage\Adapter\FlysystemCache'
+            ],
+            'test' => [
+                'enabled' => false
+            ],
+        ],
     ]
 ];
