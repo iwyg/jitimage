@@ -92,6 +92,13 @@ class ImageResolver implements ParameterResolverInterface
         return $this->applyProcessor($path, $params, $cache, $key);
     }
 
+    /**
+     * Resolve the url parameters to a cached image resource.
+     *
+     * @param array $params
+     *
+     * @return ResourceInterface
+     */
     public function resolveCached(array $parameters)
     {
         $prefix = trim(substr($parameters[0], 0, strrpos($parameters[0], '/')), '/');

@@ -19,6 +19,7 @@ use \Thapp\JitImage\Resolver\ResolverInterface;
 use \Thapp\JitImage\Resolver\ParameterResolverInterface;
 use \Thapp\JitImage\Controller\Traits\ImageControllerTrait;
 use \Symfony\Component\HttpFoundation\Response;
+use \Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
  * @class LaravelController extends Controller LaravelController
@@ -31,19 +32,34 @@ use \Symfony\Component\HttpFoundation\Response;
 class LaravelController extends Controller
 {
     /**
-     * router
-     *
      * @var Router
      */
     private $router;
 
+    /**
+     * @var Request
+     */
     private $request;
 
+    /**
+     * @var string
+     */
     private $path;
 
+    /**
+     * @var ResolverInterface
+     */
     private $pathResolver;
 
+    /**
+     * @var ParameterResolverInterface
+     */
     private $imageResolver;
+
+    /**
+     * @var ResolverInterface
+     */
+    private $recipes;
 
     /**
      * @param ResolverInterface $pathResolver
@@ -59,7 +75,6 @@ class LaravelController extends Controller
      *
      * @param mixed $router
      *
-     * @access public
      * @return void
      */
     public function setRouter($router)
@@ -72,7 +87,6 @@ class LaravelController extends Controller
      *
      * @param mixed $request
      *
-     * @access public
      * @return void
      */
     public function setRequest($request)
@@ -81,18 +95,50 @@ class LaravelController extends Controller
     }
 
     /**
-     * getImage
+     * @param ResolverInterface $recipes
+     *
+     * @return void
+     */
+    public function setRecieps(ResolverInterface $recipes)
+    {
+        $this->recipes = $recipes;
+    }
+
+    /**
+     * Resolve an aliased route
+     *
+     * @param string $route
+     * @param string $alias
+     * @param string $source
+     *
+     * @throws NotFoundHttpException if image was not found
+     * @return Response
+     */
+    public function getResource($route, $alias, $source)
+    {
+        if (null === $this->recipes) {
+            $this->notFound($source);
+        }
+
+        list($params, $filter) = $this->recipes->resolve($alias);
+
+        return $this->getImage($route, $params, $source, $filter);
+    }
+
+    /**
+     * Resolve a dynamic route
      *
      * @param string $alias
      * @param string $params
      * @param string $source
      * @param string $filter
      *
+     * @throws NotFoundHttpException if image was not found
      * @return Response
      */
     public function getImage($alias, $params = null, $source = null, $filter = null)
     {
-        $resource = $this->imageResolver->resolveParameters(
+        if (!$resource = $this->imageResolver->resolveParameters(
             [
                 $this->pathResolver->resolve($alias),
                 $params,
@@ -100,23 +146,27 @@ class LaravelController extends Controller
                 $filter,
                 $alias
             ]
-        );
+        )
+        ) {
+            $this->notFound($source);
+        }
 
         return $this->processResource($resource);
     }
 
     /**
-     * getCached
+     * Resolve a cache route
      *
      * @param string $path
      * @param string $id
      *
+     * @throws NotFoundHttpException if image was not found
      * @return Response
      */
     public function getCached($path, $id)
     {
         if (!$resource = $this->imageResolver->resolveCached([$path, $id])) {
-            return $this->notFound();
+            $this->notFound($id);
         }
 
         return $this->processResource($resource);
@@ -143,12 +193,13 @@ class LaravelController extends Controller
     /**
      * notFournd
      *
-     * @access private
+     * @throws NotFoundHttpException always
+     *
      * @return void
      */
-    private function notFournd()
+    private function notFound($source)
     {
-        return new Response('Resource not found', 404);
+        throw new NotFoundHttpException(sprintf('resource "%s" not found', $source));
     }
 
     /**

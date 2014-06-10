@@ -16,16 +16,17 @@ return [
     | File Loaders
     |--------------------------------------------------------------------------
     |
-    | This URL is used by the console to properly generate URLs when using
-    | the Artisan command line tool. You should set this to the root of
-    | your application so that it is used when running Artisan tasks.
+    | Define which loader should be delegated to load an image.
+    | Note that custom loaders must implement \Thapp\Image\Loader\LoaderInterface.
+    | If your custom loader needs preparation, it must be registered on
+    | the DIC beforehand
     |
     */
 
     'loaders' => [
         'Thapp\Image\Loader\FilesystemLoader',
         'Thapp\Image\Loader\RemoteLoader',
-        'Thapp\JitImage\Adapter\FlysystemLoader',
+        //'Thapp\JitImage\Adapter\FlysystemLoader',
     ],
 
     /*
@@ -34,9 +35,9 @@ return [
     |--------------------------------------------------------------------------
     |
     | Specify the processing driver:
+    |  - imagick: The imagick driver (http://php.net/manual/en/book.imagick.php).
     |  - gd:      The GD driver (http://www.imagemagick.org/).
     |  - im:      The imagemagick driver (http://php.net/manual/en/book.image.php).
-    |  - imagick: The imagick driver (http://php.net/manual/en/book.imagick.php).
     */
 
     'driver' => 'imagick',
@@ -49,9 +50,8 @@ return [
     | Define the base paths for images to be converted.
     | These paths do not neccessarily need to be public.
     |
-    | The key will act as the base route.
+    | The key will act as the base path of the image uri.
     */
-
     'routes' => [
         'image'   => public_path() . '/test',
         'thumb'   => public_path() . '/thumbs',
@@ -60,64 +60,71 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | On demand processing routes
+    | Disable dynamic route processing
     |--------------------------------------------------------------------------
     |
-    | Define the base paths for images to be converted.
-    | These paths do not neccessarily need to be public.
-    |
-    | The key will act as the base route.
+    | Set this to true, if you want to dispable all dynamic processing routes
+    */
+    'disable_dynamic_processing' => false,
+
+    /*
+    |--------------------------------------------------------------------------
+    | Set mode constraints on scaling values
+    |--------------------------------------------------------------------------
     */
     'mode_constraints' => [
-        1   => [2000, 2000],
-        2   => [2000, 2000],
-        3   => [2000, 2000],
-        4   => [2000, 2000],
-        5   => [150],
-        6   => [100000],
+        1   => [2000, 2000],  // max width and height 2000px
+        2   => [2000, 2000],  // max width and height 2000px
+        3   => [2000, 2000],  // max width and height 2000px
+        4   => [2000, 2000],  // max width and height 2000px
+        5   => [100],         // max scaling 100%
+        6   => [4000000],     // max pixel count 4000000
     ],
 
     /*
     |--------------------------------------------------------------------------
-    | Application URL
+    | Predefined processing assignments
     |--------------------------------------------------------------------------
     |
-    | This URL is used by the console to properly generate URLs when using
-    | the Artisan command line tool. You should set this to the root of
-    | your application so that it is used when running Artisan tasks.
-    |
+    | Use this set predefined processing instructions.
+    | The first key must correspond to an existing image route
     */
-
     'recipes' => [
-
+        'image' => [
+            'gallery' => '1/800/0, filter:gs'
+        ]
     ],
 
     /*
     |--------------------------------------------------------------------------
-    | Application URL
+    | Cache
     |--------------------------------------------------------------------------
-    |
-    | This URL is used by the console to properly generate URLs when using
-    | the Artisan command line tool. You should set this to the root of
-    | your application so that it is used when running Artisan tasks.
     |
     */
 
     'cache' => [
 
-        //enable cache by default
+        // enable cache by default
         'enabled' => true,
 
+        // the default first uri segment
+        'default' => 'image',
+
+        // the default path suffix
+        'suffix' => 'cached',
+
+        // the default storage path, used for the default Filesystemloader
         'path' => storage_path() . '/jitimage',
 
         // specify cache adapter for different routes
+        // Note: custom adapters must implement Thapp\Image\Cache\CacheInterface
         'routes' => [
-            'foo/bar' => [
-                'class' => 'Thapp\JitImage\Adapter\FlysystemCache'
-            ],
-            'test' => [
-                'enabled' => false
-            ],
+            //'foo/bar' => [
+            //    'service' => 'Thapp\JitImage\Adapter\FlysystemCache'
+            //],
+            //'thumb' => [
+            //    'enabled' => false
+            //],
         ],
     ]
 ];

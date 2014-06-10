@@ -29,6 +29,7 @@ class JitImageServiceProvider extends ServiceProvider
         $this->package('thapp/jitimage', 'jitimage', __DIR__);
 
         $this->registerControllers($this->app['router'], $this->app['config']['jitimage::routes']);
+
         $this->registerLoader();
         $this->registerWriter();
         $this->registerProcessor();
@@ -160,35 +161,73 @@ class JitImageServiceProvider extends ServiceProvider
      */
     protected function registerControllers(Router $router, array $routes)
     {
-        list ($pattern, $params, $source, $filter) = $this->getPathRegexp();
+        if (!$disabled = $this->app['config']->get('jitimage::disable_dynamic_processing', false)) {
+            list ($pattern, $params, $source, $filter) = $this->getPathRegexp();
+        }
+
+        $useCache    = $this->app['config']->get('jitimage::cache.enabled', true);
+        $default     = $this->app['config']->get('jitimage::cache.default', 'image');
+        $suffix      = $this->app['config']->get('jitimage::cache.suffix', 'cached');
+        $cachepath   = $this->app['config']->get('jitimage::cache.path', storage_path() . DIRECTORY_SEPARATOR . 'jitimage');
+        $cacheRoutes = $this->app['config']->get('jitimage::cache.routes', []);
+
+        $caches = [];
 
         foreach (array_keys($routes) as $path) {
-            $route = $router
+
+            !$disabled && $router
                 ->get($path . $pattern, 'Thapp\JitImage\Controller\LaravelController@getImage')
                 ->where('params', $params)
                 ->where('source', $source)
                 ->where('filter', $filter);
+
+            if (!$useCache) {
+                continue;
+            }
+
+            $enabled = true;
+
+            $usePath = false;
+
+            if (isset($cacheRoutes[$path]['enabled']) && !($enabled = $cacheRoutes[$path]['enabled'])) {
+                continue;
+            }
+
+            if ($usePath = isset($cacheRoutes[$path]) && isset($cacheRoutes[$path]['service'])) {
+                $caches[$path] = $cacheRoutes[$path]['service'];
+
+            } else {
+
+                if (isset($cacheRoutes[$path]['path'])) {
+                    $cachepath = $cacheRoutes[$path]['path'];
+                }
+
+                $caches[$path] = [true, $cachepath];
+            }
+
+
+            $this->setUpCachedRoute($router, $path, $suffix);
         }
 
-        $router
-            ->get('/image/cached/{id}', 'Thapp\JitImage\Controller\LaravelController@getCached')
-            ->where('id', '(.*\/){1}.*');
+        $recipes = $this->registerStaticRoutes($router, $this->app['config']->get('jitimage::recipes', []), $routes);
 
-        $this->app->singleton('Thapp\JitImage\Controller\LaravelController', function () use ($routes) {
+        $this->app->singleton('Thapp\JitImage\Controller\LaravelController', function () use ($routes, $caches, $recipes) {
 
-            $caches = [];
+            $cache = [];
 
-            foreach (array_keys($routes) as $route) {
-                $caches[$route] = new \Thapp\Image\Cache\FilesystemCache(public_path(). '/cache');
+            foreach ($caches as $route => $c) {
+                if (is_array($cache) && false !== $c[0]) {
+                    $cache[$route] = $this->getDefaultCache($c[1]);
+                } else {
+                    $cache[$route] = $this->getOptCache($c);
+                }
             }
 
             $controller = new \Thapp\JitImage\Controller\LaravelController(
                 new \Thapp\JitImage\Resolver\PathResolver($routes),
                 new \Thapp\JitImage\Resolver\ImageResolver(
                     $this->app->make('Thapp\Image\Processor'),
-                    $this->app['config']['jitimage::cache']['enabled'] ? new \Thapp\JitImage\Resolver\CacheResolver(
-                        $caches
-                    ) : null,
+                    new \Thapp\JitImage\Resolver\CacheResolver($cache),
                     new \Thapp\JitImage\Validator\ModeConstraints(
                         $this->app['config']['jitimage::mode_constraints'] ?: []
                     )
@@ -197,8 +236,81 @@ class JitImageServiceProvider extends ServiceProvider
 
             $this->prepareController($controller);
 
+            if (!empty($recipes)) {
+                $controller->setRecieps(new \Thapp\JitImage\Resolver\RecipeResolver($recipes));
+            }
+
             return $controller;
         });
+
+    }
+
+    private function registerStaticRoutes($router, array $recipes, array $routes = [])
+    {
+        $resolved = [];
+
+        foreach ($recipes as $route => $params) {
+            if (!in_array($route, array_keys($routes))) {
+                continue;
+            }
+            foreach ($params as $routeAlias => $formular) {
+
+                $param = str_replace('/', '_', $routeAlias);
+
+                $resolved[$routeAlias] = $formular;
+
+                $router
+                    ->get(
+                        $route . '/{' . $param . '}/{source}',
+                        ['uses' => 'Thapp\JitImage\Controller\LaravelController@getResource']
+                    )
+                    ->where($param, $routeAlias)
+                    ->where('source', '(.*)');
+            }
+        }
+
+        return $resolved;
+    }
+
+    public function setUpCaches()
+    {
+
+    }
+
+    /**
+     * getDefaultCache
+     *
+     * @param string $path
+     *
+     * @return \Thapp\Image\Cache\CacheInterface
+     */
+    private function setUpCachedRoute($router, $path, $suffix)
+    {
+        $router
+            ->get(rtrim($path, '/') . '/'. $suffix . '/{id}', 'Thapp\JitImage\Controller\LaravelController@getCached')
+            ->where('id', '(.*\/){1}.*');
+    }
+
+    /**
+     * getDefaultCache
+     *
+     * @param string $path
+     *
+     * @return \Thapp\Image\Cache\CacheInterface
+     */
+    private function getDefaultCache($path)
+    {
+        return new \Thapp\Image\Cache\FilesystemCache($path);
+    }
+
+    /**
+     * @param mixed $service
+     *
+     * @return mixed
+     */
+    private function getOptCache($service)
+    {
+        return $this->app->make($service);
     }
 
     /**

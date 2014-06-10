@@ -3,6 +3,7 @@
   "description": "Just In Time image manipulation",
   "require": {
     "php":">=5.4.0",
+    "thapp/image":"dev-development",
     "symfony/http-foundation":"~2.4"
   },
   "require-dev": {
