@@ -114,7 +114,8 @@ return [
         'suffix' => 'cached',
 
         // the default storage path, used for the default Filesystemloader
-        'path' => storage_path() . '/jitimage',
+        //'path' => storage_path() . '/jitimage',
+        'path' => public_path() . '/cache',
 
         // specify cache adapter for different routes
         // Note: custom adapters must implement Thapp\Image\Cache\CacheInterface

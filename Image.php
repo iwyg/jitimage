@@ -181,51 +181,33 @@ class Image extends BaseImage
     {
         $this->cache = $cache;
 
+        $path = $this->path;
         $src = $this->getPath($this->paths->resolve($this->path), $source);
         $key = $cache->createKey($src, $params.'/'.$filter, PATHINFO($src, PATHINFO_EXTENSION));
 
+        // If the image is not cached yet, this is the only time the processor
+        // is invoked:
         if (!$cache->has($key)) {
-            $this->processImage($src, $processor = $this->resolver->getProcessor(), $this->compileExpression());
+
+            $processor = $this->resolver->getProcessor();
+            $processor->load($src);
+            $processor->process($this->compileExpression());
 
             $cache->set($key, $processor->getContents());
-            $processor->close();
+
+            $this->close();
         }
 
         $extension = $this->addExtension ? '.'.$this->getFileExtension($cache->get($key)->getMimeType()) : '';
 
-        return '/'. implode('/', [$this->path, $this->cacheSuffix, strtr($key, ['.' => '/'])]).$extension;
+        return '/'. implode('/', [$path, $this->cacheSuffix, strtr($key, ['.' => '/'])]).$extension;
     }
 
-    /**
-     * processImage
-     *
-     * @param mixed $src
-     * @param mixed $processor
-     * @param array $params
-     *
-     * @access protected
-     * @return void
-     */
-    protected function processImage($src, $processor, array $params)
+    protected function compileExpression()
     {
-        $processor->load($src);
-        $processor->process($params);
-    }
+        $params = parent::compileExpression();
 
-    /**
-     * getCache
-     *
-     * @param mixed $cache
-     *
-     * @access protected
-     * @return mixed
-     */
-    protected function getCache($cache)
-    {
-        $this->cache = $cache;
-
-        $src = $this->getPath($this->pathResolver->resolve($this->path), $source);
-        $key = $cache->createKey($src, $params.'/'.$filter, PATHINFO($src, PATHINFO_EXTENSION));
+        return array_merge($params, ['filter' => $this->filters]);
     }
 
     /**
@@ -252,9 +234,20 @@ class Image extends BaseImage
     {
     }
 
+    /**
+     * getImageFingerPrint
+     *
+     *
+     * @access protected
+     * @return void
+     */
     protected function close()
     {
-        $this->filters = [];
+        $this->resolver->getProcessor()->close();
+
+        $this->filters   = [];
+        $this->arguments = [];
+
         $this->source = null;
         $this->path = null;
         $this->cache = null;
