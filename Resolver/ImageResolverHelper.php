@@ -11,6 +11,8 @@
 
 namespace Thapp\JitImage\Resolver;
 
+use \Thapp\Image\Cache\CacheInterface;
+use \Thapp\Image\Filter\FilterExpression;
 use \Thapp\Image\ProcessorInterface;
 use \Thapp\JitImage\Resource\ImageResource;
 
@@ -87,5 +89,62 @@ trait ImageResolverHelper
         }
 
         return $resource;
+    }
+
+    /**
+     * extractParams
+     *
+     * @param string $params
+     *
+     * @return array
+     */
+    private function extractParamString($params)
+    {
+        list ($mode, $width, $height, $gravity, $background) = array_map(function ($value, $key = null) {
+            return is_numeric($value) ? (int)$value : $value;
+        }, array_pad(explode('/', $params), 5, null));
+
+        $width  = ($mode !== 1 && $mode !== 2) ? $width : (int)$width;
+        $height = ($mode !== 1 && $mode !== 2) ? $height : (int)$height;
+
+        return compact('mode', 'width', 'height', 'gravity', 'background');
+    }
+
+    /**
+     * extractFilters
+     *
+     * @param mixed $filters
+     *
+     * @return mixed
+     */
+    private function extractFilterString($filterStr = null)
+    {
+        $filters = [];
+
+        if (null === $filterStr) {
+            return $filters;
+        }
+
+        $f = substr($filterStr, 1 + strpos($filterStr, ':'));
+
+        return (new FilterExpression($f))->toArray();
+    }
+
+    /**
+     * Return the cache key derived from the url parameters.
+     *
+     * @param string $path the image source
+     * @param string $parameters the parameters as string
+     * @param string $filters the filters as string
+     *
+     * @return string
+     */
+    private function makeCacheKey(CacheInterface $cache, $path, $paramStr, $filterStr)
+    {
+        return $cache->createKey(
+            $path,
+            $paramStr.'/'.$filterStr,
+            pathinfo($path, PATHINFO_EXTENSION)
+        );
     }
 }

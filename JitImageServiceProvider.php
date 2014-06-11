@@ -81,6 +81,12 @@ class JitImageServiceProvider extends ServiceProvider
      */
     protected function registerLoader()
     {
+        $this->app->singleton('Thapp\Image\Loader\RemoteLoader', function () {
+            return new \Thapp\Image\Loader\RemoteLoader(
+                $this->app['config']->get('jitimage::trusted_sites', [])
+            );
+        });
+
         $this->app->singleton('Thapp\Image\Loader\DelegatingLoader', function () {
 
             $loaders = [];

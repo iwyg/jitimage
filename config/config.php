@@ -130,5 +130,9 @@ return [
             //    'enabled' => false
             //],
         ],
+    ],
+
+    'trusted_sites' => [
+        'http://[0-9]+.media.tumblr.(com|de|net)',
     ]
 ];

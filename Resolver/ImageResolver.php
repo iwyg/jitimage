@@ -12,7 +12,6 @@
 namespace Thapp\JitImage\Resolver;
 
 use \Thapp\Image\ProcessorInterface;
-use \Thapp\Image\Filter\FilterExpression;
 use \Thapp\JitImage\Resource\ImageResource;
 use \Thapp\JitImage\Cache\CacheAwareInterface;
 use \Thapp\JitImage\Validator\ValidatorInterface;
@@ -98,13 +97,13 @@ class ImageResolver implements ParameterResolverInterface
 
         $key = null;
 
-        if (null !== $cache && $cache->has($key = $this->getCacheKey($cache, $path, $params, $filter)) &&
+        if (null !== $cache && $cache->has($key = $this->makeCacheKey($cache, $path, $params, $filter)) &&
             $resource = $cache->get($key)
         ) {
             return $resource;
         }
 
-        $params = array_merge($this->extractParams($params), ['filter' => $this->extractFilters($filter)]);
+        $params = array_merge($this->extractParamString($params), ['filter' => $this->extractFilterString($filter)]);
         $this->validateParams($params);
 
         return $this->applyProcessor($this->processor, $path, $params, $cache, $key);
@@ -154,62 +153,5 @@ class ImageResolver implements ParameterResolverInterface
         if (!$this->constraintValidator->validate($params['mode'], [$params['width'], $params['height']])) {
             throw new \OutOfBoundsException('Parameters exceed limit');
         }
-    }
-
-    /**
-     * Return the cache key derived from the url parameters.
-     *
-     * @param string $path the image source
-     * @param string $parameters the parameters as string
-     * @param string $filters the filters as string
-     *
-     * @return string
-     */
-    private function getCacheKey($cache, $path, $parameters, $filters)
-    {
-        return $cache->createKey(
-            $path,
-            $parameters.'/'.$filters,
-            pathinfo($path, PATHINFO_EXTENSION)
-        );
-    }
-
-    /**
-     * extractParams
-     *
-     * @param string $params
-     *
-     * @return array
-     */
-    private function extractParams($params)
-    {
-        list ($mode, $width, $height, $gravity, $background) = array_map(function ($value, $key = null) {
-            return is_numeric($value) ? (int)$value : $value;
-        }, array_pad(explode('/', $params), 5, null));
-
-        $width  = ($mode !== 1 && $mode !== 2) ? $width : (int)$width;
-        $height = ($mode !== 1 && $mode !== 2) ? $height : (int)$height;
-
-        return compact('mode', 'width', 'height', 'gravity', 'background');
-    }
-
-    /**
-     * extractFilters
-     *
-     * @param mixed $filters
-     *
-     * @return mixed
-     */
-    private function extractFilters($filterStr = null)
-    {
-        $filters = [];
-
-        if (null === $filterStr) {
-            return $filters;
-        }
-
-        $f = substr($filterStr, 1 + strpos($filterStr, ':'));
-
-        return (new FilterExpression($f))->toArray();
     }
 }

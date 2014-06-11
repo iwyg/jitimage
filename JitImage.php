@@ -191,17 +191,15 @@ class JitImage extends Image
     protected function resolveFromCache(CacheInterface $cache, $fragments, $source, $params, $filter)
     {
         $path = $this->getCurrentPath();
-
-        $src = $this->getPath($this->paths->resolve($this->path), $source);
-        $key = $cache->createKey($src, $params.'/'.$filter, PATHINFO($src, PATHINFO_EXTENSION));
+        $src  = $this->getPath($this->paths->resolve($path), $source);
 
         // If the image is not cached yet, this is the only time the processor
         // is invoked:
-        if (!$cache->has($key)) {
+        if (!$cache->has($key = $this->makeCacheKey($cache, $src, $params, $filter))) {
 
             $processor = $this->resolver->getProcessor();
             $processor->load($src);
-            $processor->process($this->compileExpression());
+            $processor->process($p = $this->compileExpression());
 
             $cache->set($key, $processor->getContents());
 
@@ -222,7 +220,7 @@ class JitImage extends Image
     {
         $params = parent::compileExpression();
 
-        return array_merge($params, ['filter' => $this->filters]);
+        return array_merge($params, ['filter' => $this->filters->toArray()]);
     }
 
     /**
