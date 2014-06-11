@@ -166,6 +166,7 @@ class LaravelController extends Controller
     public function getCached($path, $id)
     {
         if (!$resource = $this->imageResolver->resolveCached([$path, $id])) {
+
             $this->notFound($id);
         }
 

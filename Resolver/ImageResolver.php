@@ -27,6 +27,7 @@ use \Thapp\JitImage\Response\GenericFileResponse as Response;
  */
 class ImageResolver implements ParameterResolverInterface
 {
+    use ImageResolverHelper;
     /**
      * processor
      *
@@ -64,6 +65,22 @@ class ImageResolver implements ParameterResolverInterface
     }
 
     /**
+     * @return ProcessorInterface
+     */
+    public function getProcessor()
+    {
+        return $this->processor;
+    }
+
+    /**
+     * @return ResolverInterface
+     */
+    public function getCacheResolver()
+    {
+        return $this->cacheResolver;
+    }
+
+    /**
      * Resolve the url parameters to a image resource.
      *
      * @param array $params
@@ -86,10 +103,9 @@ class ImageResolver implements ParameterResolverInterface
         }
 
         $params = array_merge($this->extractParams($params), ['filter' => $this->extractFilters($filter)]);
-
         $this->validateParams($params);
 
-        return $this->applyProcessor($path, $params, $cache, $key);
+        return $this->applyProcessor($this->processor, $path, $params, $cache, $key);
     }
 
     /**
@@ -154,49 +170,6 @@ class ImageResolver implements ParameterResolverInterface
             $parameters.'/'.$filters,
             pathinfo($path, PATHINFO_EXTENSION)
         );
-    }
-
-    /**
-     * applyProcessor
-     *
-     * @return ResourceInterface
-     */
-    private function applyProcessor($source, array $params, $cache = null, $key = null)
-    {
-        $this->processor->load($source);
-        $this->processor->process($params);
-
-        if (null !== $cache) {
-            $cache->set($key, $this->processor->getContents());
-
-            return $cache->get($key);
-        }
-
-        return $this->createResource($this->processor);
-    }
-
-    /**
-     * createResource
-     *
-     * @param mixed $processor
-     *
-     * @return ResourceInterface
-     */
-    private function createResource($processor)
-    {
-        $resource = new ImageResource;
-
-        $resource->setContents($processor->getContents());
-        $resource->setFresh(!$processor->isProcessed());
-        $resource->setLastModified($processor->getLastModTime());
-        $resource->setMimeType($processor->getMimeType());
-
-        // if the image was passed through, we can set a source path
-        if (!$processor->isProcessed()) {
-            $resource->setPath($processor->getSource());
-        }
-
-        return $resource;
     }
 
     /**
@@ -279,25 +252,5 @@ class ImageResolver implements ParameterResolverInterface
         }
 
         return $value;
-    }
-
-    /**
-     * getPath
-     *
-     * @return string
-     */
-    private function getPath($path, $source)
-    {
-        if (null === $path || null !== parse_url($source, PHP_URL_SCHEME)) {
-            return $source;
-        };
-
-        if (null !== parse_url($path, PHP_URL_PATH)) {
-            $slash = DIRECTORY_SEPARATOR;
-
-            return rtrim($path, '\\\/') . $slash . strtr($source, ['/' => $slash]);
-        }
-
-        return $path . '/' . $source;
     }
 }

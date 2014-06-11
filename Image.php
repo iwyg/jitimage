@@ -13,6 +13,13 @@ namespace Thapp\JitImage;
 
 use \Thapp\Image\ProcessorInterface;
 use \Thapp\Image\Image as BaseImage;
+use \Thapp\JitImage\Resource\ImageResource;
+use \Thapp\JitImage\Resolver\UrlResolver;
+use \Thapp\JitImage\Resolver\PathResolver;
+use \Thapp\JitImage\Resolver\ImageResolver;
+use \Thapp\JitImage\Resolver\ImageResolverHelper;
+use \Thapp\JitImage\Resolver\ParameterResolverInterface;
+use \Symfony\Component\HttpKernel\HttpKernelInterface;
 
 /**
  * @class Image extends BaseImage
@@ -25,106 +32,299 @@ use \Thapp\Image\Image as BaseImage;
  */
 class Image extends BaseImage
 {
+    use ImageResolverHelper;
+
     /**
      * @param ImageResolver $imageResolver
      */
-    public function __construct(ImageResolver $imageResolver)
+    public function __construct(ImageResolver $resolver, PathResolver $pathResolver, $cacheSuffix = 'cached')
     {
-        $this->resolver = $imageResolver;
+        $this->resolver = $resolver;
+        $this->paths = $pathResolver;
+        $this->cacheSuffix = $cacheSuffix;
     }
 
     /**
-     * get
+     * {@inheritdoc}
      *
      * @return string
      */
     public function get()
     {
         $this->mode = ProcessorInterface::IM_NOSCALE;
-        $this->arguments = [];
+        $this->setTargetSize();
+        $this->setArguments([]);
 
         return $this->process();
     }
 
     /**
-     * resize
+     * {@inheritdoc}
      *
      * @return string
      */
-    public function resize()
+    public function pixel($pixel)
     {
-        call_user_func_array(parent::resize, func_get_args());
+        parent::pixel($pixle);
 
         return $this->process();
     }
 
     /**
-     * scale
+     * {@inheritdoc}
      *
      * @return string
      */
-    public function scale()
+    public function resize($width, $height)
     {
-        call_user_func_array(parent::scale, func_get_args());
+        parent::resize($width, $height);
 
         return $this->process();
     }
 
     /**
-     * crop
+     * {@inheritdoc}
      *
      * @return string
      */
-    public function crop()
+    public function scale($percent)
     {
-        call_user_func_array(parent::crop, func_get_args());
+        parent::scale($percent);
 
         return $this->process();
     }
 
     /**
-     * fit
+     * {@inheritdoc}
      *
      * @return string
      */
-    public function fit()
+    public function crop($width, $height, $gravity = 5, $background = null)
     {
-        call_user_func_array(parent::fit, func_get_args());
+        parent::crop($width, $height, $gravity, $background);
 
         return $this->process();
     }
 
     /**
-     * cropAndResize
+     * {@inheritdoc}
      *
      * @return string
      */
-    public function cropAndResize()
+    public function fit($width, $height)
     {
-        call_user_func_array(parent::cropAndResize, func_get_args());
+        parent::fit($width, $height);
 
         return $this->process();
     }
 
+    /**
+     * {@inheritdoc}
+     *
+     * @param string  $path
+     * @param boolean $addExtension
+     *
+     * @return Image
+     */
+    public function from($path, $addExtension = false)
+    {
+        $this->close();
+
+        $this->addExtension = (bool)$addExtension;
+
+        $this->path = $path;
+
+        return $this;
+    }
+
+    /**
+     * {@inheritdoc}
+     *
+     * @return string
+     */
+    public function cropAndResize($width, $height, $gravity)
+    {
+        parent::cropAndResize($width, $height, $gravity);
+
+        return $this->process();
+    }
+
+    /**
+     * process
+     *
+     * @return string
+     */
     protected function process()
     {
-        if ($this->processor->isProcessed()) {
-            return $this->getFileUrl();
+        list ($source, $params, $filter) = $this->paramsToString();
+
+        $fragments = implode('/', [$params, $source, $filter]);
+
+        if (!$cache = $this->resolver->getCacheResolver()->resolve($this->path)) {
+            return $this->getUri($fragments);
         }
 
-        $params = $this->compileExpression();
+        return $this->resolveFromCache($cache, $fragments, $source, $params, $filter);
 
-        if (null !== $this->cache && $this->cache->has($key = $this->getCacheKey($params, $this->filters))) {
-            $this->loadFromCache($key);
-
-            $resource = $this->cache->get($id);
-
-        } else {
-            $this->doProcess($params);
-        }
     }
 
-    protected function getFileUrl()
+    /**
+     * resolveFromCache
+     *
+     * @param mixed $cache
+     * @param mixed $fragments
+     *
+     * @access protected
+     * @return mixed
+     */
+    protected function resolveFromCache($cache, $fragments, $source, $params, $filter)
     {
+        $this->cache = $cache;
+
+        $src = $this->getPath($this->paths->resolve($this->path), $source);
+        $key = $cache->createKey($src, $params.'/'.$filter, PATHINFO($src, PATHINFO_EXTENSION));
+
+        if (!$cache->has($key)) {
+            $this->processImage($src, $processor = $this->resolver->getProcessor(), $this->compileExpression());
+
+            $cache->set($key, $processor->getContents());
+            $processor->close();
+        }
+
+        $extension = $this->addExtension ? '.'.$this->getFileExtension($cache->get($key)->getMimeType()) : '';
+
+        return '/'. implode('/', [$this->path, $this->cacheSuffix, strtr($key, ['.' => '/'])]).$extension;
+    }
+
+    /**
+     * processImage
+     *
+     * @param mixed $src
+     * @param mixed $processor
+     * @param array $params
+     *
+     * @access protected
+     * @return void
+     */
+    protected function processImage($src, $processor, array $params)
+    {
+        $processor->load($src);
+        $processor->process($params);
+    }
+
+    /**
+     * getCache
+     *
+     * @param mixed $cache
+     *
+     * @access protected
+     * @return mixed
+     */
+    protected function getCache($cache)
+    {
+        $this->cache = $cache;
+
+        $src = $this->getPath($this->pathResolver->resolve($this->path), $source);
+        $key = $cache->createKey($src, $params.'/'.$filter, PATHINFO($src, PATHINFO_EXTENSION));
+    }
+
+    /**
+     * getUri
+     *
+     * @param mixed $uri
+     *
+     * @access protected
+     * @return string
+     */
+    protected function getUri($fragments)
+    {
+        return '/' . implode('/', [trim($this->path, '/'), $fragments]);
+    }
+
+    /**
+     * getImageFingerPrint
+     *
+     *
+     * @access protected
+     * @return mixed
+     */
+    protected function getImageFingerPrint(array $params, array $filters)
+    {
+    }
+
+    protected function close()
+    {
+        $this->filters = [];
+        $this->source = null;
+        $this->path = null;
+        $this->cache = null;
+    }
+
+    /**
+     * compileExpression
+     *
+     * @access protected
+     * @return array
+     */
+    protected function paramsToString()
+    {
+        $parts = ['mode' => $this->mode];
+
+        foreach ($this->targetSize as $value) {
+
+            if (is_numeric($value)) {
+                $parts[] = (string) $value;
+            }
+        }
+
+        foreach ($this->arguments as $i => $arg) {
+
+            if (is_numeric($arg) || ($i === 1 and $this->isColor($arg))) {
+                $parts[] = trim((string) $arg);
+            }
+        }
+
+        $source = $this->source;
+        $params = implode('/', $parts);
+        $filter = $this->filtersToString();
+
+        return [$source, $params, $filter];
+    }
+
+    /**
+     * compileFilterExpression
+     *
+     * @access private
+     * @return string|null
+     */
+    private function filtersToString()
+    {
+        $filters = [];
+
+        foreach ($this->filters as $filter => $options) {
+            $opt = [];
+
+            if (is_array($options)) {
+
+                foreach ($options as $option => $value) {
+                    $opt[] = sprintf('%s=%s', $option, $value);
+                }
+            }
+            $filters[] = sprintf('%s;%s', $filter, implode(';', $opt));
+        }
+        if (!empty($filters)) {
+             return rtrim(sprintf('filter:%s', implode(':', $filters)), ';');
+        }
+
+        return null;
+    }
+
+    protected function getFileExtension($mime)
+    {
+        if ('image/jpeg' === $mime) {
+            return 'jpg';
+        }
+
+        return explode('/', $mime)[1];
     }
 }
