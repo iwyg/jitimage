@@ -47,7 +47,7 @@ class JitImageServiceProvider extends ServiceProvider
     {
         $this->app['jitimage'] = $this->app->share(
             function () {
-                return new \Thapp\JitImage\Image(
+                return new \Thapp\JitImage\JitImage(
                     $this->app->make('Thapp\JitImage\Resolver\ImageResolver'),
                     $this->app->make('Thapp\JitImage\Resolver\PathResolver'),
                     $this->app['config']->get('jitimage::cache.suffix', 'cached')

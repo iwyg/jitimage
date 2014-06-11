@@ -9,7 +9,7 @@
  * that was distributed with this package.
  */
 
-namespace Thapp\JitImage\Facade;
+namespace Thapp\JitImage\Facades;
 
 use \Illuminate\Support\Facades\Facade;
 

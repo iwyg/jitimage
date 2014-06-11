@@ -11,15 +11,14 @@
 
 namespace Thapp\JitImage;
 
+use \Thapp\Image\Image;
 use \Thapp\Image\ProcessorInterface;
-use \Thapp\Image\Image as BaseImage;
+use \Thapp\Image\Cache\CacheInterface;
+use \Thapp\Image\Filter\FilterExpression;
 use \Thapp\JitImage\Resource\ImageResource;
-use \Thapp\JitImage\Resolver\UrlResolver;
 use \Thapp\JitImage\Resolver\PathResolver;
 use \Thapp\JitImage\Resolver\ImageResolver;
 use \Thapp\JitImage\Resolver\ImageResolverHelper;
-use \Thapp\JitImage\Resolver\ParameterResolverInterface;
-use \Symfony\Component\HttpKernel\HttpKernelInterface;
 
 /**
  * @class Image extends BaseImage
@@ -30,18 +29,26 @@ use \Symfony\Component\HttpKernel\HttpKernelInterface;
  * @version $Id$
  * @author Thomas Appel <mail@thomas-appel.com>
  */
-class Image extends BaseImage
+class JitImage extends Image
 {
     use ImageResolverHelper;
 
     /**
      * @param ImageResolver $imageResolver
      */
-    public function __construct(ImageResolver $resolver, PathResolver $pathResolver, $cacheSuffix = 'cached')
+    public function __construct(ImageResolver $resolver, PathResolver $pathResolver, $cSuffix = 'cached', $dPath = null)
     {
-        $this->resolver = $resolver;
-        $this->paths = $pathResolver;
-        $this->cacheSuffix = $cacheSuffix;
+        $this->paths       = $pathResolver;
+        $this->resolver    = $resolver;
+        $this->cacheSuffix = $cSuffix;
+        $this->defaultPath = $dPath;
+
+        $this->filters     = new FilterExpression([]);
+    }
+
+    public static function create($source = null, $driver = self::DRIVER_IMAGICK)
+    {
+        throw new \BadMethodCallException('calling create is not allowed on this intance');
     }
 
     /**
@@ -158,14 +165,18 @@ class Image extends BaseImage
     {
         list ($source, $params, $filter) = $this->paramsToString();
 
-        $fragments = implode('/', [$params, $source, $filter]);
+        $fragments = $this->getParamString($params, $source, $filter);
 
-        if (!$cache = $this->resolver->getCacheResolver()->resolve($this->path)) {
+        if (!$cache = $this->resolver->getCacheResolver()->resolve($this->getCurrentPath())) {
             return $this->getUri($fragments);
         }
 
         return $this->resolveFromCache($cache, $fragments, $source, $params, $filter);
+    }
 
+    private function getParamString($params, $source, $filter = null)
+    {
+        return null !== $filter ? implode('/', [$params, $source, $filter]) : implode('/', [$params, $source]);
     }
 
     /**
@@ -177,11 +188,10 @@ class Image extends BaseImage
      * @access protected
      * @return mixed
      */
-    protected function resolveFromCache($cache, $fragments, $source, $params, $filter)
+    protected function resolveFromCache(CacheInterface $cache, $fragments, $source, $params, $filter)
     {
-        $this->cache = $cache;
+        $path = $this->getCurrentPath();
 
-        $path = $this->path;
         $src = $this->getPath($this->paths->resolve($this->path), $source);
         $key = $cache->createKey($src, $params.'/'.$filter, PATHINFO($src, PATHINFO_EXTENSION));
 
@@ -203,35 +213,16 @@ class Image extends BaseImage
         return '/'. implode('/', [$path, $this->cacheSuffix, strtr($key, ['.' => '/'])]).$extension;
     }
 
+    /**
+     * compileExpression
+     *
+     * @return array
+     */
     protected function compileExpression()
     {
         $params = parent::compileExpression();
 
         return array_merge($params, ['filter' => $this->filters]);
-    }
-
-    /**
-     * getUri
-     *
-     * @param mixed $uri
-     *
-     * @access protected
-     * @return string
-     */
-    protected function getUri($fragments)
-    {
-        return '/' . implode('/', [trim($this->path, '/'), $fragments]);
-    }
-
-    /**
-     * getImageFingerPrint
-     *
-     *
-     * @access protected
-     * @return mixed
-     */
-    protected function getImageFingerPrint(array $params, array $filters)
-    {
     }
 
     /**
@@ -243,14 +234,15 @@ class Image extends BaseImage
      */
     protected function close()
     {
-        $this->resolver->getProcessor()->close();
+        parent::close();
 
-        $this->filters   = [];
-        $this->arguments = [];
-
-        $this->source = null;
         $this->path = null;
         $this->cache = null;
+    }
+
+    protected function getProcessor()
+    {
+        return $this->resolver->getProcessor();
     }
 
     /**
@@ -277,47 +269,47 @@ class Image extends BaseImage
             }
         }
 
-        $source = $this->source;
-        $params = implode('/', $parts);
-        $filter = $this->filtersToString();
+        $filters = $this->filters->toArray();
 
-        return [$source, $params, $filter];
+        return [
+            $this->source,
+            implode('/', $parts),
+            !empty($filters) ? sprintf('filter:%s', $this->filters->compile()) : null
+        ];
     }
 
     /**
-     * compileFilterExpression
+     * getFileExtension
      *
-     * @access private
-     * @return string|null
+     * @return string
      */
-    private function filtersToString()
-    {
-        $filters = [];
-
-        foreach ($this->filters as $filter => $options) {
-            $opt = [];
-
-            if (is_array($options)) {
-
-                foreach ($options as $option => $value) {
-                    $opt[] = sprintf('%s=%s', $option, $value);
-                }
-            }
-            $filters[] = sprintf('%s;%s', $filter, implode(';', $opt));
-        }
-        if (!empty($filters)) {
-             return rtrim(sprintf('filter:%s', implode(':', $filters)), ';');
-        }
-
-        return null;
-    }
-
-    protected function getFileExtension($mime)
+    private function getFileExtension($mime)
     {
         if ('image/jpeg' === $mime) {
             return 'jpg';
         }
 
         return explode('/', $mime)[1];
+    }
+
+    /**
+     * @return string
+     */
+    private function getCurrentPath()
+    {
+        return $this->path ?: $this->defaultPath;
+    }
+
+    /**
+     * getUri
+     *
+     * @param mixed $uri
+     *
+     * @access protected
+     * @return string
+     */
+    private function getUri($fragments)
+    {
+        return '/' . implode('/', [trim($this->path, '/'), $fragments]);
     }
 }

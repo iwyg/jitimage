@@ -120,6 +120,9 @@ return [
         // specify cache adapter for different routes
         // Note: custom adapters must implement Thapp\Image\Cache\CacheInterface
         'routes' => [
+            //'image' => [
+            //    'enabled' => false
+            //]
             //'foo/bar' => [
             //    'service' => 'Thapp\JitImage\Adapter\FlysystemCache'
             //],

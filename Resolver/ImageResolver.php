@@ -12,6 +12,7 @@
 namespace Thapp\JitImage\Resolver;
 
 use \Thapp\Image\ProcessorInterface;
+use \Thapp\Image\Filter\FilterExpression;
 use \Thapp\JitImage\Resource\ImageResource;
 use \Thapp\JitImage\Cache\CacheAwareInterface;
 use \Thapp\JitImage\Validator\ValidatorInterface;
@@ -28,6 +29,7 @@ use \Thapp\JitImage\Response\GenericFileResponse as Response;
 class ImageResolver implements ParameterResolverInterface
 {
     use ImageResolverHelper;
+
     /**
      * processor
      *
@@ -206,51 +208,8 @@ class ImageResolver implements ParameterResolverInterface
             return $filters;
         }
 
-        foreach (explode(',', substr($filterStr, 1 + strpos($filterStr, ':'))) as $filter) {
-            list ($key, $value) = $this->extractFilterParams($filter);
-            $filters[$key] = $value;
-        }
+        $f = substr($filterStr, 1 + strpos($filterStr, ':'));
 
-        return $filters;
-    }
-
-    /**
-     * extractFilterParams
-     *
-     * @param mixed $paramStr
-     *
-     * @access private
-     * @return array
-     */
-    private function extractFilterParams($paramStr)
-    {
-        $parts = explode(';', $paramStr);
-        $key = array_shift($parts);
-
-        $params = [];
-
-        foreach ($parts as $part) {
-            $options = explode('=', $part);
-            $params[$options[0]] = $this->getFilterOptionValue($options[1]);
-        }
-
-        return [$key, $params];
-    }
-
-    /**
-     * getFilterOptionValue
-     *
-     * @param mixed $value
-     *
-     * @access private
-     * @return array
-     */
-    private function getFilterOptionValue($value)
-    {
-        if (is_numeric($value)) {
-            return substr_count($value, '.') ? (float)$value : (int)$value;
-        }
-
-        return $value;
+        return (new FilterExpression($f))->toArray();
     }
 }
