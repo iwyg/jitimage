@@ -26,7 +26,7 @@ return [
     'loaders' => [
         'Thapp\Image\Loader\FilesystemLoader',
         'Thapp\Image\Loader\RemoteLoader',
-        //'Thapp\JitImage\Adapter\FlysystemLoader',
+        'Thapp\JitImage\Adapter\FlysystemLoader',
     ],
 
     /*
@@ -52,10 +52,10 @@ return [
     |
     | The key will act as the base path of the image uri.
     */
-    'routes' => [
+    'paths' => [
         'image'   => public_path() . '/test',
         'thumb'   => public_path() . '/thumbs',
-        'foo/bar' => null,
+        'dropbox' => 'scum',
     ],
 
     /*

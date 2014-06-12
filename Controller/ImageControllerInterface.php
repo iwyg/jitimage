@@ -9,27 +9,20 @@
  * that was distributed with this package.
  */
 
-namespace Thapp\JitImage\Facades;
-
-use \Illuminate\Support\Facades\Facade;
+namespace Thapp\JitImage\Controller;
 
 /**
- * @class JitImage extends Facade
- *
- * @see Facade
+ * @interface ImageControllerInterface
  *
  * @package Thapp\JitImage
  * @version $Id$
  * @author Thomas Appel <mail@thomas-appel.com>
- * @license MIT
  */
-class JitImage extends Facade
+interface ImageControllerInterface
 {
-    /**
-     * @see \Illuminate\Support\Facades\Facade#getFacadeAccessor()
-     */
-    protected static function getFacadeAccessor()
-    {
-        return 'jitimage';
-    }
+    public function getImage($alias, $params = null, $source = null, $filter = null);
+
+    public function getResource($route, $alias, $source);
+
+    public function getCached($path, $id);
 }

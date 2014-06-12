@@ -57,7 +57,7 @@ class ImageResolver implements ParameterResolverInterface
      */
     public function __construct(
         ProcessorInterface $processor,
-        CacheAwareInterface $cacheResolver = null,
+        ResolverInterface $cacheResolver = null,
         ValidatorInterface $constraintValidator = null
     ) {
         $this->processor = $processor;
@@ -92,7 +92,7 @@ class ImageResolver implements ParameterResolverInterface
     {
         list ($path, $params, $source, $filter, $alias) = array_pad($parameters, 4, null);
 
-        $cache = $this->cacheResolver->resolve(trim($alias, '/'));
+        $cache = $this->cacheResolver ? $this->cacheResolver->resolve(trim($alias, '/')) : null;
         $path = $this->getPath($path, $source);
 
         $key = null;

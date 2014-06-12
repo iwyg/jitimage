@@ -9,10 +9,11 @@
  * that was distributed with this package.
  */
 
-namespace Thapp\JitImage;
+namespace Thapp\JitImage\Laravel;
 
 use \Illuminate\Routing\Router;
 use \Illuminate\Support\ServiceProvider;
+use \Thapp\JitImage\ProviderTrait;
 
 /**
  * @class JitImageServiceProvider extends ServiceProvider
@@ -24,11 +25,18 @@ use \Illuminate\Support\ServiceProvider;
  */
 class JitImageServiceProvider extends ServiceProvider
 {
+    use ProviderTrait;
+
     public function register()
+    {
+
+    }
+
+    public function boot()
     {
         $this->package('thapp/jitimage', 'jitimage', __DIR__);
 
-        $aliases = $this->registerControllers($this->app['router'], $this->app['config']['jitimage::routes']);
+        $this->registerControllers($this->app['router']);
 
         $this->registerLoader();
         $this->registerWriter();
@@ -54,10 +62,6 @@ class JitImageServiceProvider extends ServiceProvider
                 );
             }
         );
-    }
-
-    public function boot()
-    {
     }
 
     /**
@@ -185,21 +189,26 @@ class JitImageServiceProvider extends ServiceProvider
      *
      * @return void
      */
-    protected function registerControllers(Router $router, array $routes)
+    protected function registerControllers(Router $router)
     {
+        $routes = $this->app['config']->get('jitimage::paths', []);
+        $config = $this->app['config'];
+
         if (!$disabled = $this->app['config']->get('jitimage::disable_dynamic_processing', false)) {
-            list ($pattern, $params, $source, $filter) = $this->getPathRegexp();
+            // laravel doesn't handle default params, so replace the pattern;
+            list ($params, $source, $filter) = array_slice($this->getPathRegexp(), 1);
+            $pattern = '/{params}/{source}/{filter?}';
         }
 
-        $useCache    = $this->app['config']->get('jitimage::cache.enabled', true);
-        $default     = $this->app['config']->get('jitimage::cache.default', 'image');
-        $suffix      = $this->app['config']->get('jitimage::cache.suffix', 'cached');
-        $cachepath   = $this->app['config']->get(
+        $useCache    = $config->get('jitimage::cache.enabled', true);
+        $default     = $config->get('jitimage::cache.default', 'image');
+        $suffix      = $config->get('jitimage::cache.suffix', 'cached');
+        $cachepath   = $config->get(
             'jitimage::cache.path',
             storage_path() . DIRECTORY_SEPARATOR . 'jitimage'
         );
 
-        $cacheRoutes = $this->app['config']->get('jitimage::cache.routes', []);
+        $cacheRoutes = $config->get('jitimage::cache.routes', []);
 
         $caches = [];
 
@@ -379,20 +388,5 @@ class JitImageServiceProvider extends ServiceProvider
     {
         $controller->setRouter($this->app['router']);
         $controller->setRequest($this->app['request']);
-    }
-
-    /**
-     * getPathRegexp
-     *
-     * @return array
-     */
-    private function getPathRegexp()
-    {
-        return [
-            '/{params}/{source?}/{filter?}',
-            '([5|6](\/\d+){1}|[0]|[1|4](\/\d+){2}|[2](\/\d+){3}|[3](\/\d+){3}\/?([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})?)',
-            '((([^0-9A-Fa-f]{3}|[^0-9A-Fa-f]{6})?).*?.(?=(\/filter:.*)?))',
-            '(filter:.*)'
-        ];
     }
 }
