@@ -1,0 +1,25 @@
+language: php
+php:
+  - 5.4
+  - 5.5
+  - 5.6
+  - hhvm
+  - hhvm-nightly
+matrix: 
+  allow_failures: 
+    - php: hhvm
+    - php: hhvm-nightly
+  fast_finish: true
+services:
+  - memcache
+  - memcached
+before_script:
+  - composer self-update
+  - composer install --prefer-source --no-interaction --dev
+  - sh ./.travis_install.sh  
+script: 
+  - bash -c 'if [ "$TRAVIS_PHP_VERSION" == "hhvm" ]; then vendor/bin/phpunit --verbose; fi;'
+  - bash -c 'if [ "$TRAVIS_PHP_VERSION" != "hhvm" ]; then vendor/bin/phpunit --verbose --coverage-text --coverage-clover /tmp/coverage/coverage.xml; fi;'
+notififation:   
+  on_success: never
+  on_failure: always
