@@ -104,6 +104,23 @@ trait ImageResolverHelper
             return is_numeric($value) ? (int)$value : $value;
         }, array_pad(explode('/', $params), 5, null));
 
+        if (0 > $mode || 3 < $mode || 0 === $mode) {
+            $gravity = null;
+        }
+
+        if ($mode !== 3) {
+            $background = null;
+        }
+
+        if (4 < $mode || 0 === $mode) {
+            $height     = null;
+            $gravity    = null;
+        }
+
+        if (0 == $mode) {
+            $width = null;
+        }
+
         $width  = ($mode !== 1 && $mode !== 2) ? $width : (int)$width;
         $height = ($mode !== 1 && $mode !== 2) ? $height : (int)$height;
 

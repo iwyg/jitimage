@@ -41,5 +41,7 @@ class PathResolverTest extends \PHPUnit_Framework_TestCase
 
         $this->assertSame('path/to/images', $resolver->resolve('/images'));
         $this->assertSame('path/to/thumbs', $resolver->resolve('/thumbs'));
+
+        $this->assertSame('path', $resolver->resolve('path'));
     }
 }

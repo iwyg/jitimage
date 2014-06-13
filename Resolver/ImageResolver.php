@@ -90,7 +90,7 @@ class ImageResolver implements ParameterResolverInterface
      */
     public function resolveParameters(array $parameters)
     {
-        list ($path, $params, $source, $filter, $alias) = array_pad($parameters, 4, null);
+        list ($path, $params, $source, $filter, $alias) = array_pad($parameters, 5, null);
 
         $cache = $this->cacheResolver ? $this->cacheResolver->resolve(trim($alias, '/')) : null;
         $path = $this->getPath($path, $source);

@@ -118,6 +118,9 @@ class FlysystemCache extends AbstractCache
     }
 
 
+    /**
+     * @TODO: get rid of this shit
+     */
     private function mapMimeType($content)
     {
         $byteA = bin2hex($content[0]);
