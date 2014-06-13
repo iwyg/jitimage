@@ -27,41 +27,130 @@ class JitImageServiceProvider extends ServiceProvider
 {
     use ProviderTrait;
 
+    /**
+     * register
+     *
+     * @return void
+     */
     public function register()
     {
-
+        $this->registerLoader();
+        $this->registerWriter();
+        $this->registerDriver();
+        $this->registerProcessor();
     }
 
+    /**
+     * boot
+     *
+     * @return void
+     */
     public function boot()
     {
         $this->package('thapp/jitimage', 'jitimage', __DIR__);
 
-        $this->registerControllers($this->app['router']);
-
-        $this->registerLoader();
-        $this->registerWriter();
-        $this->registerProcessor();
-        $this->registerDriver();
-
-        $this->registerImage();
-        $this->registerJitImage();
-    }
-
-    private function registerImage()
-    {
-    }
-
-    private function registerJitImage()
-    {
-        $this->app['jitimage'] = $this->app->share(
-            function () {
-                return new \Thapp\JitImage\JitImage(
-                    $this->app->make('Thapp\JitImage\Resolver\ImageResolver'),
-                    $this->app->make('Thapp\JitImage\Resolver\PathResolver'),
-                    $this->app['config']->get('jitimage::cache.suffix', 'cached')
-                );
-            }
+        $this->registerRoutingAndCaches(
+            $this->app['router'],
+            $this->app['config']->get('jitimage::recipes', []),
+            $this->getCacheConfig()
         );
+
+        $this->registerJitImage();
+        $this->registerCommands();
+    }
+
+    /**
+     * Registers Controllers and Caches
+     *
+     * @param Router $router
+     * @param array  $recipes
+     * @param array  $cacheConfig
+     *
+     * @return void
+     */
+    protected function registerRoutingAndCaches(Router $router, array $recipes = [], array $cacheConfig = [])
+    {
+        $paths   = $this->app['config']->get('jitimage::paths');
+
+        $caches  = $this->registerCaches($router, $paths, $cacheConfig);
+        $recipes = $this->registerStaticRoutes($router, $recipes, $paths);
+
+        $this->registerResolvers($caches, $paths);
+        $this->registerControllerService($router, $recipes, $paths);
+
+        if ($this->app['config']->get('jitimage::disable_dynamic_processing', false)) {
+            return;
+        }
+
+        // laravel doesn't handle default params, so replace the pattern;
+        list ($params, $source, $filter) = array_slice($this->getPathRegexp(), 1);
+        $pattern = '/{params}/{source}/{filter?}';
+
+        foreach ($paths as $alias => $path) {
+            $this->registerDynamicController($router, $alias, $pattern, $params, $source, $filter);
+        }
+    }
+
+    /**
+     * Registers cachecontrollers
+     *
+     * @param Router $router
+     * @param array  $paths
+     * @param array  $cacheConfig
+     *
+     * @return void
+     */
+    protected function registerCaches(Router $router, array $paths, array $cacheConfig)
+    {
+        $caches = [];
+
+        list ($useCache, $default, $suffix, $cachePath, $cacheRoutes) = $cacheConfig;
+
+        foreach ($paths as $alias => $path) {
+
+            if (isset($cacheRoutes[$alias]['enabled']) && true !== $cacheRoutes[$alias]['enabled']) {
+                continue;
+            }
+
+            if (!isset($cacheRoutes[$alias])) {
+                $caches[$alias] = [true, $cachePath];
+            }
+
+            if (isset($cacheRoutes[$alias]['path'])) {
+                $caches[$alias] = [true, $cacheRoutes[$alias]['path']];
+            } elseif (isset($cacheRoutes[$alias]['service'])) {
+                $caches[$alias] = $cacheRoutes[$alias]['service'];
+            } else {
+                $caches[$alias] = [true, $cachePath];
+            }
+
+            // setup cached routes
+            $this->registerCachedController($router, $alias, $suffix);
+        }
+
+        return $caches;
+    }
+
+
+    protected function registerCommands()
+    {
+    }
+
+    /**
+     * registerJitImage
+     *
+     * @return void
+     */
+    protected function registerJitImage()
+    {
+        $this->app['jitimage'] = $this->app->share(function ($app) {
+            return new \Thapp\JitImage\JitImage(
+                $app['jitimage.image_resolver'],
+                $app['jitimage.path_resolver'],
+                $app['config']->get('jitimage::cache.suffix', 'cached'),
+                $app['config']->get('jitimage::cache.default_path', null)
+            );
+        });
     }
 
     /**
@@ -72,8 +161,27 @@ class JitImageServiceProvider extends ServiceProvider
      */
     protected function registerWriter()
     {
-        $this->app['image.writer'] = $this->app->share(function () {
+        $this->app['jitimage.image_writer'] = $this->app->share(function () {
             return new \Thapp\Image\Writer\FilesystemWriter;
+        });
+    }
+
+    /**
+     * registerProcessor
+     *
+     * @return void
+     */
+    protected function registerProcessor()
+    {
+        $this->app['jitimage.image_processor'] = $this->app->share(function () {
+            $quality = $this->app['config']->get('jitimage::quality', 80);
+            $processor = new \Thapp\JitImage\JitImageProcessor(
+                $this->app['jitimage.image_driver'],
+                $this->app['jitimage.image_writer']
+            );
+            $processor->setQuality($quality);
+
+            return $processor;
         });
     }
 
@@ -85,13 +193,18 @@ class JitImageServiceProvider extends ServiceProvider
      */
     protected function registerLoader()
     {
-        $this->app->singleton('Thapp\Image\Loader\RemoteLoader', function () {
+        // register the filesystem loader:
+        $this->app->singleton('Thapp\Image\Loader\FileSystemLoader');
+
+        // register the curl loader:
+        $this->app->singleton('Thapp\Image\Loader\RemoteLoader', function ($app) {
             return new \Thapp\Image\Loader\RemoteLoader(
-                $this->app['config']->get('jitimage::trusted_sites', [])
+                $app['config']->get('jitimage::trusted_sites', [])
             );
         });
 
-        $this->app->singleton('Thapp\Image\Loader\DelegatingLoader', function () {
+        // register the delegating loader:
+        $this->app['jitimage.source_loader'] = $this->app->share(function () {
 
             $loaders = [];
 
@@ -104,31 +217,40 @@ class JitImageServiceProvider extends ServiceProvider
     }
 
     /**
-     * registerProcessor
-     *
-     * @return void
-     */
-    protected function registerProcessor()
-    {
-        $this->app->singleton('Thapp\Image\Processor', function () {
-            return new \Thapp\Image\Processor($this->app['image.driver'], $this->app['image.writer']);
-        });
-    }
-
-    /**
      * registerDriver
      *
      * @return void
      */
     protected function registerDriver()
     {
-        $driver = $this->app['config']['jitimage::driver'];
+        $this->app['jitimage.image_driver'] = $this->app->share(function ($app) {
 
-        if (method_exists($this, $method = sprintf('register%sDriver', ucfirst($driver)))) {
-            return call_user_func([$this, $method]);
-        }
+            $driver = $this->app['config']->get('jitimage::driver', 'gd');
 
-        throw new \InvalidArgumentException(sprintf('invalid driver %s', $driver));
+            if (method_exists($this, $method = sprintf('register%sDriver', ucfirst($driver)))) {
+                return call_user_func([$this, $method], $this->app['config']->get('jitimage::quality', 80));
+            }
+
+            throw new \InvalidArgumentException(sprintf('invalid driver %s', $driver));
+        });
+    }
+
+    /**
+     * getCacheConfig
+     *
+     * @return array
+     */
+    private function getCacheConfig()
+    {
+        $defaultPath = storage_path() . DIRECTORY_SEPARATOR . 'jitimage';
+
+        return [
+            $this->app['config']->get('jitimage::cache.enabled', true),
+            $this->app['config']->get('jitimage::cache.default', 'image'),
+            $this->app['config']->get('jitimage::cache.suffix', 'cached'),
+            $this->app['config']->get('jitimage::cache.path', $defaultPath),
+            $this->app['config']->get('jitimage::cache.paths', [])
+        ];
     }
 
     /**
@@ -136,172 +258,111 @@ class JitImageServiceProvider extends ServiceProvider
      *
      * @return void
      */
-    protected function registerImagickDriver()
+    private function registerImagickDriver()
     {
-        $this->app['image.driver'] = $this->app->share(function () {
-            return new \Thapp\Image\Driver\ImagickDriver(
-                $this->app->make('Thapp\Image\Loader\DelegatingLoader')
-            );
-        });
-    }
-
-    /**
-     * registeImaDriver
-     *
-     * @return void
-     */
-    protected function registerImDriver()
-    {
-        $this->app['image.driver'] = $this->app->share(function () {
-            return $this->app->make('Thapp\Image\Driver\ImDriver');
-        });
-    }
-
-    /**
-     * registeImaDriver
-     *
-     * @return void
-     */
-    protected function registerGdDriver()
-    {
-        $this->app['image.driver'] = $this->app->share(function () {
-            $driver = $this->app->make('Thapp\Image\Driver\GdDriver');
-            $driver->setQuality(80);
-
-            return $driver;
-        });
-    }
-
-    /**
-     * registerLoaders
-     *
-     * @return void
-     */
-    protected function registerLoaders()
-    {
-        foreach ($this->app['config']['jitimage::loaders'] as $loaderClass) {
-
-        }
-    }
-
-    /**
-     * registerControllers
-     *
-     * @return void
-     */
-    protected function registerControllers(Router $router)
-    {
-        $routes = $this->app['config']->get('jitimage::paths', []);
-        $config = $this->app['config'];
-
-        if (!$disabled = $this->app['config']->get('jitimage::disable_dynamic_processing', false)) {
-            // laravel doesn't handle default params, so replace the pattern;
-            list ($params, $source, $filter) = array_slice($this->getPathRegexp(), 1);
-            $pattern = '/{params}/{source}/{filter?}';
-        }
-
-        $useCache    = $config->get('jitimage::cache.enabled', true);
-        $default     = $config->get('jitimage::cache.default', 'image');
-        $suffix      = $config->get('jitimage::cache.suffix', 'cached');
-        $cachepath   = $config->get(
-            'jitimage::cache.path',
-            storage_path() . DIRECTORY_SEPARATOR . 'jitimage'
+        $driver = new \Thapp\Image\Driver\ImagickDriver(
+            $this->app['jitimage.source_loader']
         );
 
-        $cacheRoutes = $config->get('jitimage::cache.routes', []);
+        return $driver;
+    }
 
-        $caches = [];
+    /**
+     * registeImaDriver
+     *
+     * @return void
+     */
+    private function registerImDriver()
+    {
+        $driver = new \Thapp\Image\Driver\ImDriver(
+            $this->app['jitimage.source_loader'],
+            new \Thapp\Image\Driver\ImBinLocator($app['config']['jitimage::imagick'] ?: null)
+        );
 
-        foreach (array_keys($routes) as $path) {
+        return $driver;
+    }
 
-            !$disabled && $router
-                ->get($path . $pattern, 'Thapp\JitImage\Controller\LaravelController@getImage')
-                ->where('params', $params)
-                ->where('source', $source)
-                ->where('filter', $filter);
+    /**
+     * registeImaDriver
+     *
+     * @return void
+     */
+    private function registerGdDriver()
+    {
+        $driver = new \Thapp\Image\Driver\GdDriver(
+            $this->app['jitimage.source_loader']
+        );
 
-            if (!$useCache) {
-                continue;
-            }
+        return $driver;
+    }
 
-            $enabled = true;
-
-            $usePath = false;
-
-            if (isset($cacheRoutes[$path]['enabled']) && !($enabled = $cacheRoutes[$path]['enabled'])) {
-                continue;
-            }
-
-            if ($usePath = isset($cacheRoutes[$path]) && isset($cacheRoutes[$path]['service'])) {
-                $caches[$path] = $cacheRoutes[$path]['service'];
-
-            } else {
-
-                if (isset($cacheRoutes[$path]['path'])) {
-                    $cachepath = $cacheRoutes[$path]['path'];
-                }
-
-                $caches[$path] = [true, $cachepath];
-            }
-
-
-            $this->registerCachedRoute($router, $path, $suffix);
-        }
-
-        $recipes = $this->registerStaticRoutes($router, $this->app['config']->get('jitimage::recipes', []), $routes);
-
-        $setUpCaches = function () use ($caches) {
-            $cache = [];
-
-            foreach ($caches as $route => $c) {
-                if (is_array($cache) && false !== $c[0]) {
-                    $cache[$route] = $this->getDefaultCache($c[1]);
-                } else {
-                    $cache[$route] = $this->getOptCache($c);
-                }
-            }
-
-            return $cache;
-        };
-
-        // register the CacheResolver
-        $this->app->singleton('Thapp\JitImage\Resolver\CacheResolver', function () use ($setUpCaches) {
-            return new \Thapp\JitImage\Resolver\CacheResolver($setUpCaches());
-        });
-
-        // register the PathResolver
-        $this->app->singleton('Thapp\JitImage\Resolver\PathResolver', function () use ($routes) {
-            return new \Thapp\JitImage\Resolver\PathResolver($routes);
-        });
-
-        // register the ImageResolver
-        $this->app->singleton('Thapp\JitImage\Resolver\ImageResolver', function () {
-
-            return new \Thapp\JitImage\Resolver\ImageResolver(
-                $this->app->make('Thapp\Image\Processor'),
-                $this->app->make('Thapp\JitImage\Resolver\CacheResolver'),
-                new \Thapp\JitImage\Validator\ModeConstraints(
-                    $this->app['config']['jitimage::mode_constraints'] ?: []
-                )
-            );
-        });
-
+    /**
+     * registerControllerService
+     *
+     * @param array $recipes
+     * @param array $routes
+     *
+     * @return void
+     */
+    private function registerControllerService(Router $router, array $recipes, array $routes)
+    {
         // register the ImageController
-        $this->app->singleton('Thapp\JitImage\Controller\LaravelController', function () use ($recipes, $routes) {
+        $this->app->singleton(
+            'Thapp\JitImage\Controller\LaravelController',
+            function ($app) use ($router, $recipes, $routes) {
 
-            $controller = new \Thapp\JitImage\Controller\LaravelController(
-                $this->app->make('Thapp\JitImage\Resolver\PathResolver'),
-                $this->app->make('Thapp\JitImage\Resolver\ImageResolver')
-            );
+                $controller = new \Thapp\JitImage\Controller\LaravelController(
+                    $app['jitimage.path_resolver'],
+                    $app['jitimage.image_resolver']
+                );
 
-            $this->prepareController($controller);
+                $controller->setRouter($router);
+                $controller->setRequest($app['request']);
 
-            if (!empty($recipes)) {
-                $controller->setRecieps(new \Thapp\JitImage\Resolver\RecipeResolver($recipes));
+                if (!empty($recipes)) {
+                    $controller->setRecieps(new \Thapp\JitImage\Resolver\RecipeResolver($recipes));
+                }
+
+                return $controller;
             }
+        );
+    }
 
-            return $controller;
-        });
+    /**
+     * registerDynamicController
+     *
+     * @param Router $router
+     * @param mixed $path
+     * @param string $pattern
+     * @param string $params
+     * @param string $source
+     * @param string $filter
+     *
+     * @return void
+     */
+    private function registerDynamicController(Router $router, $path, $pattern, $params, $source, $filter)
+    {
+        $router->get($path . $pattern, 'Thapp\JitImage\Controller\LaravelController@getImage')
+            ->where('params', $params)
+            ->where('source', $source)
+            ->where('filter', $filter);
+    }
+
+    /**
+     * registerCachedController
+     *
+     * @param Router $router
+     * @param string $path
+     * @param string $suffix
+     *
+     * @return void
+     */
+    private function registerCachedController(Router $router, $path, $suffix)
+    {
+        $router->get(
+            rtrim($path, '/') . '/'. $suffix . '/{id}',
+            'Thapp\JitImage\Controller\LaravelController@getCached'
+        )->where('id', '(.*\/){1}.*');
     }
 
     /**
@@ -311,7 +372,7 @@ class JitImageServiceProvider extends ServiceProvider
      *
      * @return array
      */
-    private function registerStaticRoutes($router, array $recipes, array $routes = [])
+    private function registerStaticRoutes(Router $router, array $recipes, array $routes = [])
     {
         $resolved = [];
 
@@ -322,18 +383,10 @@ class JitImageServiceProvider extends ServiceProvider
             }
 
             foreach ($params as $routeAlias => $formular) {
-
                 $param = str_replace('/', '_', $routeAlias);
-
                 $resolved[$routeAlias] = $formular;
 
-                $router
-                    ->get(
-                        $route . '/{' . $param . '}/{source}',
-                        ['uses' => 'Thapp\JitImage\Controller\LaravelController@getResource']
-                    )
-                    ->where($param, $routeAlias)
-                    ->where('source', '(.*)');
+                $this->registerStaticController($router, $route, $param, $routeAlias);
             }
         }
 
@@ -341,17 +394,79 @@ class JitImageServiceProvider extends ServiceProvider
     }
 
     /**
-     * getDefaultCache
+     * registerStaticController
      *
-     * @param string $path
+     * @param Router $router
+     * @param string $route
+     * @param string $param
+     * @param string $routeAlias
      *
      * @return void
      */
-    private function registerCachedRoute($router, $path, $suffix)
+    private function registerStaticController(Router $router, $route, $param, $routeAlias)
     {
-        $router
-            ->get(rtrim($path, '/') . '/'. $suffix . '/{id}', 'Thapp\JitImage\Controller\LaravelController@getCached')
-            ->where('id', '(.*\/){1}.*');
+        $router->get(
+            $route . '/{' . $param . '}/{source}',
+            ['uses' => 'Thapp\JitImage\Controller\LaravelController@getResource']
+        )
+        ->where($param, $routeAlias)
+        ->where('source', '(.*)');
+    }
+
+    /**
+     * registerResolvers
+     *
+     * @param array $caches
+     * @param array $routes
+     *
+     * @return void
+     */
+    private function registerResolvers(array $caches, array $routes)
+    {
+        // register the CacheResolver
+        $this->app['jitimage.cache_resolver'] = $this->app->share(function () use ($caches) {
+            return new \Thapp\JitImage\Resolver\CacheResolver($this->initCaches($caches));
+        });
+
+        // register the PathResolver
+        $this->app['jitimage.path_resolver'] = $this->app->share(function () use ($routes) {
+            return new \Thapp\JitImage\Resolver\PathResolver($routes);
+        });
+
+        // register the ImageResolver
+        $this->app['jitimage.image_resolver'] = $this->app->share(function ($app) {
+
+            return new \Thapp\JitImage\Resolver\ImageResolver(
+                $app['jitimage.image_processor'],
+                $app['jitimage.cache_resolver'],
+                new \Thapp\JitImage\Validator\ModeConstraints(
+                    $this->app['config']->get('jitimage::mode_constraints', [])
+                )
+            );
+        });
+    }
+
+    /**
+     * setUpCaches
+     *
+     * @param array $caches
+     *
+     * @return void
+     */
+    private function initCaches(array $caches = [])
+    {
+        $cache = [];
+
+        foreach ($caches as $route => $c) {
+            if (is_array($cache) && false !== $c[0]) {
+                $cache[$route] = $this->getDefaultCache($c[1]);
+                continue;
+            }
+
+            $cache[$route] = $this->getOptCache($c);
+        }
+
+        return $cache;
     }
 
     /**
@@ -374,19 +489,5 @@ class JitImageServiceProvider extends ServiceProvider
     private function getOptCache($service)
     {
         return $this->app->make($service);
-    }
-
-    /**
-     * prepareController
-     *
-     * @param \Illuminate\Routing\Controller $controller
-     *
-     * @access protected
-     * @return void
-     */
-    protected function prepareController(\Illuminate\Routing\Controller $controller)
-    {
-        $controller->setRouter($this->app['router']);
-        $controller->setRequest($this->app['request']);
     }
 }

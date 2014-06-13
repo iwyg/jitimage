@@ -13,37 +13,6 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | File Loaders
-    |--------------------------------------------------------------------------
-    |
-    | Define which loader should be delegated to load an image.
-    | Note that custom loaders must implement \Thapp\Image\Loader\LoaderInterface.
-    | If your custom loader needs preparation, it must be registered on
-    | the DIC beforehand
-    |
-    */
-
-    'loaders' => [
-        'Thapp\Image\Loader\FilesystemLoader',
-        'Thapp\Image\Loader\RemoteLoader',
-        'Thapp\JitImage\Adapter\FlysystemLoader',
-    ],
-
-    /*
-    |--------------------------------------------------------------------------
-    | Image Processing driver
-    |--------------------------------------------------------------------------
-    |
-    | Specify the processing driver:
-    |  - imagick: The imagick driver (http://php.net/manual/en/book.imagick.php).
-    |  - gd:      The GD driver (http://www.imagemagick.org/).
-    |  - im:      The imagemagick driver (http://php.net/manual/en/book.image.php).
-    */
-
-    'driver' => 'imagick',
-
-    /*
-    |--------------------------------------------------------------------------
     | On demand processing routes
     |--------------------------------------------------------------------------
     |
@@ -55,8 +24,16 @@ return [
     'paths' => [
         'image'   => public_path() . '/test',
         'thumb'   => public_path() . '/thumbs',
+        'porn'    => public_path() . '/thumbs',
         'dropbox' => 'scum',
     ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | The default path when ommittin JitImage::from()
+    |--------------------------------------------------------------------------
+    */
+    'default_path' => 'image',
 
     /*
     |--------------------------------------------------------------------------
@@ -71,6 +48,8 @@ return [
     |--------------------------------------------------------------------------
     | Set mode constraints on scaling values
     |--------------------------------------------------------------------------
+    |
+    | Note that this will only affect on demand image processing.
     */
     'mode_constraints' => [
         1   => [2000, 2000],  // max width and height 2000px
@@ -86,12 +65,14 @@ return [
     | Predefined processing assignments
     |--------------------------------------------------------------------------
     |
-    | Use this set predefined processing instructions.
-    | The first key must correspond to an existing image route
+    | Use this predefined processing instructions.
+    | The parent key must correspond to an existing image path alias.
+    | You can set as many prosessing aliases per path alias as you like
     */
     'recipes' => [
         'image' => [
-            'gallery' => '1/800/0, filter:gs'
+            'gallery' => '1/800/0',
+            'thumbs'  => '2/200/200/5',
         ]
     ],
 
@@ -101,7 +82,6 @@ return [
     |--------------------------------------------------------------------------
     |
     */
-
     'cache' => [
 
         // enable cache by default
@@ -119,19 +99,58 @@ return [
 
         // specify cache adapter for different routes
         // Note: custom adapters must implement Thapp\Image\Cache\CacheInterface
-        'routes' => [
-            //'image' => [
-            //    'enabled' => false
-            //]
-            //'foo/bar' => [
-            //    'service' => 'Thapp\JitImage\Adapter\FlysystemCache'
-            //],
-            //'thumb' => [
-            //    'enabled' => false
-            //],
+        'paths' => [
+            'image' => [
+                'enabled' => true
+            ],
+            'foo/bar' => [
+                'service' => 'Thapp\JitImage\Adapter\FlysystemCache'
+            ],
+            'thumb' => [
+                'enabled' => false
+            ],
+            'porn' => [
+                'path' => storage_path() . '/porn'
+            ],
         ],
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Image Processing driver
+    |--------------------------------------------------------------------------
+    |
+    | Specify the processing driver, defaults to gd:
+    |  - imagick: The imagick driver (http://php.net/manual/en/book.imagick.php).
+    |  - gd:      The GD driver (http://www.imagemagick.org/).
+    |  - im:      The imagemagick driver (http://php.net/manual/en/book.image.php).
+    */
+    'driver' => 'imagick',
+
+    /*
+    |--------------------------------------------------------------------------
+    | File Loaders
+    |--------------------------------------------------------------------------
+    |
+    | Define which loader should be delegated to load an image.
+    | Note that custom loaders must implement \Thapp\Image\Loader\LoaderInterface.
+    | If your custom loader needs preparation, it must be registered on
+    | the DIC beforehand
+    |
+    */
+    'loaders' => [
+        'Thapp\Image\Loader\FilesystemLoader',
+        'Thapp\Image\Loader\RemoteLoader',
+        'Thapp\JitImage\Adapter\FlysystemLoader',
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Set Domain constraints when loading images from remote http sources
+    |--------------------------------------------------------------------------
+    |
+    | This will only affect the `\Thapp\Image\Loader\RemoteLoader` class.
+    */
     'trusted_sites' => [
         'http://[0-9]+.media.tumblr.(com|de|net)',
     ]
