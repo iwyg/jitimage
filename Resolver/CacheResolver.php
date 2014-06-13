@@ -11,16 +11,17 @@
 
 namespace Thapp\JitImage\Resolver;
 
+use \ArrayIterator;
+use \IteratorAggregate;
 use \Thapp\Image\Cache\CacheInterface;
 use \Thapp\JitImage\Resource\ImageResource;
-use \Thapp\JitImage\Cache\CacheAwareInterface;
 
 /**
  * @class CacheResolver
  * @package Thapp\JitImage
  * @version $Id$
  */
-class CacheResolver implements ResolverInterface, CacheAwareInterface
+class CacheResolver implements ResolverInterface, IteratorAggregate
 {
     private $caches;
     private $cache;
@@ -31,33 +32,54 @@ class CacheResolver implements ResolverInterface, CacheAwareInterface
     }
 
     /**
+     * Add a cache instance to the resolver
+     *
+     * @param sting $alias
+     * @param CacheInterface $cache
+     *
      * @return void
      */
-    public function add($path, CacheInterface $cache)
+    public function add($alias, CacheInterface $cache)
     {
-        $this->caches[$path] = $cache;
+        $this->caches[$alias] = $cache;
     }
 
+    /**
+     * Add an array of cache instances to the resolver
+     *
+     * @param sting $alias
+     * @param CacheInterface $cache
+     *
+     * @return void
+     */
     public function set(array $caches)
     {
         $this->caches = [];
-        foreach ($caches as $path => $cache) {
-            $this->add($path, $cache);
+
+        foreach ($caches as $alias => $cache) {
+            $this->add($alias, $cache);
         }
     }
 
     /**
-     * resolve
+     * Resolves an alias to a cache instance
      *
-     * @param mixed $key
+     * @param string $alias
      *
-     * @access public
-     * @return void
+     * @return null|CachInterface return null if no cache was found
      */
-    public function resolve($path)
+    public function resolve($alias)
     {
-        if (array_key_exists($path, $this->caches)) {
-            return $this->caches[$path];
+        if (array_key_exists($alias, $this->caches)) {
+            return $this->caches[$alias];
         }
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getIterator()
+    {
+        return new ArrayIterator($this->caches);
     }
 }

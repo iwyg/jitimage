@@ -13,6 +13,7 @@ namespace Thapp\JitImage\Laravel;
 
 use \Illuminate\Routing\Router;
 use \Illuminate\Support\ServiceProvider;
+use \Symfony\Component\Filesystem\Filesystem;
 use \Thapp\JitImage\ProviderTrait;
 
 /**
@@ -134,6 +135,13 @@ class JitImageServiceProvider extends ServiceProvider
 
     protected function registerCommands()
     {
+        $this->app['commands.jitimage.clearcache'] = $this->app->share(function ($app) {
+            return new \Thapp\JitImage\Laravel\Console\ClearCacheCommand(
+                $app['jitimage.cache_resolver']
+            );
+        });
+
+        $this->commands('commands.jitimage.clearcache');
     }
 
     /**
@@ -478,7 +486,7 @@ class JitImageServiceProvider extends ServiceProvider
      */
     private function getDefaultCache($path)
     {
-        return new \Thapp\Image\Cache\FilesystemCache($path);
+        return new \Thapp\Image\Cache\FilesystemCache(new Filesystem, $path);
     }
 
     /**
