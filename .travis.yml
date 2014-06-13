@@ -16,7 +16,6 @@ services:
 before_script:
   - composer self-update
   - composer install --prefer-source --no-interaction --dev
-  - sh ./.travis_install.sh  
 script: 
   - bash -c 'if [ "$TRAVIS_PHP_VERSION" == "hhvm" ]; then vendor/bin/phpunit --verbose; fi;'
   - bash -c 'if [ "$TRAVIS_PHP_VERSION" != "hhvm" ]; then vendor/bin/phpunit --verbose --coverage-text --coverage-clover /tmp/coverage/coverage.xml; fi;'
