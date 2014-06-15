@@ -11,7 +11,7 @@
 
 namespace Thapp\JitImage;
 
-use \Thapp\Image\Image;
+use \Thapp\Image\AbstractImage;
 use \Thapp\Image\ProcessorInterface;
 use \Thapp\Image\Cache\CacheInterface;
 use \Thapp\Image\Filter\FilterExpression;
@@ -19,6 +19,7 @@ use \Thapp\JitImage\Resource\ImageResource;
 use \Thapp\JitImage\Resolver\PathResolver;
 use \Thapp\JitImage\Resolver\ImageResolver;
 use \Thapp\JitImage\Resolver\ImageResolverHelper;
+use \Thapp\Image\Driver\Parameters;
 
 /**
  * @class Image extends BaseImage
@@ -29,7 +30,7 @@ use \Thapp\JitImage\Resolver\ImageResolverHelper;
  * @version $Id$
  * @author Thomas Appel <mail@thomas-appel.com>
  */
-class JitImage extends Image
+class JitImage extends AbstractImage
 {
     use ImageResolverHelper;
 
@@ -44,6 +45,7 @@ class JitImage extends Image
         $this->defaultPath = $dPath;
 
         $this->filters     = new FilterExpression([]);
+        $this->parameters  = new Parameters;
     }
 
     public static function create($source = null, $driver = self::DRIVER_IMAGICK)
@@ -58,9 +60,8 @@ class JitImage extends Image
      */
     public function get()
     {
-        $this->mode = ProcessorInterface::IM_NOSCALE;
-        $this->setTargetSize();
-        $this->setArguments([]);
+        $this->parameters->setMode(ProcessorInterface::IM_NOSCALE);
+        $this->parameters->setTargetSize();
 
         return $this->process();
     }
@@ -251,27 +252,11 @@ class JitImage extends Image
      */
     protected function paramsToString()
     {
-        $parts = ['mode' => $this->mode];
-
-        foreach ($this->targetSize as $value) {
-
-            if (is_numeric($value)) {
-                $parts[] = (string) $value;
-            }
-        }
-
-        foreach ($this->arguments as $i => $arg) {
-
-            if (is_numeric($arg) || ($i === 1 and $this->isColor($arg))) {
-                $parts[] = trim((string) $arg);
-            }
-        }
-
         $filters = $this->filters->toArray();
 
         return [
             $this->source,
-            implode('/', $parts),
+            implode('/', array_values($this->parameters->all())),
             !empty($filters) ? sprintf('filter:%s', $this->filters->compile()) : null
         ];
     }

@@ -11,6 +11,7 @@
 
 namespace Thapp\JitImage\Resolver;
 
+use \Thapp\Image\Driver\Parameters;
 use \Thapp\Image\ProcessorInterface;
 use \Thapp\JitImage\Resource\ImageResource;
 use \Thapp\JitImage\Cache\CacheAwareInterface;
@@ -103,7 +104,11 @@ class ImageResolver implements ParameterResolverInterface
             return $resource;
         }
 
-        $params = array_merge($this->extractParamString($params), ['filter' => $this->extractFilterString($filter)]);
+        $params = array_merge(
+            Parameters::fromString($params, '/')->all(),
+            ['filter' => $this->extractFilterString($filter)]
+        );
+
         $this->validateParams($params);
 
         return $this->applyProcessor($this->processor, $path, $params, $cache, $key);
