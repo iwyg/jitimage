@@ -25,7 +25,7 @@ return [
         'image'   => public_path() . '/test',
         'thumb'   => public_path() . '/thumbs',
         'porn'    => public_path() . '/thumbs',
-        'dropbox' => 'scum',
+        'dropbox' => 'assets',
     ],
 
     /*
@@ -88,7 +88,7 @@ return [
         'enabled' => true,
 
         // the default first uri segment
-        'default' => 'image',
+        // 'default' => 'image',
 
         // the default path suffix
         'suffix' => 'cached',
@@ -103,14 +103,14 @@ return [
             'image' => [
                 'enabled' => true
             ],
-            'foo/bar' => [
+            'dropbox' => [
                 'service' => 'Thapp\JitImage\Adapter\FlysystemCache'
             ],
             'thumb' => [
                 'enabled' => false
             ],
-            'porn' => [
-                'path' => storage_path() . '/porn'
+            'gallery' => [
+                'path' => public_path() . '/cache'
             ],
         ],
     ],
@@ -152,6 +152,6 @@ return [
     | This will only affect the `\Thapp\Image\Loader\RemoteLoader` class.
     */
     'trusted_sites' => [
-        'http://[0-9]+.media.tumblr.(com|de|net)',
+        //'http://[0-9]+.media.tumblr.(com|de|net)',
     ]
 ];
