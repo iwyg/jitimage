@@ -66,11 +66,35 @@ Next, copy the `config.php` from `vendor/thapp/jitimage/Laravel/config/config.ph
 
 ### Silex
 
-Not ready yet.
+Register the `Thapp\JitImage\Siliex\JitImageServiceProvider` on your
+application
 
+```php
+<?php
+
+$app->register(new Thapp\JitImage\Siliex\JitImageServiceProvider);
+
+```
+
+If you want to use the jitimage twig filters, register the  `Thapp\JitImage\Siliex\JitImageTwigHelperProvider`.
+Make sure you've alse registered the [silex twig service provider](http://silex.sensiolabs.org/doc/providers/twig.html).
+
+```php
+<?php
+
+$app->register(new Thapp\JitImage\Siliex\JitImageTwigHelperProvider);
+
+```
+
+You can configure JitImage using the bundled exaple config file `vendor/thapp/jitimage/Silex/config/default.php` as a blueprint.
 
 ## Configuration
 
+Silex users must prefix keys with `jitimage.`, e.g. 
+
+```php 
+'$app['jitimage.default_path'] = 'image'
+```
 
 #### `paths <type array>`
 
