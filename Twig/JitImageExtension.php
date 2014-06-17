@@ -227,7 +227,11 @@ class JitImageExtension extends \Twig_Extension
      */
     private function getImage($src, $filters = null, $addExtension = false)
     {
-        $img = $this->image->from($this->getLocation(), $addExtension);
+        $img = $this->image->from($this->getLocation());
+
+        if ($addExtension) {
+            $img->withExtension();
+        }
 
         $img->load($src);
 

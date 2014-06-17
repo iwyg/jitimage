@@ -164,7 +164,7 @@ class JitImageServiceProvider implements ServiceProviderInterface
                 $app['jitimage.path_resolver'],
                 $app['jitimage.recipe_resolver'],
                 $this->get('jitimage.cache.suffix', 'cached'),
-                $this->get('jitimage.cache.default_path', null)
+                $this->get('jitimage.default_path', null)
             );
         });
     }

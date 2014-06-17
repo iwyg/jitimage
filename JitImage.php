@@ -180,6 +180,13 @@ class JitImage extends AbstractImage
         return $this;
     }
 
+    public function withExtension()
+    {
+        $this->addExtension = true;
+
+        return $this;
+    }
+
     /**
      * {@inheritdoc}
      *
@@ -268,8 +275,6 @@ class JitImage extends AbstractImage
     /**
      * getImageFingerPrint
      *
-     *
-     * @access protected
      * @return void
      */
     protected function close()
@@ -333,7 +338,7 @@ class JitImage extends AbstractImage
      */
     private function getUri($fragments)
     {
-        return '/' . implode('/', [trim($this->path, '/'), $fragments]);
+        return '/' . implode('/', [trim($this->getCurrentPath(), '/'), $fragments]);
     }
 
     /**
