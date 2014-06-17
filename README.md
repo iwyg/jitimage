@@ -161,4 +161,154 @@ This is only relevant, if you choose to utilize the
 `Thapp\Image\Loader\RemoteLoader` source loader. You can define a list of
 trusted sites from which you may fetch images via http. The list can contain valid regexps.
 
+## Usage
 
+### Routes
+
+#### Dynamic routes
+
+A common jit route uri looks something like this `/path/<mode>/[<params>]/<source>/[filter:<filter>]`. It takes the processing mode as its first argument, followed by mode specific parameters and the image source. Filters can be declared after the source parameter, using the keyword `filter:`.
+
+Filters are separated by a colon `:`, filter parameters are separated by
+a semicolon `;`, e.g., `filter:overlay;c=f0e:circle` will add an overlay with color `#ff00ee` and apply a circle mask. 
+
+#### Modes
+
+**mode 0**  
+Pass through, no scaling. 
+
+**mode 1** `< width/height >`  
+Resizes the image with the given width and height values and ignores aspect
+ratio unless one of the values is zero.  
+
+**mode 2** `< width/height/gravity >`  
+Resize the image to fit within the cropping boundaries defined in width and height. 
+
+Gravity explained:        
+
+```
+-------------  
+| 1 | 2 | 3 |  
+-------------  
+| 4 | 5 | 6 |  
+-------------  
+| 7 | 8 | 9 |  
+-------------  
+```
+
+**mode 3** `< width/height/gravity/[color] >`  
+Crops the image with cropping boundaries defined in width and height. Will
+create a frame if the image is smaller than the cropping area. 
+
+**mode 4** `< width/height >`  
+Best fit  within the given bounds.
+
+**mode 5** `< percentage >`  
+Percrentual scale. 
+
+**mode 6** `< pixelcount >`  
+Pixel limit.
+
+### Templates
+
+#### Twig
+
+Takes an image `source.jpg` from the image source path 
+and applies the `thumb` recipe.
+
+```html
+<img src="{{ 'source.jpg' | jmg_from('image') | jmg_make('thumb', true) }}"/>
+```
+
+Takes an image `source.jpg` from the image source path,
+performs a `200px * 200px` crop with a gravity of `5`, and applies an `overlay`
+filter.
+
+```html
+<img src="{{ 'source.jpg' | jmg_from('image') | jmg_crop_resize(200, 200, 5, 'overlay;c=ccc', true) }}"/>
+```
+
+You can also use the `jmg` twig function to dircetly access the jitimage service.
+
+```html
+<img src="{{ jmg('image').load('source.jpg').filter('circle').get() }}"/>
+```
+
+#### Blade (laravel)
+
+Using blade, you can directly utilize the `JitImage` facade. 
+
+Takes an image `source.jpg` from the image source path,
+performs a `200px * 200px` crop with a gravity of `5`, and applies an `overlay`
+
+```php
+
+JitImage::from('image')
+	->load('source.jpg')
+	->withExtension() /* print image extension */
+	->filter('overlay;c=ccc')
+	->cropAndResize(200, 200, 5);
+
+```
+
+Takes an image `source.jpg` from the image source path 
+and applies the `thumb` recipe.
+
+```php
+
+JitImage::from('image')
+	->load('source.jpg')
+	->make('thumb');
+
+```
+
+### Filters
+
+JitImage comes with 4 predfined filters, `Greyscale`, `Circle`, `Overlay`,
+`Colorize`, and `Convert` (since v0.1.3):
+
+(**Note:** since v0.1.4. calling invalid arguments on a filter will throw an
+[`\InvalidArgumentException`](http://php.net/manual/en/class.invalidargumentexception.php))
+
+##### GreyScale
+```
+- alias `gs`  
+- options (not available for the `gd` driver) 
+	- `b` (Brightness){integer}, 0-100
+	- `s` (Satturation){integer}, 0-100
+	- `h` (Hue){integer}, 0-100
+	- `c` (Contrast){integer} 0 or 1 
+```
+
+##### Circle
+
+```
+- alias `circle`  
+- options 
+	- `o` {integer} offset, any positive integer value
+```
+
+##### Overlay
+
+```
+- alias `overlay`  
+- options 
+	- `a` (alpha) {float} a float value between 0 and 1
+	- `c` (color) {string} hex representation of an rgb value
+```
+
+##### Colorize
+
+```
+- alias `colorize`  
+- options 
+	- `c` (color){string} hex representation of an rgb value
+```
+
+##### Convert
+
+```
+- alias `convert`  
+- options 
+	- `f` (file format){string} a valid image file extension such as `png`, `jpg`, etc.
+```
