@@ -26,7 +26,8 @@ class JitImageTest extends \PHPUnit_Framework_TestCase
     {
         $ires = m::mock('\Thapp\JitImage\Resolver\ImageResolver');
         $pres = m::mock('\Thapp\JitImage\Resolver\PathResolver');
+        $rres = m::mock('\Thapp\JitImage\Resolver\RecipeResolver');
 
-        $this->assertInstanceof('\Thapp\JitImage\JitImage', new JitImage($ires, $pres));
+        $this->assertInstanceof('\Thapp\JitImage\JitImage', new JitImage($ires, $pres, $rres));
     }
 }
