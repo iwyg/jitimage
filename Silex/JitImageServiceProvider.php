@@ -71,6 +71,11 @@ class JitImageServiceProvider implements ServiceProviderInterface
 
         $resolved = $this->resolveRecipes($recipes, $paths);
 
+
+        $app['jitimage.recipe_resolver'] = $app->share(function () use ($resolved) {
+            return new \Thapp\JitImage\Resolver\RecipeResolver($resolved['recipes']);
+        });
+
         $app->mount('/', new JitImageControllerProvider($paths, $caches, $resolved['params']));
 
         $this->registerControllerService($app, $resolved['recipes'], $paths);
@@ -79,10 +84,16 @@ class JitImageServiceProvider implements ServiceProviderInterface
     private function registerControllerService(Application $app, array $recipes, array $paths)
     {
         $app['jitimage.controller'] = $app->share(function () use ($app) {
-            return new \Thapp\JitImage\Controller\SilexController(
+            $controller =  new \Thapp\JitImage\Controller\SilexController(
                 $app['jitimage.path_resolver'],
                 $app['jitimage.image_resolver']
             );
+
+            if (!empty($recipes)) {
+                $controller->setRecieps($app['jitimage.recipe_resolver']);
+            }
+
+            return $controller;
         });
     }
 
@@ -151,6 +162,7 @@ class JitImageServiceProvider implements ServiceProviderInterface
             return new \Thapp\JitImage\JitImage(
                 $app['jitimage.image_resolver'],
                 $app['jitimage.path_resolver'],
+                $app['jitimage.recipe_resolver'],
                 $this->get('jitimage.cache.suffix', 'cached'),
                 $this->get('jitimage.cache.default_path', null)
             );

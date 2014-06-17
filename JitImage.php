@@ -19,6 +19,7 @@ use \Thapp\JitImage\Resource\ImageResource;
 use \Thapp\JitImage\Resolver\PathResolver;
 use \Thapp\JitImage\Resolver\ImageResolver;
 use \Thapp\JitImage\Resolver\ImageResolverHelper;
+use \Thapp\JitImage\Resolver\RecipeResolver;
 use \Thapp\Image\Driver\Parameters;
 
 /**
@@ -36,14 +37,21 @@ class JitImage extends AbstractImage
 
     private $path;
     private $pool;
+    private $recipes;
 
     /**
      * @param ImageResolver $imageResolver
      */
-    public function __construct(ImageResolver $resolver, PathResolver $pathResolver, $cSuffix = 'cached', $dPath = null)
-    {
+    public function __construct(
+        ImageResolver $resolver,
+        PathResolver $pathResolver,
+        RecipeResolver $recipes,
+        $cSuffix = 'cached',
+        $dPath = null
+    ) {
         $this->pool        = [];
         $this->paths       = $pathResolver;
+        $this->recipes     = $recipes;
         $this->resolver    = $resolver;
         $this->cacheSuffix = $cSuffix;
         $this->defaultPath = $dPath;
@@ -55,6 +63,29 @@ class JitImage extends AbstractImage
     public static function create($source = null, $driver = self::DRIVER_IMAGICK)
     {
         throw new \BadMethodCallException('calling create is not allowed on this intance');
+    }
+
+    /**
+     * make
+     *
+     * @param mixed $recipe
+     *
+     * @access public
+     * @return mixed
+     */
+    public function make($recipe)
+    {
+        if (!$res = $this->recipes->resolve($recipe)) {
+            return;
+        }
+
+        if (null !== $res[1]) {
+            $this->filter($res[1]);
+        }
+
+        $this->parameters->setFromString($res[0]);
+
+        return $this->process();
     }
 
     /**

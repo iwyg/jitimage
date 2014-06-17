@@ -76,6 +76,11 @@ class JitImageExtension extends \Twig_Extension
 
                 return $src;
             }),
+            new \Twig_SimpleFilter('jmg_make', function ($src, $recipe, $addExtension = false) {
+                $img = $this->getImage($src, null, $addExtension);
+
+                return $img->make($recipe);
+            }),
             new \Twig_SimpleFilter('jmg_get', [$this, 'filterGet']),
             new \Twig_SimpleFilter('jmg_resize', [$this, 'filterResize']),
             new \Twig_SimpleFilter('jmg_crop', [$this, 'filterCrop']),
@@ -113,11 +118,11 @@ class JitImageExtension extends \Twig_Extension
      *
      * @return string
      */
-    public function filterResize($src, $w = null, $h = null, $f = null, $e = false)
+    public function filterResize($src, $w = 0, $h = 0, $f = null, $e = false)
     {
         $image = $this->getImage($src, $f, $e);
 
-        return $image->resize($w, $h, $g, $c);
+        return $image->resize($w, $h);
     }
 
     /**

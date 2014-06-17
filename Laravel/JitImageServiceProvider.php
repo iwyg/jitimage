@@ -76,8 +76,13 @@ class JitImageServiceProvider extends ServiceProvider
         $caches  = $this->registerCaches($router, $paths, $cacheConfig);
         $recipes = $this->registerStaticRoutes($router, $recipes, $paths);
 
+        $this->app['jitimage.recipe_resolver'] = $this->app->share(function () use ($recipes) {
+            return new \Thapp\JitImage\Resolver\RecipeResolver($recipes);
+        });
+
         $this->registerResolvers($caches, $paths);
         $this->registerControllerService($router, $recipes, $paths);
+
 
         if ($this->app['config']->get('jitimage::disable_dynamic_processing', false)) {
             return;
@@ -155,6 +160,7 @@ class JitImageServiceProvider extends ServiceProvider
             return new \Thapp\JitImage\JitImage(
                 $app['jitimage.image_resolver'],
                 $app['jitimage.path_resolver'],
+                $app['jitimage.recipe_resolver'],
                 $app['config']->get('jitimage::cache.suffix', 'cached'),
                 $app['config']->get('jitimage::cache.default_path', null)
             );
@@ -328,7 +334,7 @@ class JitImageServiceProvider extends ServiceProvider
                 $controller->setRequest($app['request']);
 
                 if (!empty($recipes)) {
-                    $controller->setRecieps(new \Thapp\JitImage\Resolver\RecipeResolver($recipes));
+                    $controller->setRecieps($app['jitimage.recipe_resolver']);
                 }
 
                 return $controller;
