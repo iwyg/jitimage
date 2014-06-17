@@ -26,6 +26,7 @@ class JitImageTwigHelperProvider implements ServiceProviderInterface
     {
         $app['twig'] = $app->share($app->extend('twig', function ($twig, $app) {
             $twig->addExtension(new JitImageExtension($app['jitimage']));
+
             return $twig;
         }));
     }

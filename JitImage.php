@@ -35,12 +35,14 @@ class JitImage extends AbstractImage
     use ImageResolverHelper;
 
     private $path;
+    private $pool;
 
     /**
      * @param ImageResolver $imageResolver
      */
     public function __construct(ImageResolver $resolver, PathResolver $pathResolver, $cSuffix = 'cached', $dPath = null)
     {
+        $this->pool        = [];
         $this->paths       = $pathResolver;
         $this->resolver    = $resolver;
         $this->cacheSuffix = $cSuffix;
@@ -147,14 +149,6 @@ class JitImage extends AbstractImage
         return $this;
     }
 
-    public function filterExpression($expr)
-    {
-        $this->filters = clone($this->filters);
-        $this->filters->setExpression($expr);
-
-        return $this;
-    }
-
     /**
      * {@inheritdoc}
      *
@@ -206,7 +200,7 @@ class JitImage extends AbstractImage
 
         // If the image is not cached yet, this is the only time the processor
         // is invoked:
-        if (!$cache->has($key = $this->makeCacheKey($cache, $src, $params, $filter))) {
+        if (!$cache->has($key = $this->createCacheKey($cache, $src, $params, $filter))) {
 
             $processor = $this->resolver->getProcessor();
             $processor->load($src);
@@ -217,9 +211,15 @@ class JitImage extends AbstractImage
             $this->close();
         }
 
+        if (isset($this->pool[$key])) {
+            return $this->pool[$key];
+        }
+
         $extension = $this->addExtension ? '.'.$this->getFileExtension($cache->get($key)->getMimeType()) : '';
 
-        return '/'. implode('/', [$path, $this->cacheSuffix, strtr($key, ['.' => '/'])]).$extension;
+        $src =  '/'. implode('/', [$path, $this->cacheSuffix, strtr($key, ['.' => '/'])]).$extension;
+
+        return $this->pool[$key] = $src;
     }
 
     /**
@@ -266,7 +266,7 @@ class JitImage extends AbstractImage
 
         return [
             $this->source,
-            implode('/', array_values($this->parameters->all())),
+            $this->parameters->asString(),
             !empty($filters) ? sprintf('filter:%s', $this->filters->compile()) : null
         ];
     }
@@ -296,13 +296,33 @@ class JitImage extends AbstractImage
     /**
      * getUri
      *
-     * @param mixed $uri
+     * @param array $fragments
      *
-     * @access protected
      * @return string
      */
     private function getUri($fragments)
     {
         return '/' . implode('/', [trim($this->path, '/'), $fragments]);
+    }
+
+    /**
+     * createCacheKey
+     *
+     * @param CacheInterface $cache
+     * @param string $path
+     * @param string $paramStr
+     * @param string $filterStr
+     *
+     * @return string
+     */
+    private function createCacheKey(CacheInterface $cache, $path, $paramStr, $filterStr)
+    {
+        $p = $path.$paramStr.$filterStr;
+
+        if (isset($this->pool[$p])) {
+            return $this->pool[$p];
+        }
+
+        return $this->pool[$p] = $this->makeCacheKey($cache, $path, $paramStr, $filterStr);
     }
 }
