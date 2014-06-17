@@ -9,7 +9,7 @@
  * that was distributed with this package.
  */
 
-namespace Thapp\JitImage\Silex\Twig;
+namespace Thapp\JitImage\Twig;
 
 use \Thapp\JitImage\JitImage;
 

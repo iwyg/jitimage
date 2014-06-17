@@ -13,7 +13,7 @@ namespace Thapp\JitImage\Silex;
 
 use \Silex\Application;
 use \Silex\ServiceProviderInterface;
-use \Thapp\JitImage\Silex\Twig\JitImageExtension;
+use \Thapp\JitImage\Twig\JitImageExtension;
 
 /**
  * @class JitImageTwigHelperProvider
