@@ -1,5 +1,7 @@
 # Just in time image manipulation
 
+[![Build Status](https://travis-ci.org/iwyg/jitimage.png?branch=v0_2)](https://travis-ci.org/iwyg/jitimage)
+
 version 0.2.* fo the jitimage package is still under development. Feel free to
 give it a shot. Don't hasitate to file an [issue](https://github.com/iwyg/jitimage/issues). 
 
@@ -96,7 +98,7 @@ Silex users must prefix keys with `jitimage.`, e.g.
 '$app['jitimage.default_path'] = 'image'
 ```
 
-#### `paths <type array>`
+**paths** `<type array>`
 
 Paths define the the source pathses from where your images are stored.
 Depending on your loader configuraion this my be absolute or relative paths.
@@ -104,28 +106,28 @@ Depending on your loader configuraion this my be absolute or relative paths.
 The path key also acts as the base path for dynamic processing routes and
 cached routes.
 
-#### `default_path <type string>`
+**default_path** `<type string>`
 
 This applies to the `JitImage class` and is used as a default lookup path when
 ommitting the 'JitImage::from()' call.
 
-#### `disable_dynamic_processing <type boolean>`
+**disable_dynamic_processing** `<type boolean>`
 
 Set this to `true` if you want to completely disable dynamic processing routes.
 
-#### `mode_constraints <type array>`
+**mode_constraints** `<type array>`
 
 You can set scaling constraints for dynamic processing routes. Set the maximum
 allowed value per processing mode, e.g. `2 => [2000, 2000]` will limit the
 width/height to be 2000px for the corp an resize mode.
 
-#### `recipes <type array>, [optional]`
+**recipes** `<type array>, [optional]`
 
 Defines a set of predefined processing instructions per source path. You may
 define as many recipes per source path as you like. The recipe route will then be
 available under `/<alias>/<resource>`
 
-#### `cache <type array>`
+**cache** `<type array>`
 
 - `enabled <boolean>`:  
 set this to false if you wan't to completely disable caching.
@@ -144,18 +146,18 @@ It is alos possible to completely override the default caching service by specif
 Note that the caching service must implement `Thapp\Image\Cache\CacheInterface`. 
 
 
-#### `driver <type string>`
+**driver** `<type string>`
 
 Define the driver for image processing. There're 3 different drivers available:
 `gd`, `im`, and `imagick`
 
-#### `loaders <type array>`
+**loaders** `<type array>`
 
 A list of source loaders you wan't to utilize.  
 You may also use a custom loader. The loader must implement
 `Thapp\Image\Loader\LoaderInterface`.
 
-#### `trusted_sites <type array> [optional]`
+**trusted_sites** `<type array> [optional]`
 
 This is only relevant, if you choose to utilize the
 `Thapp\Image\Loader\RemoteLoader` source loader. You can define a list of
@@ -246,7 +248,7 @@ performs a `200px * 200px` crop with a gravity of `5`, and applies an `overlay`
 JitImage::from('image')
 	->load('source.jpg')
 	->withExtension() /* print image extension */
-	->filter('overlay;c=ccc')
+	->filter('overlay;c=ccc') /* or ->addFilter('overly', ['c' => 'ccc'])*/
 	->cropAndResize(200, 200, 5);
 
 ```
@@ -270,45 +272,61 @@ JitImage comes with 4 predfined filters, `Greyscale`, `Circle`, `Overlay`,
 (**Note:** since v0.1.4. calling invalid arguments on a filter will throw an
 [`\InvalidArgumentException`](http://php.net/manual/en/class.invalidargumentexception.php))
 
-##### GreyScale
+-----------------
+
+##### Greyscale
+
+**alias** `greyscale`  
+**parameters** (not available for the `gd` driver) 
+
 ```
-- alias `gs`  
-- options (not available for the `gd` driver) 
-	- `b` (Brightness){integer}, 0-100
-	- `s` (Satturation){integer}, 0-100
-	- `h` (Hue){integer}, 0-100
-	- `c` (Contrast){integer} 0 or 1 
+`b` (Brightness){integer}, 0-100
+```
+```
+`s` (Satturation){integer}, 0-100
+```
+```
+`h` (Hue){integer}, 0-100
+```
+```
+`c` (Contrast){integer} 0 or 1 
 ```
 
 ##### Circle
 
+**alias** `circle`  
+**parameters** 
+
 ```
-- alias `circle`  
-- options 
-	- `o` {integer} offset, any positive integer value
+`o` {integer} offset, any positive integer value
 ```
 
 ##### Overlay
 
+**alias** `overlay`  
+**parameters** 
+
 ```
-- alias `overlay`  
-- options 
-	- `a` (alpha) {float} a float value between 0 and 1
-	- `c` (color) {string} hex representation of an rgb value
+`a` (alpha) {float} a float value between 0 and 1
+```
+```
+`c` (color) {string} hex representation of an rgb value
 ```
 
 ##### Colorize
 
+**alias** `colorize`  
+**parameters** 
+
 ```
-- alias `colorize`  
-- options 
-	- `c` (color){string} hex representation of an rgb value
+`c` (color){string} hex representation of an rgb value
 ```
 
 ##### Convert
 
+**alias** `convert`  
+**parameters** 
+
 ```
-- alias `convert`  
-- options 
-	- `f` (file format){string} a valid image file extension such as `png`, `jpg`, etc.
+`f` (file format){string} a valid image file extension such as `png`, `jpg`, etc.
 ```
