@@ -236,7 +236,7 @@ class JitImageServiceProvider extends ServiceProvider
             $driver = $this->app['config']->get('jitimage::driver', 'gd');
 
             if (method_exists($this, $method = sprintf('register%sDriver', ucfirst($driver)))) {
-                return call_user_func([$this, $method], $this->app['config']->get('jitimage::quality', 80));
+                return call_user_func([$this, $method]);
             }
 
             throw new \InvalidArgumentException(sprintf('invalid driver %s', $driver));
@@ -475,27 +475,5 @@ class JitImageServiceProvider extends ServiceProvider
         }
 
         return $cache;
-    }
-
-    /**
-     * getDefaultCache
-     *
-     * @param string $path
-     *
-     * @return \Thapp\Image\Cache\CacheInterface
-     */
-    private function getDefaultCache($path)
-    {
-        return new \Thapp\Image\Cache\FilesystemCache(new Filesystem, $path);
-    }
-
-    /**
-     * @param mixed $service
-     *
-     * @return \Thapp\Image\Cache\CacheInterface
-     */
-    private function getOptCache($service)
-    {
-        return $this->app->make($service);
     }
 }

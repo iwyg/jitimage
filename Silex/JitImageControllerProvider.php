@@ -12,6 +12,7 @@
 namespace Thapp\JitImage\Silex;
 
 use \Silex\Application;
+use \Silex\ControllerCollection;
 use \Silex\ControllerProviderInterface;
 use \Thapp\JitImage\ProviderTrait as ProviderHelper;
 use \Symfony\Component\HttpFoundation\Request;
@@ -28,9 +29,15 @@ class JitImageControllerProvider implements ControllerProviderInterface
 
     private $paths;
 
-    public function __construct(array $paths = [])
+    private $staticPaths;
+
+    private $cacheConfig;
+
+    public function __construct(array $paths = [], array $cacheConfig = [], array $static = [])
     {
         $this->paths = $paths;
+        $this->cacheConfig = $cacheConfig;
+        $this->staticPaths = $static;
     }
 
     /**
@@ -57,51 +64,91 @@ class JitImageControllerProvider implements ControllerProviderInterface
      */
     private function registerControllers(Application $app)
     {
-        $app['jitimage.controller'] = $app->share(function () use ($app) {
-            return new \Thapp\JitImage\Controller\SilexController(
-                $app['jitimage.path_resolver'],
-                $app['jitimage.image_resolver']
-            );
-        });
 
         $controllers = $app['controllers_factory'];
 
-        $this->registerROutes($app, $controllers);
+        $this->registerRoutes($app, $controllers);
 
         return $controllers;
     }
 
-    private function registerRoutes(Application $app, $controllers)
+    private function registerRoutes(Application $app, ControllerCollection $controllers)
     {
-        if (!$disabled = $this->get('jitimage.disable_dynamic_processing', false)) {
-            list ($pattern, $params, $source, $filter) = $this->getPathRegexp();
-            $requirements = compact('params', 'source', 'filter');
+        $this->registerCachedControllers($app, $controllers, $this->cacheConfig, $this->get('jitimage.cache.suffix', 'cached'));
+
+        $this->registerStaticControllers($app, $controllers, $this->staticPaths);
+
+        if ($disabled = $this->get('jitimage.disable_dynamic_processing', false)) {
+            return;
         }
 
-        $useCache    = $this->get('jitimage.cache.enabled', true);
-        $default     = $this->get('jitimage.cache.default', 'image');
-        $suffix      = $this->get('jitimage.cache.suffix', 'cached');
-        $cachepath   = $this->get(
-            'jitimage.cache.path',
-            storage_path() . DIRECTORY_SEPARATOR . 'jitimage'
-        );
-
-        $cacheRoutes = $app->get('jitimage.cache.routes', []);
-
-        $caches = [];
+        list ($pattern, $params, $source, $filter) = $this->getPathRegexp();
+        $requirements = compact('params', 'source', 'filter');
 
         foreach ($this->paths as $alias => $path) {
-
-            if (!$disabled) {
-                $controllers->get(rtrim($path, '/') . $pattern, 'jitimage.controller:getImage')
-                    ->addRequirements($requirements)
-                    ->setDefault('filter', null)
-                    ->setDefault('path', $alias)
-
-                    ->before(function (Request $request) use ($app) {
-                        $app['jitimage.controller']->setRequest($request);
-                    });
-            }
+            $this->registerDynamicController(
+                $app,
+                $controllers,
+                $alias,
+                $pattern,
+                $params,
+                $source,
+                $filter,
+                $requirements
+            );
         }
+    }
+
+    private function registerStaticControllers(Application $app, ControllerCollection $controllers, array $paths = [])
+    {
+        foreach ($paths as $routeAlias => $params) {
+            list($route, $param) = $params;
+
+            $controllers->get(
+                $route . '/{' . $param . '}/{source}',
+                ['uses' => 'Thapp\JitImage\Controller\LaravelController@getResource']
+            )
+            ->setRequirements([
+                $param   => $routeAlias,
+                'source' => '(.*)'
+            ]);
+        }
+    }
+
+    private function registerCachedControllers(
+        Application $app,
+        ControllerCollection $controllers,
+        array $caches,
+        $suffix
+    ) {
+        foreach (array_keys($caches) as $path) {
+            $controllers->get(
+                rtrim($path, '/') . '/'. $suffix . '/{id}',
+                'jitimage.controller:getCached'
+            )
+            ->setRequirements(['id' => '(.*\/){1}.*'])
+            ->before(function (Request $request) use ($app) {
+                $app['jitimage.controller']->setRequest($request);
+            });
+        }
+    }
+
+    private function registerDynamicController(
+        Application $app,
+        ControllerCollection $controllers,
+        $path,
+        $pattern,
+        $params,
+        $source,
+        $filter,
+        $requirements
+    ) {
+        $controllers->get($path . $pattern, 'jitimage.controller:getImage')
+            ->addRequirements($requirements)
+            ->setDefault('filter', null)
+            ->setDefault('path', $path)
+            ->before(function (Request $request) use ($app) {
+                $app['jitimage.controller']->setRequest($request);
+            });
     }
 }

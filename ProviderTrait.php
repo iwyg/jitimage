@@ -11,6 +11,8 @@
 
 namespace Thapp\JitImage;
 
+use \Symfony\Component\Filesystem\Filesystem;
+
 /**
  * @trait SilexProviderTrait
  * @package Thapp\JitImage
@@ -31,5 +33,27 @@ trait ProviderTrait
             '((([^0-9A-Fa-f]{3}|[^0-9A-Fa-f]{6})?).*?.(?=(\/filter:.*)?))',
             '(filter:.([^\/])*)'
         ];
+    }
+
+    /**
+     * getDefaultCache
+     *
+     * @param string $path
+     *
+     * @return \Thapp\Image\Cache\CacheInterface
+     */
+    private function getDefaultCache($path)
+    {
+        return new \Thapp\Image\Cache\FilesystemCache(new Filesystem, $path);
+    }
+
+    /**
+     * @param mixed $service
+     *
+     * @return \Thapp\Image\Cache\CacheInterface
+     */
+    private function getOptCache($service)
+    {
+        return $this->app->make($service);
     }
 }

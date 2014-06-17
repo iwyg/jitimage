@@ -24,7 +24,7 @@ trait ProviderTrait
 
     private function getDefault(Application $app, $key, $default = null)
     {
-        return $app[$key] ?: $default;
+        return isset($app[$key]) ?$app[$key]  : $default;
     }
 
     private function get($key, $default = null)

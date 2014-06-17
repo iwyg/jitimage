@@ -34,6 +34,8 @@ class JitImage extends AbstractImage
 {
     use ImageResolverHelper;
 
+    private $path;
+
     /**
      * @param ImageResolver $imageResolver
      */
@@ -73,7 +75,7 @@ class JitImage extends AbstractImage
      */
     public function pixel($pixel)
     {
-        parent::pixel($pixle);
+        parent::pixel($pixel);
 
         return $this->process();
     }
@@ -141,6 +143,14 @@ class JitImage extends AbstractImage
         $this->addExtension = (bool)$addExtension;
 
         $this->path = $path;
+
+        return $this;
+    }
+
+    public function filterExpression($expr)
+    {
+        $this->filters = clone($this->filters);
+        $this->filters->setExpression($expr);
 
         return $this;
     }
