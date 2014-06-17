@@ -272,7 +272,6 @@ JitImage comes with 4 predfined filters, `Greyscale`, `Circle`, `Overlay`,
 (**Note:** since v0.1.4. calling invalid arguments on a filter will throw an
 [`\InvalidArgumentException`](http://php.net/manual/en/class.invalidargumentexception.php))
 
------------------
 
 ##### Greyscale
 
