@@ -46,6 +46,17 @@ class LaravelController extends Controller implements ImageControllerInterface
         $this->setImageResolver($imageResolver);
     }
 
+    public function getCachedResource($route, $suffix, $id, $path = 'test')
+    {
+        $path = trim($route, '/');
+
+        if (!$resource = $this->imageResolver->resolveCached([$path, $id])) {
+            $this->notFound($id);
+        }
+
+        return $this->processResource($resource);
+    }
+
     /**
      * setRouter
      *
@@ -82,6 +93,7 @@ class LaravelController extends Controller implements ImageControllerInterface
      */
     private function getCurrentPath()
     {
+        $r = new \ReflectionObject($this->router->getCurrentRoute());
         return $this->router->getCurrentRoute()->getCompiled()->getStaticPrefix();
     }
 }

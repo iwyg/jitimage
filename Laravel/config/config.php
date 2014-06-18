@@ -25,7 +25,7 @@ return [
         'image'   => public_path() . '/test',
         'thumb'   => public_path() . '/thumbs',
         'porn'    => public_path() . '/thumbs',
-        'dropbox' => 'assets',
+        'dropbox' => 'scum',
     ],
 
     /*
@@ -85,7 +85,7 @@ return [
     'cache' => [
 
         // enable cache by default
-        'enabled' => true,
+        'enabled' => false,
 
         // the default first uri segment
         // 'default' => 'image',

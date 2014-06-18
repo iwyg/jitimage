@@ -123,9 +123,10 @@ class JitImageControllerProvider implements ControllerProviderInterface
     ) {
         foreach (array_keys($caches) as $path) {
             $controllers->get(
-                rtrim($path, '/') . '/'. $suffix . '/{id}',
+                $pattern = rtrim($path, '/') . '/'. $suffix . '/{id}',
                 'jitimage.controller:getCached'
             )
+            ->setDefault('path', $path)
             ->setRequirements(['id' => '(.*\/){1}.*'])
             ->before(function (Request $request) use ($app) {
                 $app['jitimage.controller']->setRequest($request);

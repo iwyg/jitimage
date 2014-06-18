@@ -35,10 +35,21 @@ class JitImageServiceProvider extends ServiceProvider
      */
     public function register()
     {
+        $this->app->singleton('Thapp\JitImage\Adapter\FlysystemCache', function ($app) {
+            @mkdir($path = storage_path().'/fly', 0755, true);
+
+            return new \Thapp\JitImage\Adapter\FlysystemCache(
+                $app['GrahamCampbell\Flysystem\Managers\FlysystemManager'],
+                'public/cache',
+                $path
+            );
+        });
+
         $this->registerLoader();
         $this->registerWriter();
         $this->registerDriver();
         $this->registerProcessor();
+
     }
 
     /**
@@ -373,10 +384,13 @@ class JitImageServiceProvider extends ServiceProvider
      */
     private function registerCachedController(Router $router, $path, $suffix)
     {
-        $router->get(
-            rtrim($path, '/') . '/'. $suffix . '/{id}',
-            'Thapp\JitImage\Controller\LaravelController@getCached'
-        )->where('id', '(.*\/){1}.*');
+        $r = $router->get(
+            rtrim($path, '/') . '/{suffix}/{id}',
+            'Thapp\JitImage\Controller\LaravelController@getCachedResource'
+        )
+        ->where('id', '(.*\/){1}.*')
+        ->where('suffix', $suffix)
+        ->defaults('path', $path);
     }
 
     /**
@@ -472,7 +486,7 @@ class JitImageServiceProvider extends ServiceProvider
         $cache = [];
 
         foreach ($caches as $route => $c) {
-            if (is_array($cache) && false !== $c[0]) {
+            if (is_array($c) && false !== $c[0]) {
                 $cache[$route] = $this->getDefaultCache($c[1]);
                 continue;
             }
@@ -481,5 +495,10 @@ class JitImageServiceProvider extends ServiceProvider
         }
 
         return $cache;
+    }
+
+    private function getOptCache($service)
+    {
+        return $this->app[$service];
     }
 }

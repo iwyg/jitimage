@@ -14,6 +14,7 @@ namespace Thapp\JitImage\Silex;
 use \Silex\Application;
 use \Thapp\JitImage\ProviderTrait as CommonProviderTrait;
 use \Silex\ServiceProviderInterface;
+use \Symfony\Component\Filesystem\Filesystem;
 
 /**
  * @class SilexServiceProvider
@@ -127,6 +128,47 @@ class JitImageServiceProvider implements ServiceProviderInterface
             return $caches;
         }
 
+
+        $this->app['jitimage.memcached_cache'] = $this->app->protect(function ($path) {
+
+            return new \Thapp\Image\Cache\MemcachedCache(
+                $this->app['jitimage.memcached_client'],
+                'somestring9872713'
+            );
+        });
+
+        $this->app['jitimage.default_cache'] = $this->app->protect(function ($path) {
+            return new \Thapp\Image\Cache\FilesystemCache(
+                new Filesystem,
+                $path,
+                $this->get('jitimage.cache.file_prefix', 'fsh_'),
+                'meta',
+                $this->get('jitimage.cache.meta_path')
+            );
+        });
+
+        $this->app['jitimage.memcached_client'] = $this->app->share(function ($app) {
+
+            $memcached = new \Memcached;
+            $memcached->addServers([
+                ['host' => '127.0.0.1', 'port' => 11211, 'weight' => 100]
+            ]);
+
+            return new \Thapp\Image\Cache\MemcachedClient($memcached);
+        });
+
+        $this->app['jitimage.hybrid_cache'] = $this->app->protect(function ($path) {
+
+            return new \Thapp\Image\Cache\HybridCache(
+                $this->app['jitimage.memcached_client'],
+                new Filesystem,
+                'a01293cache',
+                $path
+            );
+
+
+        });
+
         foreach ($paths as $alias => $path) {
 
             if (isset($cacheRoutes[$alias]['enabled']) && true !== $cacheRoutes[$alias]['enabled']) {
@@ -238,16 +280,10 @@ class JitImageServiceProvider implements ServiceProviderInterface
         $app['jitimage.image_processor'] = $app->share(function ($app) {
             $quality = $this->get('jitimage.quality', 80);
 
-            try {
-                $processor = new \Thapp\JitImage\JitImageProcessor(
-                    $app['jitimage.image_driver'],
-                    $app['jitimage.image_writer']
-                );
-            } catch (\Exception $e) {
-                var_dump($e->getMessage());
-                die;
-            }
-
+            $processor = new \Thapp\JitImage\JitImageProcessor(
+                $app['jitimage.image_driver'],
+                $app['jitimage.image_writer']
+            );
             $processor->setQuality($quality);
 
             return $processor;
@@ -363,8 +399,9 @@ class JitImageServiceProvider implements ServiceProviderInterface
         $cache = [];
 
         foreach ($caches as $route => $c) {
-            if (is_array($cache) && false !== $c[0]) {
-                $cache[$route] = $this->getDefaultCache($c[1]);
+            if (is_array($c) && false !== $c[0]) {
+                //$cache[$route] = $this->getDefaultCache($c[1]);
+                $cache[$route] = $this->app['jitimage.memcached_cache']($c[1]);
                 continue;
             }
 
@@ -389,5 +426,15 @@ class JitImageServiceProvider implements ServiceProviderInterface
             $this->get('jitimage.cache.path', $defaultPath),
             $this->get('jitimage.cache.paths', [])
         ];
+    }
+
+    /**
+     * @param mixed $service
+     *
+     * @return \Thapp\Image\Cache\CacheInterface
+     */
+    private function getOptCache($service)
+    {
+        return $this->app[$service];
     }
 }

@@ -244,7 +244,7 @@ class JitImage extends AbstractImage
             $processor->load($src);
             $processor->process($p = $this->compileExpression());
 
-            $cache->set($key, $processor->getContents());
+            $cache->set($key, $processor);
 
             $this->close();
         }
@@ -253,11 +253,12 @@ class JitImage extends AbstractImage
             return $this->pool[$key];
         }
 
-        $extension = $this->addExtension ? '.'.$this->getFileExtension($cache->get($key)->getMimeType()) : '';
+        $cached = $cache->get($key);
 
-        $src =  '/'. implode('/', [$path, $this->cacheSuffix, strtr($key, ['.' => '/'])]).$extension;
+        $file = $cached->getFileName();
+        $dir  = basename(dirname($cached->getPath()));
 
-        return $this->pool[$key] = $src;
+        return $this->pool[$key] = '/'. implode('/', [$path, $this->cacheSuffix, $dir, $file]);
     }
 
     /**

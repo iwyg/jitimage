@@ -46,14 +46,4 @@ trait ProviderTrait
     {
         return new \Thapp\Image\Cache\FilesystemCache(new Filesystem, $path);
     }
-
-    /**
-     * @param mixed $service
-     *
-     * @return \Thapp\Image\Cache\CacheInterface
-     */
-    private function getOptCache($service)
-    {
-        return $this->app->make($service);
-    }
 }

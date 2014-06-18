@@ -125,18 +125,24 @@ class ImageResolver implements ParameterResolverInterface
     {
         $prefix = trim(substr($parameters[0], 0, strrpos($parameters[0], '/')), '/');
 
-        if (null === ($cache = $this->cacheResolver->resolve($prefix))) {
+        if (null === ($cache = $this->cacheResolver->resolve($parameters[0]))) {
             return;
         }
+
 
         $pos = strrpos($parameters[1], '.');
 
         $key = strtr($parameters[1], ['/' => '.']);
         $key = false !== $pos ? substr($key, 0, $pos) : $key;
 
+
+        //var_dump($cache);
+        //var_dump($cache->has($key));
+        //die;
         if (!$cache->has($key)) {
             return;
         }
+
 
         return $cache->get($key);
     }

@@ -62,7 +62,7 @@ trait ImageResolverHelper
             return $this->createResource($this->processor);
         }
 
-        $cache->set($key, $this->processor->getContents());
+        $cache->set($key, $this->processor);
 
         return $cache->get($key);
     }

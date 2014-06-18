@@ -159,12 +159,12 @@ trait ImageControllerTrait
     public function getCached($path, $id)
     {
         if (!$resource = $this->imageResolver->resolveCached([$path, $id])) {
-
             $this->notFound($id);
         }
 
         return $this->processResource($resource);
     }
+
     /**
      * processResource
      *
