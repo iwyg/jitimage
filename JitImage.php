@@ -66,12 +66,11 @@ class JitImage extends AbstractImage
     }
 
     /**
-     * make
+     * Bakes an image from a recipe.
      *
-     * @param mixed $recipe
+     * @param string $recipe
      *
-     * @access public
-     * @return mixed
+     * @return string
      */
     public function make($recipe)
     {
@@ -79,11 +78,13 @@ class JitImage extends AbstractImage
             return;
         }
 
-        if (null !== $res[1]) {
-            $this->filter($res[1]);
+        list ($params, $filter) = $res;
+
+        if (null !== $filter) {
+            $this->filter($filter);
         }
 
-        $this->parameters->setFromString($res[0]);
+        $this->parameters->setFromString($params);
 
         return $this->process();
     }
@@ -165,24 +166,14 @@ class JitImage extends AbstractImage
      * {@inheritdoc}
      *
      * @param string  $path
-     * @param boolean $addExtension
      *
      * @return Image
      */
-    public function from($path, $addExtension = false)
+    public function from($path)
     {
         $this->close();
 
-        $this->addExtension = (bool)$addExtension;
-
         $this->path = $path;
-
-        return $this;
-    }
-
-    public function withExtension()
-    {
-        $this->addExtension = true;
 
         return $this;
     }

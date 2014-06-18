@@ -76,8 +76,8 @@ class JitImageExtension extends \Twig_Extension
 
                 return $src;
             }),
-            new \Twig_SimpleFilter('jmg_make', function ($src, $recipe, $addExtension = false) {
-                $img = $this->getImage($src, null, $addExtension);
+            new \Twig_SimpleFilter('jmg_make', function ($src, $recipe) {
+                $img = $this->getImage($src, null);
 
                 return $img->make($recipe);
             }),
@@ -100,9 +100,9 @@ class JitImageExtension extends \Twig_Extension
      *
      * @return string
      */
-    public function filterGet($src, $f = null, $e = false)
+    public function filterGet($src, $f = null)
     {
-        $image = $this->getImage($src, $f, $e);
+        $image = $this->getImage($src, $f);
 
         return $image->get();
     }
@@ -114,13 +114,12 @@ class JitImageExtension extends \Twig_Extension
      * @param int    $w    image width
      * @param int    $h    image height
      * @param string $f    image filter
-     * @param bool   $e    print file extension
      *
      * @return string
      */
-    public function filterResize($src, $w = 0, $h = 0, $f = null, $e = false)
+    public function filterResize($src, $w = 0, $h = 0, $f = null)
     {
-        $image = $this->getImage($src, $f, $e);
+        $image = $this->getImage($src, $f);
 
         return $image->resize($w, $h);
     }
@@ -134,13 +133,12 @@ class JitImageExtension extends \Twig_Extension
      * @param int    $g    image gravity
      * @param string $c    image background color
      * @param string $f    image filter
-     * @param bool   $e    print file extension
      *
      * @return string
      */
-    public function filterCrop($src, $w = null, $h = null, $g = 5, $c = null, $f = null, $e = false)
+    public function filterCrop($src, $w = null, $h = null, $g = 5, $c = null, $f = null)
     {
-        $image = $this->getImage($src, $f, $e);
+        $image = $this->getImage($src, $f);
 
         return $image->resize($w, $h, $g, $c);
     }
@@ -153,11 +151,10 @@ class JitImageExtension extends \Twig_Extension
      * @param int    $h    image height
      * @param int    $g    image gravity
      * @param string $f    image filter
-     * @param bool   $e    print file extension
      *
      * @return string
      */
-    public function filterCropResize($src, $w = null, $h = null, $g = 5, $f = null, $e = false)
+    public function filterCropResize($src, $w = null, $h = null, $g = 5, $f = null)
     {
         $image = $this->getImage($src, $f, $e);
 
@@ -171,13 +168,12 @@ class JitImageExtension extends \Twig_Extension
      * @param int    $w    image width
      * @param int    $h    image height
      * @param string $f    image filter
-     * @param bool   $e    print file extension
      *
      * @return string
      */
-    public function filterFit($src, $w = null, $h = null, $f = null, $e = false)
+    public function filterFit($src, $w = null, $h = null, $f = null)
     {
-        $image = $this->getImage($src, $f, $e);
+        $image = $this->getImage($src, $f);
 
         return $image->fit($w, $h);
     }
@@ -188,13 +184,12 @@ class JitImageExtension extends \Twig_Extension
      * @param string $src  image source
      * @param int    $p    scaling value in percent
      * @param string $f    image filter
-     * @param bool   $e    print file extension
      *
      * @return string
      */
-    public function filterScale($src, $p = null, $f = null, $e = false)
+    public function filterScale($src, $p = null, $f = null)
     {
-        $image = $this->getImage($src, $f, $e);
+        $image = $this->getImage($src, $f);
 
         return $image->scale($p);
     }
@@ -205,13 +200,12 @@ class JitImageExtension extends \Twig_Extension
      * @param string $src  image source
      * @param int    $px   image pixel
      * @param string $f    image filter
-     * @param bool   $e    print file extension
      *
      * @return string
      */
-    public function filterPixel($src, $px = null, $f = null, $e = false)
+    public function filterPixel($src, $px = null, $f = null)
     {
-        $image = $this->getImage($src, $f, $e);
+        $image = $this->getImage($src, $f);
 
         return $image->pixel($px);
     }
@@ -221,17 +215,12 @@ class JitImageExtension extends \Twig_Extension
      *
      * @param string $src
      * @param string $filters
-     * @param bool   $addExtension
      *
      * @return JitImage
      */
-    private function getImage($src, $filters = null, $addExtension = false)
+    private function getImage($src, $filters = null)
     {
         $img = $this->image->from($this->getLocation());
-
-        if ($addExtension) {
-            $img->withExtension();
-        }
 
         $img->load($src);
 
