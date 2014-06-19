@@ -11,8 +11,6 @@
 
 namespace Thapp\JitImage;
 
-use \Symfony\Component\Filesystem\Filesystem;
-
 /**
  * @trait SilexProviderTrait
  * @package Thapp\JitImage
@@ -44,6 +42,6 @@ trait ProviderTrait
      */
     private function getDefaultCache($path)
     {
-        return new \Thapp\Image\Cache\FilesystemCache(new Filesystem, $path);
+        return new \Thapp\Image\Cache\FilesystemCache($path);
     }
 }

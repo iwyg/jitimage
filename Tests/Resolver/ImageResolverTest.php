@@ -144,7 +144,7 @@ class ImageResolverTest extends \PHPUnit_Framework_TestCase
 
         $res->shouldreceive('resolve')->with('prefix')->andReturn($cache);
 
-        $resolver->resolveCached(['prefix/suffix', 'a/b']);
+        $resolver->resolveCached(['prefix', 'a/b']);
 
         $this->assertFalse($failed);
 
@@ -165,7 +165,7 @@ class ImageResolverTest extends \PHPUnit_Framework_TestCase
 
         $res->shouldreceive('resolve')->with('prefix')->andReturn($cache);
 
-        $resolver->resolveCached(['prefix/suffix', 'a/b']);
+        $resolver->resolveCached(['prefix', 'a/b']);
 
         $this->assertFalse($failed);
     }
@@ -180,7 +180,7 @@ class ImageResolverTest extends \PHPUnit_Framework_TestCase
 
         $res->shouldreceive('resolve')->with('prefix')->andReturn(null);
 
-        $this->assertNull($resolver->resolveCached(['prefix/suffix', 'a/b']));
+        $this->assertNull($resolver->resolveCached(['prefix', 'a/b']));
     }
 
     public function paramsProvider()
