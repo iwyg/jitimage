@@ -60,9 +60,13 @@ class JitImage extends AbstractImage
         $this->parameters  = new Parameters;
     }
 
-    public static function create($source = null, $driver = self::DRIVER_IMAGICK)
+    /**
+     * {@inheritdoc}
+     * @return ProcessorInterface
+     */
+    public function getProcessor()
     {
-        throw new \BadMethodCallException('calling create is not allowed on this intance');
+        return $this->resolver->getProcessor();
     }
 
     /**
@@ -275,11 +279,6 @@ class JitImage extends AbstractImage
 
         $this->path = null;
         $this->cache = null;
-    }
-
-    protected function getProcessor()
-    {
-        return $this->resolver->getProcessor();
     }
 
     /**

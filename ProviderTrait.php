@@ -42,6 +42,9 @@ trait ProviderTrait
      */
     private function getDefaultCache($path)
     {
-        return new \Thapp\Image\Cache\FilesystemCache($path);
+        return new \Thapp\Image\Cache\FilesystemCache(
+            $path,
+            storage_path() . '/jitimage/meta'
+        );
     }
 }
