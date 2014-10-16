@@ -130,14 +130,14 @@ return [
 
      /* ------------------------------------------------
      * if the image is not found a default image will be shown.
-     * each recipe can have its own fallback image:
+     * each recipe can have its own placeholder image:
      *
      *   'preview' => 'no_previes_available.jpg',
      *
      * the paths are relative to the base directory as defined above.
      * ------------------------------------------------
      */
-    'fallback' => [
+    'placeholder' => [
         'default' => '',
     ]
 ];

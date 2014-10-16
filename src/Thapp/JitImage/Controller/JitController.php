@@ -106,12 +106,12 @@ class JitController extends Controller
 
         if(!$exists){
 
-            $fallback = $this->imageResolver->config->fallback;
+            $placeholder = $this->imageResolver->config->placeholder;
 
-            if(isset($fallback[$parameter]) and $fallback[$parameter]!=''){
-                $source = $fallback[$parameter];
-            }elseif(isset($fallback['default']) and $fallback['default']!=''){
-                $source = $fallback['default'];
+            if(isset($placeholder[$parameter]) and $placeholder[$parameter]!=''){
+                $source = $placeholder[$parameter];
+            }elseif(isset($placeholder['default']) and $placeholder['default']!=''){
+                $source = $placeholder['default'];
             }
 
             if($source=='' or !File::exists($this->imageResolver->config->base.'/'.$source)){

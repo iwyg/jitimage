@@ -179,7 +179,7 @@ class JitImageServiceProvider extends ServiceProvider
                         $config->get('jitimage::cache.environments', [])
                     ),
                     'format_filter'  => $config->get('jitimage::filter.Convert', 'conv'),
-                    'fallback'       => $config->get('jitimage::fallback', [])
+                    'placeholder'       => $config->get('jitimage::placeholder', [])
                 ];
                 return new \Thapp\JitImage\JitResolveConfiguration($conf);
             }
