@@ -11,6 +11,7 @@
 
 namespace Thapp\JitImage\Controller;
 
+use \Illuminate\Support\Facades\File;
 use \Illuminate\Routing\Router;
 use \Thapp\JitImage\ImageInterface;
 use \Illuminate\Routing\Controller;
@@ -100,6 +101,25 @@ class JitController extends Controller
      */
     public function getResource($parameter, $source)
     {
+
+        $exists = File::exists($this->imageResolver->config->base.'/'.$source);
+
+        if(!$exists){
+
+            $fallback = $this->imageResolver->config->fallback;
+
+            if(isset($fallback[$parameter]) and $fallback[$parameter]!=''){
+                $source = $fallback[$parameter];
+            }elseif(isset($fallback['default']) and $fallback['default']!=''){
+                $source = $fallback['default'];
+            }
+
+            if($source=='' or !File::exists($this->imageResolver->config->base.'/'.$source)){
+                return $this->notFound();
+            }
+
+        }
+
         if ($params = $this->recipes->resolve($parameter)) {
             extract($params);
             return $this->getImage($parameters, $source, $filter);

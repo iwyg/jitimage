@@ -126,5 +126,18 @@ return [
      * `generic` or `xsend`
      * ------------------------------------------------
      */
-    'response-type' => 'generic'
+    'response-type' => 'generic',
+
+     /* ------------------------------------------------
+     * if the image is not found a default image will be shown.
+     * each recipe can have its own fallback image:
+     *
+     *   'preview' => 'no_previes_available.jpg',
+     *
+     * the paths are relative to the base directory as defined above.
+     * ------------------------------------------------
+     */
+    'fallback' => [
+        'default' => '',
+    ]
 ];
