@@ -113,7 +113,18 @@ or as a regexp
 http://[0-9]+.media.tumblr.(com|de|net)
 ```  
 
+##### `placeholder (array)` 
+If the image is not found a placeholder image will can be shown. Each recipe can have its own placeholder image, or when not defined, the default image is used.
+The paths are relative to the base directory as defined above.
 
+```php
+
+'placeholder' => [
+  'default' => 'no_image.jpg', // default placeholder image
+
+  'thumbs' => 'no_thumb_image.jpg', // placeholder image for specific recipe
+]
+```
 
 ## Image Processors
 
