@@ -29,11 +29,11 @@
       "Thapp\\JitImage\\":""
     }
   },
-  "repositories": {
+  "repositories": [
     {
       "type": "vcs",
       "url": "https://github.com/lucidphp/image"
     }
-  },
+  ],
   "minimum-stability": "dev"
 }
