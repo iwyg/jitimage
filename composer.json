@@ -4,7 +4,7 @@
   "keywords": ["image", "thumbnail", "silex", "laravel"],
   "require": {
     "php":">=5.4.0",
-    "lucid/image":"dev-master"
+    "imagine/imagine":"~6.0"
   },
   "license": "MIT",
   "require-dev": {
@@ -29,11 +29,5 @@
       "Thapp\\JitImage\\":""
     }
   },
-  "repositories": [
-    {
-      "type": "vcs",
-      "url": "https://github.com/lucidphp/image"
-    }
-  ],
   "minimum-stability": "dev"
 }
