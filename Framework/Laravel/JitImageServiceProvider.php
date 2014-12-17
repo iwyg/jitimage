@@ -1,0 +1,282 @@
+<?php
+
+/*
+ * This File is part of the Thapp\JitImage\Framework\Laravel package
+ *
+ * (c) iwyg <mail@thomas-appel.com>
+ *
+ * For full copyright and license information, please refer to the LICENSE file
+ * that was distributed with this package.
+ */
+
+namespace Thapp\JitImage\Framework\Laravel;
+
+use Illuminate\Support\ServiceProvider;
+
+/**
+ * @class JitImageServiceProvider
+ *
+ * @package Thapp\JitImage\Framework\Laravel
+ * @version $Id$
+ * @author iwyg <mail@thomas-appel.com>
+ */
+class JitImageServiceProvider extends ServiceProvider
+{
+    const VERSION = '1.0.0-dev';
+
+    /**
+     * defer
+     *
+     * @var boolean
+     */
+    protected $defer = false;
+
+    /**
+     * {@inheritdoc}
+     */
+    public function register()
+    {
+        $this->prepareConfig();
+
+        //$this->app->singleton('jmg.loader.resolver', 'Thapp\JitImage\Framework\Laravel\LazyLoaderResolver');
+
+        $this->app->singleton(
+            'Thapp\JitImage\Resolver\ImageResolverInterface',
+            'Thapp\JitImage\Resolver\ImageResolver'
+        );
+
+        $this->app->singleton(
+            'Thapp\JitImage\ProcessorInterface',
+            'Thapp\JitImage\Imagine\Processor'
+        );
+
+        $this->app->when('Thapp\JitImage\Imagine\Processor')
+            ->needs('Imagine\Image\ImagineInterface')
+            ->give($this->getImagineClass());
+
+        $this->app->singleton(
+            'Thapp\JitImage\Resolver\FilterResolverInterface',
+            'Thapp\JitImage\Resolver\FilterResolver'
+        );
+
+        $this->app->singleton(
+            $loader = 'Thapp\JitImage\Resolver\LoaderResolverInterface',
+            'Thapp\JitImage\Framework\Laravel\Resolver\LazyLoaderResolver'
+            //'Thapp\JitImage\Resolver\LoaderResolver'
+        );
+
+        $this->app->singleton(
+            'Thapp\JitImage\Resolver\CacheResolverInterface',
+            'Thapp\JitImage\Framework\Laravel\Resolver\LazyCacheResolver'
+            //'Thapp\JitImage\Resolver\CacheResolver'
+        );
+
+        $this->app->singleton('Thapp\JitImage\Validator\ValidatorInterface', function ($app) {
+            return new \Thapp\JitImage\Validator\ModeConstraints($app['config']['jmg']['mode_constraints']);
+        });
+
+        $this->app->singleton('Thapp\JitImage\Resolver\RecipeResolverInterface', function ($app) {
+            return new \Thapp\JitImage\Resolver\RecipeResolver($app['config']['jmg']['recipes']);
+        });
+
+        $this->app->singleton('Thapp\JitImage\Resolver\PathResolverInterface', function ($app) {
+            return new \Thapp\JitImage\Resolver\PathResolver($app['config']['jmg']['paths']);
+        });
+
+        $this->app->resolving($class = $this->getControllerClass(), function ($ctrl, $app) {
+            $ctrl->setRouter($app['router']);
+            $ctrl->setRequest($app['request']);
+            $ctrl->setRecieps($app->make('Thapp\JitImage\Resolver\RecipeResolverInterface'));
+        });
+
+        // fire an event in case the processor gets instantiated
+        $this->app->resolving('Thapp\JitImage\ProcessorInterface', function ($proc, $app) {
+            $app['events']->fire('jmg.processor.boot');
+        });
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function boot()
+    {
+        $this->app->singleton('jmg', 'Thapp\JitImage\View\Jmg');
+
+        $this->app->alias('Thapp\JitImage\Resolver\LoaderResolverInterface', 'jmg.loaders');
+        $this->app->alias('Thapp\JitImage\Resolver\FilterResolverInterface', 'jmg.filters');
+
+        $this->registerRoutes();
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function provides()
+    {
+        return ['jmg', 'jmg.loaders', 'jmg.caches', 'jmg.filters'];
+    }
+
+    /**
+     * registerRoutes
+     *
+     * @return void
+     */
+    protected function registerRoutes()
+    {
+        if (file_exists(storage_path().'/framework/routes.php')) {
+            return;
+        }
+
+        $router = $this->app['router'];
+
+        if (!$this->app['config']['jmg']['disable_dynamic_processing']) {
+            $this->registerDynamicRoutes($router);
+        }
+
+        $this->registerRecipes($router);
+    }
+
+    /**
+     * registerRecipes
+     *
+     * @param mixed $router
+     *
+     * @return void
+     */
+    protected function registerRecipes($router)
+    {
+        $config = $this->app['config']['jmg'];
+        $ctrl = $this->getControllerClass().'@getResource';
+
+        foreach ($config['recipes'] as $recipe => $data) {
+            if (isset($config['paths'][$data[0]])) {
+                $this->registerRecipesController($router, $ctrl, $recipe);
+            }
+        }
+    }
+
+    protected function registerDynamicRoutes($router)
+    {
+        list (, $params, $source, $filter) = $this->getPathRegexp();
+
+        $pattern = '/{params}/{source}/{filter?}';
+        $controller = $this->getControllerClass().'@getImage';
+
+        foreach ($this->app['config']['jmg']['paths'] as $path => $filePath) {
+            $this->registerDynamicController($router, $controller, $path, $pattern, $params, $source, $filter);
+        }
+    }
+
+    /**
+     * registerCaches
+     *
+     * @return void
+     */
+    protected function registerCaches()
+    {
+        $config = $this->app['config']['jmg'];
+
+        foreach ($config['paths'] as $prefix => $path) {
+        }
+    }
+
+    protected function getControllerClass()
+    {
+        return '\Thapp\JitImage\Framework\Laravel\Http\Controller';
+    }
+
+    /**
+     * prepareConfig
+     *
+     * @return void
+     */
+    protected function prepareConfig()
+    {
+        if (!file_exists($path = storage_path().'/jmg/config/config.php')) {
+        }
+
+        $config = array_merge($this->getDefaultConfig(), $this->app['config']->get('jmg', []));
+        $this->app['config']->set('jmg', $config);
+    }
+
+    /**
+     * getDefaultConfig
+     *
+     *
+     * @return void
+     */
+    protected function getDefaultConfig()
+    {
+        return include __DIR__.'/resource/config.php';
+    }
+
+    /**
+     * registerDynamicController
+     *
+     * @param Router $router
+     * @param mixed $path
+     * @param string $pattern
+     * @param string $params
+     * @param string $source
+     * @param string $filter
+     *
+     * @return void
+     */
+    private function registerDynamicController($router, $ctrl, $path, $pattern, $params, $source, $filter)
+    {
+        $router->get(rtrim($path, '/') . $pattern, $ctrl)
+            ->where('params', $params)
+            ->where('source', $source)
+            ->where('filter', $filter);
+    }
+
+    /**
+     * registerRecipesController
+     *
+     * @param mixed $router
+     * @param mixed $ctrl
+     * @param mixed $recipe
+     *
+     * @return void
+     */
+    private function registerRecipesController($router, $ctrl, $recipe)
+    {
+        $router->get(rtrim($recipe, '/').'/{source}', $ctrl)
+            ->where('source', '(.*)');
+    }
+
+    private function getPathRegexp()
+    {
+        return [
+            '/{params}/{source}/{filter}',
+            '([5|6](\/\d+){1}|[0]|[1|4](\/\d+){2}|[2](\/\d+){3}|[3](\/\d+){3}\/?([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})?)',
+            '((([^0-9A-Fa-f]{3}|[^0-9A-Fa-f]{6})?).*?.(?=(\/filter:.*)?))',
+            '(filter:.([^\/])*)'
+        ];
+    }
+
+    /**
+     * getImagine
+     *
+     * @param mixed $driver
+     *
+     * @return void
+     */
+    protected function getImagineClass()
+    {
+        $driver = $this->app['config']['jmg']['driver'];
+
+        switch ($driver) {
+            case 'gd':
+                return '\Imagine\Gd\Imagine';
+            case 'imagick':
+                return '\Imagine\Imagick\Imagine';
+            case 'gmagick':
+                return '\Imagine\Gmagick\Imagine';
+            default:
+                break;
+        }
+
+        throw new \InvalidArgumentException('Invalid driver "'. $driver .'".');
+    }
+}
