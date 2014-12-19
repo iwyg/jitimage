@@ -11,7 +11,7 @@
 
 namespace Thapp\JitImage\Twig;
 
-use \Thapp\JitImage\JitImage;
+use \Thapp\JitImage\View\Jmg;
 
 /**
  * @class JitImageExtension
@@ -22,18 +22,11 @@ use \Thapp\JitImage\JitImage;
 class JmgExtension extends \Twig_Extension
 {
     /**
-     * image
+     * jmg
      *
-     * @var JitImage
+     * @var Jmg
      */
-    private $image;
-
-    /**
-     * from
-     *
-     * @var string
-     */
-    private $from;
+    private $jmg;
 
     /**
      * Creates a new Twig Extension

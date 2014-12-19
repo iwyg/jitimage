@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This File is part of the Thapp\JitImage\Framework\Laravel package
+ * This File is part of the Thapp\JitImage package
  *
  * (c) iwyg <mail@thomas-appel.com>
  *
@@ -16,7 +16,7 @@ use Thapp\JitImage\Resolver\FilterResolverInterface;
 /**
  * @class JitImageFilterProvider
  *
- * @package Thapp\JitImage\Framework\Laravel
+ * @package Thapp\JitImage
  * @version $Id$
  * @author iwyg <mail@thomas-appel.com>
  */

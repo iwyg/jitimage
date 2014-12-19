@@ -35,10 +35,10 @@ class JitImageViewHelperProvider extends AppProvider
      * {@inheritdoc}
      * @TODO: only register when view is actually booted.
      */
-	public function when()
-	{
-		return ['jmg.processor.boot'];
-	}
+    public function when()
+    {
+        return ['jmg.processor.boot'];
+    }
 
     /**
      * Register custom loaders

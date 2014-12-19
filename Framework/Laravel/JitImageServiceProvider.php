@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This File is part of the Thapp\JitImage\Framework\Laravel package
+ * This File is part of the Thapp\JitImage package
  *
  * (c) iwyg <mail@thomas-appel.com>
  *
@@ -17,7 +17,7 @@ use Illuminate\Contracts\Routing\Registrar as Router;
 /**
  * @class JitImageServiceProvider
  *
- * @package Thapp\JitImage\Framework\Laravel
+ * @package Thapp\JitImage
  * @version $Id$
  * @author iwyg <mail@thomas-appel.com>
  */
@@ -37,10 +37,6 @@ class JitImageServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        //$path = realpath(__DIR__.'/resource');
-
-        //$this->package('thapp/jitimage', 'thapp/jitimage', $path);
-
         $this->prepareConfig();
 
         $this->app->singleton(
