@@ -59,9 +59,7 @@ class JmgExtension extends \Twig_Extension
     public function getFunctions()
     {
         return [
-            new \Twig_SimpleFunction('jmg', function ($image, $path = null) {
-                return $this->jmg->take($image, $path);
-            })
+            new \Twig_SimpleFunction('jmg', [$this->jmg, 'take'])
         ];
     }
 }
