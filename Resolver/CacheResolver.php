@@ -1,7 +1,7 @@
 <?php
 
 /**
- * This File is part of the Thapp\JitImage\Resolver package
+ * This File is part of the Thapp\JitImage package
  *
  * (c) Thomas Appel <mail@thomas-appel.com>
  *
@@ -23,9 +23,18 @@ use Thapp\JitImage\Resource\ImageResource;
  */
 class CacheResolver implements CacheResolverInterface, IteratorAggregate
 {
+    /**
+     * caches
+     *
+     * @var array
+     */
     protected $caches;
-    protected $cache;
 
+    /**
+     * Constructor.
+     *
+     * @param array $caches
+     */
     public function __construct(array $caches = [])
     {
         $this->set($caches);

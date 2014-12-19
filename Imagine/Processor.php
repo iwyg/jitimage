@@ -43,6 +43,7 @@ class Processor implements ProcessorInterface
      * Constructor.
      *
      * @param ImagineInterface $imagine
+     * @param FilterResolverInterface $filters
      */
     public function __construct(ImagineInterface $imagine, FilterResolverInterface $filters = null)
     {
@@ -363,7 +364,6 @@ class Processor implements ProcessorInterface
     /**
      * resizeToFit
      *
-     *
      * @return void
      */
     protected function resizeToFit()
@@ -455,6 +455,13 @@ class Processor implements ProcessorInterface
         ];
     }
 
+    /**
+     * translateFormatToMime
+     *
+     * @param string $format
+     *
+     * @return string
+     */
     protected function translateFormatToMime($format)
     {
         $formats = static::formats();
@@ -464,15 +471,22 @@ class Processor implements ProcessorInterface
         }
     }
 
+    /**
+     * formats
+     *
+     * @return array
+     */
     protected static function formats()
     {
         return [
-            'jpeg' => 'image/jpeg',
-            'jpg'  => 'image/jpeg',
-            'png'  => 'image/png',
-            'gif'  => 'image/gif',
-            'tif'  => 'image/tif',
-            'wbmp' => 'image/vnd.wap.wbmp',
+            'jpeg'  => 'image/jpeg',
+            'jpg'   => 'image/jpeg',
+            'png'   => 'image/png',
+            'gif'   => 'image/gif',
+            'tif'   => 'image/tiff',
+            'tiff'  => 'image/tiff',
+            'wbmp'  => 'image/vnd.wap.wbmp',
+            'xbm'   => 'image/xbm',
         ];
     }
 }

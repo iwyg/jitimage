@@ -149,9 +149,11 @@ trait ImageResolverHelper
             return $filters;
         }
 
-        $f = substr($filterStr, 1 + strpos($filterStr, ':'));
+        if (0 === strpos($filterStr, 'filter:')) {
+            $filterStr = substr($filterStr, 7);
+        }
 
-        return (new FilterExpression($f))->toArray();
+        return (new FilterExpression($filterStr))->toArray();
     }
 
     /**

@@ -40,7 +40,7 @@ class JitImageExtension extends \Twig_Extension
      *
      * @param JitImage $image
      */
-    public function __construct(JitImage $image)
+    public function __construct(Jmg $image)
     {
         $this->image = $image;
     }
@@ -50,7 +50,7 @@ class JitImageExtension extends \Twig_Extension
      */
     public function getName()
     {
-        return 'jitimage';
+        return 'jmg';
     }
 
     /**

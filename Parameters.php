@@ -148,7 +148,7 @@ class Parameters
      */
     protected function isColor($color)
     {
-        return (bool)preg_match('#^([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$#', $color);
+        return 3 === $len = strlen($color) || 6 === $len && preg_match('#^[0-9a-fA-F]$#', $color);
     }
 
     /**

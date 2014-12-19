@@ -25,7 +25,6 @@ use \Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
  */
 trait ImageControllerTrait
 {
-
     /**
      * @var Request
      */
@@ -155,7 +154,7 @@ trait ImageControllerTrait
      * @throws NotFoundHttpException if image was not found
      * @return Response
      */
-    public function getCached($path, $id)
+    public function getCached($path, $prefix, $id)
     {
         if (!$resource = $this->imageResolver->resolveCached([$path, $id])) {
             $this->notFound($id);

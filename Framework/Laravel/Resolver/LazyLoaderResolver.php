@@ -84,19 +84,6 @@ class LazyLoaderResolver extends LoaderResolver
     }
 
     /**
-     * extend
-     *
-     * @param mixed $name
-     * @param callable $creator
-     *
-     * @return void
-     */
-    public function extend($name, callable $creator)
-    {
-        $this->customCreators[$name] = $creator;
-    }
-
-    /**
      * createFileLoader
      *
      * @return void

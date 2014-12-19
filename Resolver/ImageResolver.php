@@ -167,23 +167,24 @@ class ImageResolver implements ImageResolverInterface
      */
     public function resolveCached(array $parameters)
     {
-        $prefix = trim(substr($parameters[0], 0, strrpos($parameters[0], '/')), '/');
+        list ($path, $id) = $parameters;
+
+        $prefix = trim(substr($path, 0, strrpos($path, '/')), '/');
 
         if (null === ($cache = $this->cacheResolver->resolve($parameters[0]))) {
             return;
         }
 
 
-        $pos = strrpos($parameters[1], '.');
+        $pos = strrpos($id, '.');
+        $key = strtr($id, ['/' => '.']);
 
-        $key = strtr($parameters[1], ['/' => '.']);
         $key = false !== $pos ? substr($key, 0, $pos) : $key;
 
 
         if (!$cache->has($key)) {
             return;
         }
-
 
         return $cache->get($key);
     }

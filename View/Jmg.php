@@ -29,14 +29,9 @@ class Jmg
 {
     use ImageResolverHelper;
 
-    private $path;
     private $pool;
     private $recipes;
     private $defaultPath;
-
-    protected $source;
-    protected $filters;
-    protected $parameters;
 
     /**
      * Constructor.
@@ -48,26 +43,30 @@ class Jmg
     {
         $this->imageResolver = $imageResolver;
         $this->recipes = $recipes;
-
-        $this->filters = new FilterExpression([]);
-        $this->parameters = new Parameters;
+        $this->defaultPath = $default;
         $this->cacheSuffix = 'cached';
+
+        $this->pool = [];
     }
 
     /**
-     * get The source image
+     * take
      *
-     * @param mixed $path
+     * @param string $source
+     * @param string $path
      *
-     * @return void
+     * @return Generator
      */
-    public function from($path)
+    public function take($source, $path = null)
     {
-        $this->close();
+        $path = $path ?: $this->defaultPath;
 
-        $this->source = $path;
+        $gen = $this->newGenerator();
 
-        return $this;
+        $gen->setPath($path);
+        $gen->setSource($source);
+
+        return $gen;
     }
 
     /**
@@ -77,23 +76,20 @@ class Jmg
      *
      * @return string
      */
-    public function make($recipe)
+    public function make($recipe, $source)
     {
         if (!$res = $this->recipes->resolve($recipe)) {
-            return;
+            return '';
         }
 
         list ($prefix, $params, $filter) = $res;
 
-        $this->path = $prefix;
-
-        if (null !== $filter) {
-            $this->filter($filter);
-        }
-
-        $this->parameters->setFromString($params);
-
-        return $this->apply();
+        return $this->apply(
+            $prefix,
+            $source,
+            Parameters::fromString($params),
+            $filter ? $this->filter($filter) : null
+        );
     }
 
     /**
@@ -103,13 +99,10 @@ class Jmg
      *
      * @return Jmg
      */
-    public function filter($expr)
+    protected function filter($expr)
     {
-        $this->filters = clone($this->filters);
-        $this->filters->setExpression($expr);
-
-        return $this;
-   }
+        return new FilterExpression($expr);
+    }
 
     /**
      * close
@@ -118,7 +111,6 @@ class Jmg
      */
     protected function close()
     {
-        $this->path = null;
         $this->imageResolver->getProcessor()->close();
     }
 
@@ -128,20 +120,30 @@ class Jmg
      *
      * @return void
      */
-    protected function apply()
+    protected function apply($path, $source, Parameters $parameters, FilterExpression $filters = null)
     {
-        list ($source, $params, $filter) = $this->paramsToString();
-
-        $fragments = $this->getParamString($params, $source, $filter);
+        list ($params, $filter) = $parts = $this->listParamsAndFilter($parameters, $filters);
+        $pmStr = $this->getParamString($params, $source, $filter);
 
         $cr = $this->imageResolver->getCacheResolver();
-        $path = $this->getCurrentPath();
 
-        if (null === $cr || !$cache = $cr->resolve($path)) {
-            return $this->getUri($path, $fragments);
+        if (null !== $cr = $this->imageResolver->getCacheResolver() && ($cache = $cr->resolve($path))) {
+            return $this->resolveFromCache($cache, $path, $source, $parts, $parameters, $filters);
         }
 
-        return $this->resolveFromCache($cache, $fragments, $source, $params, $filter);
+        return $this->getUri($path, $pmStr);
+
+        //list ($params, $filter) = $this->paramsToFragments($parameters, $filters);
+
+        //$fragments = $this->getParamString($params, $source, $filter);
+
+        //$cr = $this->imageResolver->getCacheResolver();
+
+        //if (null === $cr || !$cache = $cr->resolve($path)) {
+            //return $this->getUri($path, $fragments);
+        //}
+
+        //return $this->resolveFromCache($cache, $fragments, $path, $source, $parameters, $filter);
     }
 
     /**
@@ -153,29 +155,26 @@ class Jmg
      * @access protected
      * @return mixed
      */
-    protected function resolveFromCache(CacheInterface $cache, $fragments, $source, $params, $filter)
+    protected function resolveFromCache(CacheInterface $cache, $path, $source, array $parts, Parameters $params, FilterExpression $filter = null)
     {
-        $path = $this->getCurrentPath();
-        $src  = $this->getPath($this->imageResolver->getPathResolver()->resolve($path), $source);
+        list ($pStr, $fStr) = $parts;
+        $src = $this->getPath($this->imageResolver->getPathResolver()->resolve($path), $source);
+
+        if (!$cache->has($key = $this->createCacheKey($cache, $src, $pStr, $fStr))) {
+            $this->process($cache, $params, $src, $key, $path, $filter);
+        }
 
         // If the image is not cached yet, this is the only time the processor
         // is invoked:
-        if (!$cache->has($key = $this->createCacheKey($cache, $src, $params, $filter))) {
-            $this->process($cache, $src, $key);
-        }
-
         if (!isset($this->pool[$key])) {
 
             $cached = $cache->get($key);
 
             $file = $cached->getFileName();
             $dir  = basename(dirname($cached->getPath()));
+            $str = '/'. implode('/', [$path, $this->cacheSuffix, $dir, $file]);
 
-            var_dump($path);
-            var_dump($file);
-            var_dump($dir);
-
-            $this->pool[$key] = '/'. implode('/', [$path, $this->cacheSuffix, $dir, $file]);
+            $this->pool[$key] = $str;
         }
 
         return $this->pool[$key];
@@ -190,11 +189,11 @@ class Jmg
      *
      * @return void
      */
-    protected function process(CacheInterface $cache, $src, $key)
+    protected function process(CacheInterface $cache, Parameters $params, $src, $key, $path, FilterExpression $filters = null)
     {
         $proc = $this->imageResolver->getProcessor();
 
-        if (null === $loader = $this->imageResolver->getLoaderResolver()->resolve($this->getCurrentPath())) {
+        if (null === $loader = $this->imageResolver->getLoaderResolver()->resolve($path)) {
             throw new \InvalidArgumentException;
         }
 
@@ -203,7 +202,7 @@ class Jmg
         }
 
         $proc->load($loader->load($src));
-        $proc->process($this->compileExpression());
+        $proc->process($this->compileExpression($params, $filters));
 
         $cache->set($key, $proc);
 
@@ -215,9 +214,9 @@ class Jmg
      *
      * @return array
      */
-    protected function compileExpression()
+    protected function compileExpression(Parameters $parameters, FilterExpression $filters = null)
     {
-        return array_merge($this->parameters->all(), ['filter' => $this->filters->toArray()]);
+        return array_merge($parameters->all(), ['filter' => $filters ? $filters->toArray() : []]);
     }
 
     /**
@@ -233,14 +232,6 @@ class Jmg
     }
 
     /**
-     * @return string
-     */
-    private function getCurrentPath()
-    {
-        return $this->path ?: $this->defaultPath;
-    }
-
-    /**
      * getParamString
      *
      * @param string $params
@@ -252,6 +243,20 @@ class Jmg
     private function getParamString($params, $source, $filter = null)
     {
         return null !== $filter ? implode('/', [$params, $source, $filter]) : implode('/', [$params, $source]);
+    }
+
+    /**
+     * compileExpression
+     *
+     * @access protected
+     * @return array
+     */
+    protected function listParamsAndFilter(Parameters $params, FilterExpression $filter = null)
+    {
+        return [
+            $params->asString(),
+            !empty($filter ? $filter->toArray() : []) ? sprintf('filter:%s', $filter->compile()) : null
+        ];
     }
 
     /**
@@ -276,19 +281,17 @@ class Jmg
     }
 
     /**
-     * compileExpression
+     * newGenerator
      *
-     * @access protected
-     * @return array
+     * @return Generator
      */
-    protected function paramsToString()
+    protected function newGenerator()
     {
-        $filters = $this->filters->toArray();
+        if (null === $this->generator) {
+            return $this->generator = new Generator($this);
+        }
 
-        return [
-            $this->source,
-            $this->parameters->asString(),
-            !empty($filters) ? sprintf('filter:%s', $this->filters->compile()) : null
-        ];
+        return clone $this->generator;
     }
+
 }

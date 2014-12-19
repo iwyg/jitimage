@@ -12,6 +12,7 @@
 namespace Thapp\JitImage\Framework\Laravel;
 
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Contracts\Routing\Registrar as Router;
 
 /**
  * @class JitImageServiceProvider
@@ -36,9 +37,11 @@ class JitImageServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        $this->prepareConfig();
+        //$path = realpath(__DIR__.'/resource');
 
-        //$this->app->singleton('jmg.loader.resolver', 'Thapp\JitImage\Framework\Laravel\LazyLoaderResolver');
+        //$this->package('thapp/jitimage', 'thapp/jitimage', $path);
+
+        $this->prepareConfig();
 
         $this->app->singleton(
             'Thapp\JitImage\Resolver\ImageResolverInterface',
@@ -134,6 +137,29 @@ class JitImageServiceProvider extends ServiceProvider
         }
 
         $this->registerRecipes($router);
+        $this->registerCached($router);
+    }
+
+    /**
+     * registerCached
+     *
+     * @param mixed $router
+     *
+     * @return void
+     */
+    private function registerCached($router)
+    {
+        $ctrl   = $this->getControllerClass().'@getCached';
+        $caches = $this->app['config']['jmg.caches'];
+        $prefix = $this->app['config']['jmg.cache_path_prefix'];
+
+        foreach ($this->app['config']->get('jmg.paths', []) as $alias => $path) {
+            if (isset($caches[$alias]) && false === $caches[$alias]) {
+                continue;
+            }
+
+            $this->registerCachedController($router, $ctrl, $alias, $prefix);
+        }
     }
 
     /**
@@ -222,7 +248,7 @@ class JitImageServiceProvider extends ServiceProvider
      *
      * @return void
      */
-    private function registerDynamicController($router, $ctrl, $path, $pattern, $params, $source, $filter)
+    private function registerDynamicController(Router $router, $ctrl, $path, $pattern, $params, $source, $filter)
     {
         $router->get(rtrim($path, '/') . $pattern, $ctrl)
             ->where('params', $params)
@@ -239,10 +265,27 @@ class JitImageServiceProvider extends ServiceProvider
      *
      * @return void
      */
-    private function registerRecipesController($router, $ctrl, $recipe)
+    private function registerRecipesController(Router $router, $ctrl, $recipe)
     {
         $router->get(rtrim($recipe, '/').'/{source}', $ctrl)
             ->where('source', '(.*)');
+    }
+
+    /**
+     * registerCachedController
+     *
+     * @param Router $router
+     * @param mixed $path
+     * @param mixed $suffix
+     *
+     * @return void
+     */
+    private function registerCachedController(Router $router, $ctrl, $path, $suffix)
+    {
+        $r = $router->get(rtrim($path, '/') . '/{suffix}/{id}', $ctrl)
+            ->where('id', '(.*\/){1}.*')
+            ->where('suffix', $suffix)
+            ->defaults('path', $path);
     }
 
     private function getPathRegexp()

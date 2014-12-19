@@ -73,6 +73,8 @@ class RecipeResolver implements RecipeResolverInterface
         list($path, $parameter) = $this->recipes[$recipe];
         list($parameters, $filter) = array_pad(explode(',', str_replace(' ', null, $parameter)), 2, null);
 
+        $filter = 0 === strpos($filter, 'filter:') ? substr($filter, 7) : $filter;
+
         return [$path, $parameters, $filter];
     }
 }

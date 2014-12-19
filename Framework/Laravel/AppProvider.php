@@ -34,8 +34,8 @@ abstract class AppProvider extends ServiceProvider
     /**
      * {@inheritdoc}
      */
-	public function when()
-	{
-		return ['jmg.processor.boot'];
-	}
+    public function when()
+    {
+        return ['jmg.processor.boot'];
+    }
 }
