@@ -88,6 +88,20 @@ class Generator
     }
 
     /**
+     * filter
+     *
+     * @param mixed $expr
+     *
+     * @return Generator.
+     */
+    public function filter($expr)
+    {
+        $this->filter->setExpression($expr);
+
+        return $this;
+    }
+
+    /**
      * pixel
      *
      * @param mixed $px
@@ -107,7 +121,7 @@ class Generator
      *
      * @param mixed $perc
      *
-     * @return void
+     * @return string
      */
     public function scale($perc)
     {
@@ -123,7 +137,7 @@ class Generator
      * @param mixed $width
      * @param mixed $height
      *
-     * @return void
+     * @return string
      */
     public function fit($width, $height)
     {
@@ -140,7 +154,7 @@ class Generator
      * @param mixed $height
      * @param int $gravity
      *
-     * @return void
+     * @return string
      */
     public function cropAndResize($width, $height, $gravity = 5)
     {
@@ -159,7 +173,7 @@ class Generator
      * @param int $gravity
      * @param mixed $background
      *
-     * @return void
+     * @return string
      */
     public function crop($width, $height, $gravity = 5, $background = null)
     {
@@ -167,6 +181,18 @@ class Generator
         $this->parameters->setTargetSize($width, $height);
         $this->parameters->setGravity($gravity);
         $this->parameters->setBackground($background);
+
+        return $this->apply();
+    }
+
+    /**
+     * get
+     *
+     * @return string
+     */
+    public function get()
+    {
+        $this->parameters->setMode(ProcessorInterface::IM_NOSCALE);
 
         return $this->apply();
     }
