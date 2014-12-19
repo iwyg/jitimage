@@ -11,7 +11,11 @@
 
 namespace Thapp\JitImage\Http;
 
-use \Illuminate\Routing\Controller as BaseController;
+use \Thapp\JitImage\Http\ImageResponse;
+use \Thapp\JitImage\Resource\ResourceInterface;
+use Symfony\Component\HttpFoundation\Request;
+use Thapp\JitImage\Resolver\ImageResolverInterface;
+use Thapp\JitImage\Resolver\RecipeResolverInterface;
 
 /**
  * @class Controller
@@ -20,12 +24,58 @@ use \Illuminate\Routing\Controller as BaseController;
  * @version $Id$
  * @author iwyg <mail@thomas-appel.com>
  */
-class Controller extends BaseController
+class Controller
 {
-    public function getImage($params = null, $source = null, $filter = null)
+    protected $imageResolver;
+    protected $recipeResolver;
+
+    public function setImageResolver(ImageResolverInterface $imageResolver)
     {
-        var_dump($params);
+        $this->imageResolver = $imageResolver;
+    }
+
+    public function setRecipeResolver(RecipeResolverInterface $recipes)
+    {
+        $this->recipeResolver = $recipes;
+    }
+
+    public function getImage(Request $request, $path, $params, $source, $filter = null)
+    {
+        if (!$resource = $this->imageResolver->resolveParameters([$path, $params, $source, $filter])) {
+            throw new \Exception('ups');
+        }
+
+        return $this->processResource($resource, $request);
+    }
+
+    public function getResource(Request $request, $recipe, $source)
+    {
+        list ($alias, $params, $filter) = $this->recipeResolver->resolve($recipe);
+
+        return $this->getImage($request, $alias, $params, $source, $filter);
+    }
+
+    public function getCached(Request $request, $prefix, $id)
+    {
+        var_dump('get cached');
         die;
-        return 'there be images';
+    }
+
+    /**
+     * processResource
+     *
+     * @param mixed $resource
+     *
+     * @access private
+     * @return Response
+     */
+    private function processResource(ResourceInterface $resource, Request $request)
+    {
+        $response = new ImageResponse($resource);
+
+        $response->prepare($request);
+        $response->send();
+
+        return $response;
     }
 }

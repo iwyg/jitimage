@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This File is part of the Thapp\JitImage\Framework\Laravel\Resolver package
+ * This File is part of the Thapp\JitImage package
  *
  * (c) iwyg <mail@thomas-appel.com>
  *
@@ -9,12 +9,12 @@
  * that was distributed with this package.
  */
 
-namespace Thapp\JitImage\Framework\Laravel\Resolver;
+namespace Thapp\JitImage\Framework\Common\Resolver;
 
 /**
  * @trait LazyResolverTrait
  *
- * @package Thapp\JitImage\Framework\Laravel\Resolver
+ * @package Thapp\JitImage
  * @version $Id$
  * @author iwyg <mail@thomas-appel.com>
  */

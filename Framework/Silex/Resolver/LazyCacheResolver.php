@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This File is part of the Thapp\JitImage package
+ * This File is part of the Thapp\JitImage\Framework\Laravel\Resolver package
  *
  * (c) iwyg <mail@thomas-appel.com>
  *
@@ -9,16 +9,15 @@
  * that was distributed with this package.
  */
 
-namespace Thapp\JitImage\Framework\Laravel\Resolver;
+namespace Thapp\JitImage\Framework\Silex\Resolver;
 
-use Illuminate\Contracts\Foundation\Application;
-use Thapp\JitImage\Framework\Common\Resolver\LazyResolverTrait;
+use Silex\Application;
 use Thapp\JitImage\Framework\Common\Resolver\AbstractLazyCacheResolver;
 
 /**
  * @class LazyCacheResolver
  *
- * @package Thapp\JitImage
+ * @package Thapp\JitImage\Framework\Laravel\Resolver
  * @version $Id$
  * @author iwyg <mail@thomas-appel.com>
  */
@@ -48,7 +47,7 @@ class LazyCacheResolver extends AbstractLazyCacheResolver
         $caches = $this->getCaches();
 
         if (!array_key_exists($alias, $caches)) {
-            return $this->app['config']['jmg.default_cache'];
+            return $this->app['jmg.default_cache'];
         }
 
         // cache disabled.
@@ -67,7 +66,7 @@ class LazyCacheResolver extends AbstractLazyCacheResolver
     protected function getCaches()
     {
         if (null === $this->settings) {
-            $this->settings = $this->app['config']->get('jmg.caches', []);
+            $this->settings = isset($this->app['jmg.caches']) ? $this->app['jmg.caches'] : [];
         }
 
         return $this->settings;
@@ -90,6 +89,6 @@ class LazyCacheResolver extends AbstractLazyCacheResolver
      */
     protected function getDefaultCachePath()
     {
-        return $this->app['config']['jmg.default_cache_path'];
+        return $this->app['jmg.default_cache_path'];
     }
 }

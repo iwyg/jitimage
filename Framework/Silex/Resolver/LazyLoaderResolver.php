@@ -9,10 +9,10 @@
  * that was distributed with this package.
  */
 
-namespace Thapp\JitImage\Framework\Laravel\Resolver;
+namespace Thapp\JitImage\Framework\Silex\Resolver;
 
+use Silex\Application;
 use Thapp\JitImage\Resolver\LoaderResolver;
-use Illuminate\Contracts\Foundation\Application;
 use Thapp\JitImage\Framework\Common\Resolver\LazyResolverTrait;
 
 /**
@@ -26,7 +26,7 @@ class LazyLoaderResolver extends LoaderResolver
 {
     use LazyResolverTrait;
 
-    private $app;
+    protected $app;
 
     public function __construct(Application $app)
     {
@@ -43,7 +43,6 @@ class LazyLoaderResolver extends LoaderResolver
         }
 
         if (null === $loader = $this->resolveLoader($prefix)) {
-            //throw new \InvalidArgumentException('No loader for prefix ' . $prefix);
             return;
         }
 
@@ -81,7 +80,9 @@ class LazyLoaderResolver extends LoaderResolver
      */
     protected function getLoaderName($prefix)
     {
-        return $this->app['config']["jmg.loaders.{$prefix}"];
+        if (isset($this->app['jmg.loaders'][$prefix])) {
+            return $this->app['jmg.loaders'][$prefix];
+        }
     }
 
     /**
@@ -101,7 +102,7 @@ class LazyLoaderResolver extends LoaderResolver
      */
     protected function createHttpLoader()
     {
-        $config = $this->app['config']->get('jmg.trusted_sites', []);
+        $config = isset($this->app['jmg.trusted_sites']) ? $this->app['jmg.trusted_sites'] : [];
 
         return new \Thapp\JitImage\Loader\HttpLoader($config);
     }
