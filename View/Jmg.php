@@ -60,7 +60,6 @@ class Jmg
     public function take($source, $path = null)
     {
         $path = $path ?: $this->defaultPath;
-
         $gen = $this->newGenerator();
 
         $gen->setPath($path);
@@ -132,18 +131,6 @@ class Jmg
         }
 
         return $this->getUri($path, $pmStr);
-
-        //list ($params, $filter) = $this->paramsToFragments($parameters, $filters);
-
-        //$fragments = $this->getParamString($params, $source, $filter);
-
-        //$cr = $this->imageResolver->getCacheResolver();
-
-        //if (null === $cr || !$cache = $cr->resolve($path)) {
-            //return $this->getUri($path, $fragments);
-        //}
-
-        //return $this->resolveFromCache($cache, $fragments, $path, $source, $parameters, $filter);
     }
 
     /**

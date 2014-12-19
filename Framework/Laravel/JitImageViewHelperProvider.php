@@ -12,7 +12,6 @@
 namespace Thapp\JitImage\Framework\Laravel;
 
 use Thapp\JitImage\View\Jmg;
-use Thapp\JitImage\Resolver\LoaderResolverInterface;
 
 /**
  * @class JitImageFilterProvider
@@ -37,7 +36,7 @@ class JitImageViewHelperProvider extends AppProvider
      */
     public function when()
     {
-        return ['jmg.processor.boot'];
+        return [];
     }
 
     /**
@@ -49,6 +48,6 @@ class JitImageViewHelperProvider extends AppProvider
      */
     protected function registerViewHelper(Jmg $jmg)
     {
-        $this->app['view']->share('jmg', $jmg);
+        $this->app['view']('jmg', $jmg);
     }
 }

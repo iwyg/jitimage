@@ -92,6 +92,10 @@ class JitImageServiceProvider extends ServiceProvider
         $this->app->resolving('Thapp\JitImage\ProcessorInterface', function ($proc, $app) {
             $app['events']->fire('jmg.processor.boot');
         });
+
+        $this->app->singleton('jmg', 'Thapp\JitImage\View\Jmg');
+        $this->app->alias('Thapp\JitImage\Resolver\LoaderResolverInterface', 'jmg.loaders');
+        $this->app->alias('Thapp\JitImage\Resolver\FilterResolverInterface', 'jmg.filters');
     }
 
     /**
@@ -99,10 +103,6 @@ class JitImageServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        $this->app->singleton('jmg', 'Thapp\JitImage\View\Jmg');
-
-        $this->app->alias('Thapp\JitImage\Resolver\LoaderResolverInterface', 'jmg.loaders');
-        $this->app->alias('Thapp\JitImage\Resolver\FilterResolverInterface', 'jmg.filters');
 
         $this->registerRoutes();
     }

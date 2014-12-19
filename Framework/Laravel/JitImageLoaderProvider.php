@@ -31,14 +31,6 @@ abstract class JitImageLoaderProvider extends AppProvider
     }
 
     /**
-     * {@inheritdoc}
-     */
-    public function when()
-    {
-        return ['jmg.processor.boot'];
-    }
-
-    /**
      * Register custom loaders
      *
      * @param LoaderResolverInterface $loaders
