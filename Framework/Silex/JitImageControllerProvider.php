@@ -128,28 +128,21 @@ class JitImageControllerProvider implements ControllerProviderInterface
     protected function registerCachedController(Application $app, ControllerCollection $controllers)
     {
         $caches = $app['jmg.caches'];
+        $suffix = $app['jmg.cache_path_prefix'];
 
         foreach ($app['jmg.paths'] as $alias => $path) {
             if (isset($caches[$alias]) && false === $caches[$alias]) {
                 continue;
             }
 
-            $controllers->get(rtrim($path, '/') . '/{suffix}/{id}', 'jmg.controller:getCached')
-                ->setDefault('path', $path)
-                ->setRequirements(['id' => '(.*\/){1}.*'])
-                ->before(function (Request $request) use ($app) {
-                    $app['jmg.controller']->setRequest($request);
-                });
-        }
-    }
+            $route = $controllers->get($rr = rtrim($alias, '/') . '/{suffix}/{id}', [$app['jmg.controller'], 'getCached'])
+                ->setDefault('suffix', $suffix)
+                ->setRequirements(['id' => '(.*\/){1}.*']);
 
-    private function getPathRegexp()
-    {
-        return [
-            '/{params}/{source}/{filter}',
-            '([5|6](\/\d+){1}|[0]|[1|4](\/\d+){2}|[2](\/\d+){3}|[3](\/\d+){3}\/?([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})?)',
-            '((([^0-9A-Fa-f]{3}|[^0-9A-Fa-f]{6})?).*?.(?=(\/filter:.*)?))',
-            '(filter:.([^\/])*)'
-        ];
+            $route->before(function (Request $request) use ($app, $route) {
+                $route->setDefault('request', $request);
+                $app['jmg.controller']->setImageResolver($app['jmg.resolver_image']);
+            });
+        }
     }
 }

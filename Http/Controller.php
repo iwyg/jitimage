@@ -35,11 +35,29 @@ class Controller
         $this->imageResolver = $imageResolver;
     }
 
+    /**
+     * setRecipeResolver
+     *
+     * @param RecipeResolverInterface $recipes
+     *
+     * @return void
+     */
     public function setRecipeResolver(RecipeResolverInterface $recipes)
     {
         $this->recipeResolver = $recipes;
     }
 
+    /**
+     * getImage
+     *
+     * @param Request $request
+     * @param string $path
+     * @param string $params
+     * @param string $source
+     * @param string $filter
+     *
+     * @return Response
+     */
     public function getImage(Request $request, $path, $params, $source, $filter = null)
     {
         if (!$resource = $this->imageResolver->resolveParameters([$path, $params, $source, $filter])) {
@@ -49,17 +67,42 @@ class Controller
         return $this->processResource($resource, $request);
     }
 
+    /**
+     * getResource
+     *
+     * @param Request $request
+     * @param string $recipe
+     * @param string $source
+     *
+     * @return Response
+     */
     public function getResource(Request $request, $recipe, $source)
     {
+        if (null === $this->recipes) {
+            $this->notFound($source);
+        }
+
         list ($alias, $params, $filter) = $this->recipeResolver->resolve($recipe);
 
         return $this->getImage($request, $alias, $params, $source, $filter);
     }
 
-    public function getCached(Request $request, $prefix, $id)
+    /**
+     * getCached
+     *
+     * @param Request $request
+     * @param string $prefix
+     * @param string $id
+     *
+     * @return Response
+     */
+    public function getCached(Request $request, $suffix, $id)
     {
-        var_dump('get cached');
-        die;
+        if (!$resource = $this->imageResolver->resolveCached([$suffix, $id])) {
+            $this->notFound($id);
+        }
+
+        return $this->processResource($resource, $request);
     }
 
     /**
@@ -67,7 +110,6 @@ class Controller
      *
      * @param mixed $resource
      *
-     * @access private
      * @return Response
      */
     private function processResource(ResourceInterface $resource, Request $request)
