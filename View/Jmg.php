@@ -32,6 +32,7 @@ class Jmg
     private $pool;
     private $recipes;
     private $defaultPath;
+    private $cachePrefix;
 
     /**
      * Constructor.
@@ -39,12 +40,12 @@ class Jmg
      * @param ImageResolverInterface $imageResolver
      * @param RecipeResolverInterface $recipes
      */
-    public function __construct(ImageResolverInterface $imageResolver, RecipeResolverInterface $recipes, $default = '')
+    public function __construct(ImageResolverInterface $imageResolver, RecipeResolverInterface $recipes, $default = '', $cPrefix = 'cached')
     {
         $this->imageResolver = $imageResolver;
         $this->recipes = $recipes;
         $this->defaultPath = $default;
-        $this->cacheSuffix = 'cached';
+        $this->cacheSuffix = $cPrefix;
 
         $this->pool = [];
     }

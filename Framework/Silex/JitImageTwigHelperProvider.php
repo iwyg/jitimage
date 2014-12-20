@@ -1,43 +1,45 @@
 <?php
 
-/**
+/*
  * This File is part of the Thapp\JitImage package
  *
- * (c) Thomas Appel <mail@thomas-appel.com>
+ * (c) iwyg <mail@thomas-appel.com>
  *
  * For full copyright and license information, please refer to the LICENSE file
  * that was distributed with this package.
  */
 
-namespace Thapp\JitImage\Silex;
+namespace Thapp\JitImage\Framework\Silex;
 
-use Silex\Application;
-use Silex\ServiceProviderInterface;
-use Thapp\JitImage\Twig\JmgExtension;
+use Pimple\Container;
+use Pimple\ServiceProviderInterface;
+use Thapp\JitImage\View\Jmg;
 
 /**
- * @class JitImageTwigHelperProvider
+ * @class JitImageTwigServiceProvider
+ *
  * @package Thapp\JitImage
  * @version $Id$
+ * @author iwyg <mail@thomas-appel.com>
  */
-class JitImageTwigHelperProvider implements ServiceProviderInterface
+class JitImageTwigHelperProvider implements ServiceProvider
 {
     /**
      * {@inheritdoc}
      */
-    public function register(Application $app)
+    public function register(Container $app)
     {
-        $app['twig'] = $app->share($app->extend('twig', function ($twig, $app) {
-            $twig->addExtension(new JmgExtension($app['jmg']));
+        $app->extend('twig', function ($twig, $app) {
+            $twig->addExtension(
+                new Jmg(
+                    $app['jmg.resolver_image'],
+                    $app['jmg.resolver_recipe'],
+                    $app['jmg.default_path'],
+                    $app['jmg.cache_path_prefix']
+                )
+            );
 
             return $twig;
-        }));
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function boot(Application $app)
-    {
+        });
     }
 }

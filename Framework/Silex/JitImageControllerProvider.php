@@ -15,6 +15,7 @@ use Silex\Application;
 use Silex\ControllerCollection;
 use Silex\Api\ControllerProviderInterface;
 use Symfony\Component\HttpFoundation\Request;
+use Thapp\JitImage\Framework\Common\ProviderHelperTrait;
 
 /**
  * @class JitImageServiceProvider
@@ -25,6 +26,8 @@ use Symfony\Component\HttpFoundation\Request;
  */
 class JitImageControllerProvider implements ControllerProviderInterface
 {
+    use ProviderHelperTrait;
+
     /**
      * {@inheritdoc}
      */

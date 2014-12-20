@@ -12,7 +12,10 @@
 namespace Thapp\JitImage\Framework\Silex;
 
 use Pimple\Container;
+use Silex\Application;
 use Pimple\ServiceProviderInterface;
+use Silex\Api\BootableProviderInterface;
+use Thapp\JitImage\Framework\Common\ProviderHelperTrait;
 
 /**
  * @class JitImageServiceProvider
@@ -21,14 +24,27 @@ use Pimple\ServiceProviderInterface;
  * @version $Id$
  * @author iwyg <mail@thomas-appel.com>
  */
-class JitImageServiceProvider implements ServiceProviderInterface
+class JitImageServiceProvider implements ServiceProviderInterface, BootableProviderInterface
 {
+    use ProviderHelperTrait;
+
+    /**
+     * {@inheritdoc}
+     */
     public function register(Container $app)
     {
         $this->prepareConfig($app);
         $this->registerResolver($app);
         $this->registerProcessor($app);
         $this->registerController($app);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function boot(Application $app)
+    {
+        $app->mount('/', new JitImageControllerProvider);
     }
 
     /**
@@ -42,7 +58,10 @@ class JitImageServiceProvider implements ServiceProviderInterface
     {
         $app['jmg.processor'] = function () use ($app) {
             $imagine = $this->getImagineClass($app['jmg.driver']);
-            return new \Thapp\JitImage\Imagine\Processor(new $imagine);
+            return new \Thapp\JitImage\Imagine\Processor(
+                new $imagine,
+                $app['jmg.resolver_filter']
+            );
         };
     }
 
@@ -81,6 +100,10 @@ class JitImageServiceProvider implements ServiceProviderInterface
             return new \Thapp\JitImage\Resolver\RecipeResolver($app['jmg.recipes']);
         };
 
+        $app['jmg.resolver_filter'] = function () use ($app) {
+            return new \Thapp\JitImage\Resolver\FilterResolver;
+        };
+
         $app['jmg.mode_validator'] = function () use ($app) {
             return new \Thapp\JitImage\Validator\ModeConstraints($app['jmg.mode_constraints']);
         };
@@ -98,8 +121,6 @@ class JitImageServiceProvider implements ServiceProviderInterface
         $app['jmg.controller'] = function () use ($app) {
             return new \Thapp\JitImage\Http\Controller;
         };
-
-        $app->mount('/', new JitImageControllerProvider);
     }
 
     /**
@@ -113,28 +134,5 @@ class JitImageServiceProvider implements ServiceProviderInterface
     {
         $app = $application;
         require __DIR__.'/resource/config.php';
-    }
-
-    /**
-     * getImagine
-     *
-     * @param mixed $driver
-     *
-     * @return void
-     */
-    protected function getImagineClass($driver)
-    {
-        switch ($driver) {
-            case 'gd':
-                return '\Imagine\Gd\Imagine';
-            case 'imagick':
-                return '\Imagine\Imagick\Imagine';
-            case 'gmagick':
-                return '\Imagine\Gmagick\Imagine';
-            default:
-                break;
-        }
-
-        throw new \InvalidArgumentException('Invalid driver "'. $driver .'".');
     }
 }

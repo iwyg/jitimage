@@ -13,6 +13,7 @@ namespace Thapp\JitImage\Framework\Laravel;
 
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Contracts\Routing\Registrar as Router;
+use Thapp\JitImage\Framework\Common\ProviderHelperTrait;
 
 /**
  * @class JitImageServiceProvider
@@ -23,6 +24,8 @@ use Illuminate\Contracts\Routing\Registrar as Router;
  */
 class JitImageServiceProvider extends ServiceProvider
 {
+    use ProviderHelperTrait;
+
     const VERSION = '1.0.0-dev';
 
     /**
@@ -51,7 +54,7 @@ class JitImageServiceProvider extends ServiceProvider
 
         $this->app->when('Thapp\JitImage\Imagine\Processor')
             ->needs('Imagine\Image\ImagineInterface')
-            ->give($this->getImagineClass());
+            ->give($this->getImagineClass($this->app['config']->get('jmg.driver', 'gd')));
 
         $this->app->singleton(
             'Thapp\JitImage\Resolver\FilterResolverInterface',
@@ -282,40 +285,5 @@ class JitImageServiceProvider extends ServiceProvider
             ->where('id', '(.*\/){1}.*')
             ->where('suffix', $suffix)
             ->defaults('path', $path);
-    }
-
-    private function getPathRegexp()
-    {
-        return [
-            '/{params}/{source}/{filter}',
-            '([5|6](\/\d+){1}|[0]|[1|4](\/\d+){2}|[2](\/\d+){3}|[3](\/\d+){3}\/?([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})?)',
-            '((([^0-9A-Fa-f]{3}|[^0-9A-Fa-f]{6})?).*?.(?=(\/filter:.*)?))',
-            '(filter:.([^\/])*)'
-        ];
-    }
-
-    /**
-     * getImagine
-     *
-     * @param mixed $driver
-     *
-     * @return void
-     */
-    protected function getImagineClass()
-    {
-        $driver = $this->app['config']['jmg']['driver'];
-
-        switch ($driver) {
-            case 'gd':
-                return '\Imagine\Gd\Imagine';
-            case 'imagick':
-                return '\Imagine\Imagick\Imagine';
-            case 'gmagick':
-                return '\Imagine\Gmagick\Imagine';
-            default:
-                break;
-        }
-
-        throw new \InvalidArgumentException('Invalid driver "'. $driver .'".');
     }
 }

@@ -11,11 +11,12 @@
 
 namespace Thapp\JitImage\Http;
 
-use \Thapp\JitImage\Http\ImageResponse;
-use \Thapp\JitImage\Resource\ResourceInterface;
+use Thapp\JitImage\Http\ImageResponse;
+use Thapp\JitImage\Resource\ResourceInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Thapp\JitImage\Resolver\ImageResolverInterface;
 use Thapp\JitImage\Resolver\RecipeResolverInterface;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
  * @class Controller
@@ -42,7 +43,7 @@ class Controller
     public function getImage(Request $request, $path, $params, $source, $filter = null)
     {
         if (!$resource = $this->imageResolver->resolveParameters([$path, $params, $source, $filter])) {
-            throw new \Exception('ups');
+            $this->notFound($source);
         }
 
         return $this->processResource($resource, $request);
@@ -77,5 +78,17 @@ class Controller
         $response->send();
 
         return $response;
+    }
+
+    /**
+     * notFournd
+     *
+     * @throws NotFoundHttpException always
+     *
+     * @return void
+     */
+    private function notFound($source)
+    {
+        throw new NotFoundHttpException(sprintf('resource "%s" not found', $source));
     }
 }
