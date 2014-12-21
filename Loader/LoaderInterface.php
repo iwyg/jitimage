@@ -21,18 +21,23 @@ namespace Thapp\JitImage\Loader;
 interface LoaderInterface
 {
     /**
-     * load
+     * Loads a resource.
      *
      * @param string|resource $source
      *
-     * @return resource A file handle
+     * @return Thapp\JitImage\Resource\FileResourceInterface
      */
     public function load($source);
 
+    /**
+     * Reset the current resource.
+     *
+     * @return void
+     */
     public function clean();
 
     /**
-     * supports
+     * Check if the loader supports the resource to be loaded.
      *
      * @param mixed $resource
      *

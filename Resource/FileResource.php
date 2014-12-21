@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This File is part of the Thapp\JitImage\Resource package
+ * This File is part of the Thapp\JitImage package
  *
  * (c) iwyg <mail@thomas-appel.com>
  *
@@ -14,25 +14,27 @@ namespace Thapp\JitImage\Resource;
 /**
  * @class FileResource
  *
- * @package Thapp\JitImage\Resource
+ * @package Thapp\JitImage
  * @version $Id$
  * @author iwyg <mail@thomas-appel.com>
  */
 class FileResource extends AbstractResource implements FileResourceInterface
 {
+    /**
+     * handle
+     *
+     * @var resource
+     */
     protected $handle;
 
+    /**
+     * Constructor.
+     *
+     * @param resource $handle
+     * @param string $mime
+     * @param string $content
+     */
     public function __construct($handle, $mime = null, $content = null)
-    {
-        $this->initialize($handle, $mime, $content);
-    }
-
-    public function getHandle()
-    {
-        return $this->handle;
-    }
-
-    protected function initialize($handle, $mime = null, $content = null)
     {
         $this->handle = $handle;
         $meta = stream_get_meta_data($handle);
@@ -41,6 +43,22 @@ class FileResource extends AbstractResource implements FileResourceInterface
         $this->setMimeType($this->findMimeType($meta, $mime));
     }
 
+    /**
+     * {@inheritdoc}
+     */
+    public function getHandle()
+    {
+        return $this->handle;
+    }
+
+    /**
+     * findMimeType
+     *
+     * @param array  $meta
+     * @param string $mime
+     *
+     * @return string
+     */
     protected function findMimeType(array $meta, $mime = null)
     {
         if (null === $mime && $this->isLocal()) {

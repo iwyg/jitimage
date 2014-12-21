@@ -38,30 +38,28 @@ class FilesystemLoader extends AbstractLoader
     protected $source;
 
     /**
-     * load
+     * {@inheritdoc}
      *
-     * @param mixed $file
+     * @throws SourceLoaderException if the file could not be opened.
+     * @throws SourceLoaderException if the file is not an image.
      *
-     * @access public
-     * @return boolean
+     * @return Thapp\JitImage\Resource\FileResourceInterface
      */
     public function load($file)
     {
-        $handle = fopen($file, 'rb');
+        if (!$handle = @fopen($file, 'rb')) {
+            throw new SourceLoaderException(sprintf('Could not load file "%s".', $file));
+        }
 
         if (!$resource = $this->validate($handle)) {
-            throw new SourceLoaderException(sprintf('source "%s" is not an image', $file));
+            throw new SourceLoaderException(sprintf('File "%s" is not an image.', $file));
         }
 
         return $resource;
     }
 
     /**
-     * supports
-     *
-     * @param mixed $file
-     *
-     * @return boolean
+     * {@inheritdoc}
      */
     public function supports($file)
     {

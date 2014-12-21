@@ -190,7 +190,6 @@ interface ProcessorInterface
     /**
      * Get output dimensions in width and height
      *
-     *
      * @return mixed
      */
     public function getTargetSize();

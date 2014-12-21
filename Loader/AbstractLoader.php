@@ -12,6 +12,7 @@
 namespace Thapp\JitImage\Loader;
 
 use Thapp\JitImage\Resource\FileResource;
+use Thapp\JitImage\Resource\FileResourceInterface;
 
 /**
  * @abstract class AbstractLoader implements LoaderInterface
@@ -27,14 +28,13 @@ abstract class AbstractLoader implements LoaderInterface
     /**
      * source
      *
-     * @var string
+     * @var FileResourceInterface
      */
     protected $source;
 
     /**
      * getSource
      *
-     * @access public
      * @return string
      */
     public function getSource()
@@ -69,7 +69,7 @@ abstract class AbstractLoader implements LoaderInterface
      */
     public function clean()
     {
-        if ($this->source && is_resource($handle = $this->source->getHandle())) {
+        if ($this->source instanceof FileResourceInterface && is_resource($handle = $this->source->getHandle())) {
             fclose($handle);
         }
 

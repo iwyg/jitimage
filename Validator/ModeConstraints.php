@@ -21,13 +21,25 @@ namespace Thapp\JitImage\Validator;
  */
 class ModeConstraints implements ValidatorInterface
 {
+    /**
+     * constraints
+     *
+     * @var array
+     */
+    private $constraints;
+
+    /**
+     * Constructor.
+     *
+     * @param array $constraints
+     */
     public function __construct(array $constraints)
     {
         $this->setConstraints($constraints);
     }
 
     /**
-     * addConstraint
+     * Adds a constraint.
      *
      * @param int $mode
      * @param array $values
@@ -40,7 +52,7 @@ class ModeConstraints implements ValidatorInterface
     }
 
     /**
-     * setConstraints
+     * Set constraints.
      *
      * @param array $constraints
      *
@@ -48,16 +60,17 @@ class ModeConstraints implements ValidatorInterface
      */
     public function setConstraints(array $constraints)
     {
+        $this->constraints = [];
+
         foreach ($constraints as $mode => $constraint) {
             $this->addConstraint($mode, $constraint);
         }
     }
 
     /**
-     * validate
+     * {@inheritdoc}
      *
      * @throws \InvalidArgumentException if mode is unknowen.
-     * @return boolean
      */
     public function validate($mode, array $parameters = [])
     {

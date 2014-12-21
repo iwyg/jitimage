@@ -20,5 +20,13 @@ namespace Thapp\JitImage\Validator;
  */
 interface ValidatorInterface
 {
-    public function validate($value, array $options = []);
+    /**
+     * Validates a value against given values
+     *
+     * @param mixed $value
+     * @param array $values
+     *
+     * @return boolean
+     */
+    public function validate($value, array $values = []);
 }

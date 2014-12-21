@@ -36,7 +36,6 @@ class HttpLoader extends AbstractLoader
      * @var string
      */
     protected $tmp;
-    protected $tmpFile;
 
     /**
      * file
@@ -53,7 +52,7 @@ class HttpLoader extends AbstractLoader
     protected $trustedHosts;
 
     /**
-     * Create a new RemoteLoader instance.
+     * Create a new HttpLoader instance.
      */
     public function __construct(array $trustedHosts = [])
     {
@@ -62,39 +61,42 @@ class HttpLoader extends AbstractLoader
     }
 
     /**
-     * load
+     * {@inheritdoc}
      *
-     * @param mixed $url
-     *
-     * @throws \RuntimeException if fetching remote file fails
-     * @return string|boolean false if loading fails, else the downloaded file
-     * as string
+     * @throws SourceLoaderException if fetching remote file fails.
+     * @throws SourceLoaderException if the file is not an image.
      */
     public function load($url)
     {
-        if ($handle = $this->loadRemoteFile($url)) {
-            return $this->validate($handle);
+        if (!$handle = $this->loadRemoteFile($url)) {
+            throw new SourceLoaderException(
+                sprintf('Error loading remote file "%s": %s', $url, $this->error ?: 'undefined error')
+            );
         }
 
-        throw new SourceLoaderException(
-            sprintf('Error loading remote file "%s": %s', $url, $this->error ?: 'undefined error')
-        );
+        if (!$resource = $this->validate($handle)) {
+            throw new SourceLoaderException(sprintf('File "%s" is not an image.', $file));
+        }
+
+        return $resource;
     }
 
     /**
-     * supports
-     *
-     * @param string $url
-     *
-     * @return boolean
+     * {@inheritdoc}
      */
     public function supports($url)
     {
         return is_string($url) && in_array(parse_url($url, PHP_URL_SCHEME), ['http', 'https', 'spdy']);
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function clean()
     {
+        parent::clean();
+
+        $this->error = null;
     }
 
     /**
@@ -181,6 +183,7 @@ class HttpLoader extends AbstractLoader
                 return false;
             }
         }
+
         return $url;
     }
 
@@ -200,6 +203,7 @@ class HttpLoader extends AbstractLoader
                 return true;
             }
         }
+
         return false;
     }
 }
