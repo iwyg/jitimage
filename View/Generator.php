@@ -11,6 +11,8 @@
 
 namespace Thapp\JitImage\View;
 
+use Thapp\JitImage\Parameters;
+use Thapp\JitImage\FilterExpression;
 use Thapp\JitImage\ProcessorInterface;
 
 /**

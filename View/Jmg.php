@@ -31,6 +31,7 @@ class Jmg
 
     private $pool;
     private $recipes;
+    private $generator;
     private $defaultPath;
     private $cachePrefix;
 
