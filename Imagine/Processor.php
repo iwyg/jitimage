@@ -13,6 +13,7 @@ namespace Thapp\JitImage\Imagine;
 
 use Imagine\Image\Box;
 use Imagine\Image\Point;
+use Imagine\Image\LayersInterface;
 use Imagine\Image\BoxInterface;
 use Imagine\Image\PointInterface;
 use Imagine\Image\ImageInterface;
@@ -341,13 +342,80 @@ class Processor implements ProcessorInterface
             $image = $this->imagine->create($target, $color);
             $image->usePalette($this->image->palette());
             $image->strip();
-            $point = $gravity->getPoint($target, $size);
-            $image->paste($this->image, $point);
+
+            if (($size->getWidth() < $target->getWidth() && $size->getHeight() > $target->getHeight()) ||
+                ($size->getHeight() < $target->getHeight() && $size->getWidth() > $target->getWidth())) {
+                $this->doCrop(new Point(0, 0), $target);
+                $size = $this->image->getSize();
+                $point = $gravity->getPoint($target, $size);
+            } else {
+                $point = $gravity->getPoint($target, $size);
+            }
+
+            if (1 < $this->image->layers()->count()) {
+                $this->doPaste($image, $point);
+            } else {
+                $image->paste($this->image, $point);
+            }
 
             $this->image = $image;
         } else {
+            //var_dump('B');
             $point = $gravity->getPoint($size, $target);
             $this->doCrop($point, $target);
+        }
+    }
+
+    /**
+     * doPaste
+     *
+     * @param ImageInterface $image
+     * @param mixed $layers
+     * @param PointInterface $point
+     *
+     * @return void
+     */
+    protected function doPaste(ImageInterface &$image, PointInterface $point)
+    {
+        $palette = $image->palette();
+        $meta    = $image->metadata();
+
+        $w = $image->getSize()->getWidth();
+        $h = $image->getSize()->getHeight();
+
+        if ($image instanceof \Imagine\Imagick\Image) {
+            $im = $image->getImagick();
+            $bk = $im->getImageBackgroundColor();
+            $frames = $this->image->getImagick();
+            $fmt = $frames->getImageFormat();
+            $im->setIteratorIndex(0);
+            $im->removeImage();
+
+            $frames->rewind();
+
+            do {
+                $im->newImage($w, $h, $bk, $fmt);
+                $im->setIteratorIndex($frames->getIteratorIndex());
+                $im->compositeimage($frames->getImage(), \Imagick::COMPOSITE_DEFAULT, $point->getX(), $point->getY());
+            } while ($frames->nextImage());
+
+            $im->setImageFormat($fmt);
+        //} elseif ($image instanceof \Imagine\Gmagick\Image) {
+
+        //    $gm = $image->getGmagick();
+        //    $bk = $gm->getImageBackgroundColor()->getColor(false);
+        //    $frames = $this->image->getGmagick();
+        //    $fmt = $frames->getImageFormat();
+        //    $frames->setImageIndex(0);
+        //    $gm->setImageIndex(0);
+        //    $gm->removeImage();
+        //    do {
+        //        $gm->newImage($w, $h, $bk, $fmt);
+        //        $gm->setImageIndex($frames->getImageIndex());
+        //        $gm->compositeimage($frames->getImage(), \Gmagick::COMPOSITE_DEFAULT, $point->getX(), $point->getY());
+        //    } while ($frames->nextImage());
+        } else {
+            $image->copy($this->image, $point);
         }
     }
 
@@ -384,21 +452,45 @@ class Processor implements ProcessorInterface
     protected function doCrop(PointInterface $point, BoxInterface $target)
     {
         if ($this->image instanceof \Imagine\Imagick\Image && 1 < $this->image->getImagick()->getNumberImages()) {
+
             $im = $this->image->getImagick();
-            $index = $im->getIteratorIndex();
-            $im->rewind();
+            $im->setIteratorIndex(0);
+
             do {
                 $this->image->crop($point, $target);
             } while ($im->nextImage());
-            $im->setIteratorIndex($index);
+
+            $class = get_class($this->image);
+            $this->image = new $class($im->coalesceImages(), $this->image->palette(), $this->image->metadata());
+
         } elseif ($this->image instanceof \Imagine\Gmagick\Image && 1 < $this->image->getGmagick()->getNumberImages()) {
+
             $gm = $this->image->getGmagick();
-            $index = $gm->getImageIndex();
+
+            if (!method_exists($gm, 'coalesceImages')) {
+                foreach ($this->layers as $layer) {
+                    $layer->crop($point, $target);
+                }
+
+                return;
+            }
+
+            $gm = $gm->coalesceImages();
+
             $gm->setImageIndex(0);
+            $num = $gm->getNumberImages();
             do {
-                $this->image->crop($point, $target);
+                try {
+                    $gm->cropImage($target->getWidth(), $target->getHeight(), $point->getX(), $point->getY());
+                } catch (\GmagickException $e) {
+                    // strip frame?
+                    $gm->removeImage();
+                }
             } while ($gm->nextImage());
-            $gm->setImageIndex($index);
+
+            $class = get_class($this->image);
+            $this->image = new $class($gm->coalesceImages(), $this->image->palette(), $this->image->metadata());
+
         } else {
             $this->image->crop($point, $target);
         }
@@ -414,25 +506,52 @@ class Processor implements ProcessorInterface
     protected function doResize(BoxInterface $size)
     {
         if ($this->image instanceof \Imagine\Imagick\Image && 1 < $this->image->getImagick()->getNumberImages()) {
-            $im = $this->image->getImagick();
-            $index = $im->getIteratorIndex();
-            $im->rewind();
-            do {
-                $this->image->resize($size);
-            } while ($im->nextImage());
-            $im->setIteratorIndex($index);
+
+            $this->image->layers()->coalesce();
+
+            foreach ($this->image->layers() as $frame) {
+                $frame->resize($size);
+            }
 
         } elseif ($this->image instanceof \Imagine\Gmagick\Image && 1 < $this->image->getGmagick()->getNumberImages()) {
+
             $gm = $this->image->getGmagick();
-            $index = $gm->getImageIndex();
+
+            if (!method_exists($gm, 'coalesceImages')) {
+                foreach ($this->layers as $layer) {
+                    $layer->resize($size);
+                }
+
+                return;
+            }
+
             $gm->setImageIndex(0);
+
             do {
                 $this->image->resize($size);
             } while ($gm->nextImage());
-            $gm->setImageIndex($index);
+
+            $class = get_class($this->image);
+            $this->image = new $class($gm->coalesceImages(), $this->image->palette(), $this->image->metadata());
         } else {
             $this->image->resize($size);
         }
+    }
+
+    protected function coalesceGmagick(\Gmagick $gm)
+    {
+        if (!method_exists($gm, 'coalesceImages')) {
+            return;
+        }
+
+        $meta = $this->image->metadata();
+        $palette = $this->image->palette();
+        $coalesce = $gm->coalesceImages();
+
+        $num = $gm->getNumberImages();
+
+        $class = get_class($this->image);
+        $this->image = new $class($coalesce, $this->image->palette(), $this->image->metadata());
     }
 
     /**

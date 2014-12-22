@@ -23,8 +23,8 @@ use Imagine\Image\BoxInterface;
 interface GravityInterface
 {
     const GRAVITY_NORTHWEST = 1;
-    const GRAVITY_NORTHEAST = 2;
-    const GRAVITY_NORTH = 3;
+    const GRAVITY_NORTH = 2;
+    const GRAVITY_NORTHEAST = 3;
     const GRAVITY_WEST = 4;
     const GRAVITY_CENTER = 5;
     const GRAVITY_EAST = 6;
