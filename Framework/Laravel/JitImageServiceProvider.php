@@ -96,6 +96,10 @@ class JitImageServiceProvider extends ServiceProvider
             $app['events']->fire('jmg.processor.boot');
         });
 
+        $this->app->resolving('Thapp\JitImage\Imagine\Processor', function ($proc, $app) {
+            $proc->setOptions($app['config']->get('jmg.imagine'), []);
+        });
+
         $this->app->singleton('jmg', 'Thapp\JitImage\View\Jmg');
         $this->app->alias('Thapp\JitImage\Resolver\LoaderResolverInterface', 'jmg.loaders');
         $this->app->alias('Thapp\JitImage\Resolver\FilterResolverInterface', 'jmg.filters');

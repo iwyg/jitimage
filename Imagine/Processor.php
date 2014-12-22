@@ -13,6 +13,8 @@ namespace Thapp\JitImage\Imagine;
 
 use Imagine\Image\Box;
 use Imagine\Image\Point;
+use Imagine\Image\BoxInterface;
+use Imagine\Image\PointInterface;
 use Imagine\Image\ImageInterface;
 use Imagine\Image\ImagineInterface;
 use Thapp\JitImage\ProcessorInterface;
@@ -33,6 +35,7 @@ class Processor implements ProcessorInterface
     private $filters;
     private $image;
     private $imagine;
+    private $options;
     private $resource;
     private $processed;
     private $quality;
@@ -45,10 +48,17 @@ class Processor implements ProcessorInterface
      * @param ImagineInterface $imagine
      * @param FilterResolverInterface $filters
      */
-    public function __construct(ImagineInterface $imagine, FilterResolverInterface $filters = null)
+    public function __construct(ImagineInterface $imagine, FilterResolverInterface $filters = null, array $options = [])
     {
         $this->imagine = $imagine;
         $this->filters = $filters;
+        $this->options = $options;
+
+    }
+
+    public function setOptions(array $options)
+    {
+        $this->options = $options;
     }
 
     /**
@@ -200,7 +210,7 @@ class Processor implements ProcessorInterface
      */
     public function getContents()
     {
-        return $this->image->get($this->getFileFormat());
+        return $this->image->get($this->getFileFormat(), $this->options);
     }
 
     /**
@@ -305,7 +315,7 @@ class Processor implements ProcessorInterface
             $h = round($w / $ratio);
         }
 
-        $this->image->resize(new Box($w, $h));
+        $this->doResize($nb = new Box($w, $h));
     }
 
     /**
@@ -337,7 +347,7 @@ class Processor implements ProcessorInterface
             $this->image = $image;
         } else {
             $point = $gravity->getPoint($size, $target);
-            $this->image->crop($point, $target);
+            $this->doCrop($point, $target);
         }
     }
 
@@ -355,10 +365,74 @@ class Processor implements ProcessorInterface
         list ($w, $h) = $this->targetSize;
 
         $size = $this->image->getSize();
-        $this->fillArea($w, $h, $size->getWidth(), $size->getHeight());
 
-        $this->image->resize(new Box($w, $h));
+        $this->fillArea($w, $h, $ow = $size->getWidth(), $oh = $size->getHeight());
+
+        $this->doResize(new Box($w, $h));
+
         $this->crop($gravity);
+    }
+
+    /**
+     * doCrop
+     *
+     * @param mixed $point
+     * @param mixed $target
+     *
+     * @return void
+     */
+    protected function doCrop(PointInterface $point, BoxInterface $target)
+    {
+        if ($this->image instanceof \Imagine\Imagick\Image && 1 < $this->image->getImagick()->getNumberImages()) {
+            $im = $this->image->getImagick();
+            $index = $im->getIteratorIndex();
+            $im->rewind();
+            do {
+                $this->image->crop($point, $target);
+            } while ($im->nextImage());
+            $im->setIteratorIndex($index);
+        } elseif ($this->image instanceof \Imagine\Gmagick\Image && 1 < $this->image->getGmagick()->getNumberImages()) {
+            $gm = $this->image->getGmagick();
+            $index = $gm->getImageIndex();
+            $gm->setImageIndex(0);
+            do {
+                $this->image->crop($point, $target);
+            } while ($gm->nextImage());
+            $gm->setImageIndex($index);
+        } else {
+            $this->image->crop($point, $target);
+        }
+    }
+
+    /**
+     * doResize
+     *
+     * @param BoxInterface $size
+     *
+     * @return void
+     */
+    protected function doResize(BoxInterface $size)
+    {
+        if ($this->image instanceof \Imagine\Imagick\Image && 1 < $this->image->getImagick()->getNumberImages()) {
+            $im = $this->image->getImagick();
+            $index = $im->getIteratorIndex();
+            $im->rewind();
+            do {
+                $this->image->resize($size);
+            } while ($im->nextImage());
+            $im->setIteratorIndex($index);
+
+        } elseif ($this->image instanceof \Imagine\Gmagick\Image && 1 < $this->image->getGmagick()->getNumberImages()) {
+            $gm = $this->image->getGmagick();
+            $index = $gm->getImageIndex();
+            $gm->setImageIndex(0);
+            do {
+                $this->image->resize($size);
+            } while ($gm->nextImage());
+            $gm->setImageIndex($index);
+        } else {
+            $this->image->resize($size);
+        }
     }
 
     /**
