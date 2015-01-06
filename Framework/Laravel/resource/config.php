@@ -137,5 +137,8 @@ return [
     'imagine' => [
         'flatten' => false,
         //'animated' => true
+    ],
+
+    'image' => [
     ]
 ];

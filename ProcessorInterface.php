@@ -78,6 +78,15 @@ interface ProcessorInterface
     const FORMAT_TIF = 'tif';
 
     /**
+     * setOptions
+     *
+     * @param array $options
+     *
+     * @return void
+     */
+    public function setOptions(array $options);
+
+    /**
      * load the source file
      *
      * @param string $source source url
@@ -119,7 +128,7 @@ interface ProcessorInterface
      *
      * @return void
      */
-    public function setQuality($quality);
+    //public function setQuality($quality);
 
     /**
      * set the output image format

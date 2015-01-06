@@ -18,6 +18,7 @@ use Imagine\Image\BoxInterface;
 use Imagine\Image\PointInterface;
 use Imagine\Image\ImageInterface;
 use Imagine\Image\ImagineInterface;
+use Thapp\JitImage\AbstractProcessor;
 use Thapp\JitImage\ProcessorInterface;
 use Thapp\JitImage\Resolver\FilterResolverInterface;
 use Thapp\JitImage\Resource\FileResourceInterface;
@@ -29,7 +30,7 @@ use Thapp\JitImage\Resource\FileResourceInterface;
  * @version $Id$
  * @author iwyg <mail@thomas-appel.com>
  */
-class Processor implements ProcessorInterface
+class Processor extends AbstractProcessor
 {
     use Scaling;
 
@@ -57,11 +58,6 @@ class Processor implements ProcessorInterface
 
     }
 
-    public function setOptions(array $options)
-    {
-        $this->options = $options;
-    }
-
     /**
      * {@inheritdoc}
      */
@@ -70,15 +66,6 @@ class Processor implements ProcessorInterface
         $this->processed = false;
         $this->image = $this->imagine->read($resource->getHandle());
         $this->resource = $resource;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function close()
-    {
-        $this->targetFormat = null;
-        $this->targetSize = null;
     }
 
     /**
@@ -98,44 +85,6 @@ class Processor implements ProcessorInterface
     }
 
     /**
-     * {@inheritdoc}
-     */
-    public function process(array $parameters)
-    {
-        $params = array_merge($this->defaultParams(), $parameters);
-
-        $this->targetSize = [$params['width'], $params['height']];
-
-        switch($params['mode']) {
-            case static::IM_NOSCALE:
-                break;
-            case static::IM_RESIZE:
-                $this->resize();
-                break;
-            case static::IM_SCALECROP:
-                $this->cropScale($params['gravity']);
-                break;
-            case static::IM_CROP:
-                $this->crop($params['gravity'], $params['background']);
-                break;
-            case static::IM_RSIZEFIT:
-                $this->resizeToFit();
-                break;
-            case static::IM_RSIZEPERCENT:
-                $this->resizePercentual($params['width']);
-                break;
-            case static::IM_RSIZEPXCOUNT:
-                $this->resizePixelCount($params['width']);
-                break;
-        }
-
-        foreach ((array)$params['filter'] as $f => $parameter) {
-            $this->addFilter($f, (array)$parameter);
-        }
-    }
-
-
-    /**
      * Get the image driver
      *
      * @return DriverInterface
@@ -146,65 +95,6 @@ class Processor implements ProcessorInterface
     }
 
     /**
-     * set the image compression quality.
-     *
-     * This typically is a value between
-     * 0 and 100
-     *
-     * @param int $quality
-     *
-     * @return void
-     */
-    public function setQuality($quality)
-    {
-        $this->quality = $quality;
-    }
-
-    /**
-     * set the output image format
-     *
-     * @param string $format
-     *
-     * @return void
-     */
-    public function setFileFormat($format)
-    {
-        $this->targetFormat = strtolower($format);
-    }
-
-    /**
-     * get the image output format
-     *
-     * @return string
-     */
-    public function getFileFormat()
-    {
-        if (null === $this->targetFormat) {
-            $this->targetFormat = $this->getSourceFormat();
-        }
-
-        return $this->targetFormat;
-    }
-
-    /**
-     * getSourceFormat
-     *
-     * @return string
-     */
-    public function getSourceFormat()
-    {
-        if (null === $this->resource) {
-            return;
-        }
-
-        $formats = array_flip(static::formats());
-
-        if (isset($formats[$mime = $this->resource->getMimeType()])) {
-            return $formats[$mime];
-        }
-    }
-
-    /**
      * get the filecontents of the image
      *
      * @return string
@@ -212,61 +102,6 @@ class Processor implements ProcessorInterface
     public function getContents()
     {
         return $this->image->get($this->getFileFormat(), $this->options);
-    }
-
-    /**
-     * getSourceMimeTime
-     *
-     *
-     * @return string
-     */
-    public function getSourceMimeType()
-    {
-        return $this->resource->getMimeType();
-    }
-
-    /**
-     * get the image output MimeType
-     *
-     * @return string
-     */
-    public function getMimeType()
-    {
-        return $this->translateFormatToMime($this->getFileFormat());
-    }
-
-    /**
-     * get the image input source path
-     *
-     * @return string
-     */
-    public function getSource()
-    {
-        return $this->resource->getPath();
-    }
-
-    /**
-     * Determine if the image has been processed yet.
-     *
-     * @return bool
-     */
-    public function isProcessed()
-    {
-        return (bool)$this->processed;
-    }
-
-    /**
-     * getLastModTime
-     *
-     * @return integet
-     */
-    public function getLastModTime()
-    {
-        if ($this->processed) {
-            return time();
-        }
-
-        return $this->resource->getLastModified();
     }
 
     /**
@@ -297,7 +132,6 @@ class Processor implements ProcessorInterface
     /**
      * resize
      *
-     *
      * @return void
      */
     protected function resize()
@@ -316,7 +150,7 @@ class Processor implements ProcessorInterface
             $h = round($w / $ratio);
         }
 
-        $this->doResize($nb = new Box($w, $h));
+        $this->doResize(new Box($w, $h));
     }
 
     /**
@@ -360,7 +194,6 @@ class Processor implements ProcessorInterface
 
             $this->image = $image;
         } else {
-            //var_dump('B');
             $point = $gravity->getPoint($size, $target);
             $this->doCrop($point, $target);
         }
@@ -384,14 +217,15 @@ class Processor implements ProcessorInterface
         $h = $image->getSize()->getHeight();
 
         if ($image instanceof \Imagine\Imagick\Image) {
+
             $im = $image->getImagick();
             $bk = $im->getImageBackgroundColor();
-            $frames = $this->image->getImagick();
+            $frames = $this->image->getImagick()->coalesceImages();
             $fmt = $frames->getImageFormat();
-            $im->setIteratorIndex(0);
+            $im->setFirstIterator();
             $im->removeImage();
 
-            $frames->rewind();
+            $frames->setFirstIterator();
 
             do {
                 $im->newImage($w, $h, $bk, $fmt);
@@ -400,20 +234,24 @@ class Processor implements ProcessorInterface
             } while ($frames->nextImage());
 
             $im->setImageFormat($fmt);
-        //} elseif ($image instanceof \Imagine\Gmagick\Image) {
 
-        //    $gm = $image->getGmagick();
-        //    $bk = $gm->getImageBackgroundColor()->getColor(false);
-        //    $frames = $this->image->getGmagick();
-        //    $fmt = $frames->getImageFormat();
-        //    $frames->setImageIndex(0);
-        //    $gm->setImageIndex(0);
-        //    $gm->removeImage();
-        //    do {
-        //        $gm->newImage($w, $h, $bk, $fmt);
-        //        $gm->setImageIndex($frames->getImageIndex());
-        //        $gm->compositeimage($frames->getImage(), \Gmagick::COMPOSITE_DEFAULT, $point->getX(), $point->getY());
-        //    } while ($frames->nextImage());
+        } elseif ($image instanceof \Imagine\Gmagick\Image && method_exists($image->getGmgick(), 'coalesceImages')) {
+
+            $gm = $image->getGmagick();
+            $bk = $gm->getImageBackgroundColor()->getColor(false);
+            $frames = $this->image->getGmagick()->coalesceImages();
+            $fmt = $frames->getImageFormat();
+            $frames->setImageIndex(0);
+            $gm->setImageIndex(0);
+            $gm->removeImage();
+
+            do {
+                $gm->newImage($w, $h, $bk, $fmt);
+                $gm->setImageIndex($frames->getImageIndex());
+                $gm->compositeimage($frames->getImage(), \Gmagick::COMPOSITE_DEFAULT, $point->getX(), $point->getY());
+            } while ($frames->nextImage());
+
+            $gm->setImageFormat($fmt);
         } else {
             $image->copy($this->image, $point);
         }
@@ -453,21 +291,23 @@ class Processor implements ProcessorInterface
     {
         if ($this->image instanceof \Imagine\Imagick\Image && 1 < $this->image->getImagick()->getNumberImages()) {
 
-            $im = $this->image->getImagick();
-            $im->setIteratorIndex(0);
+            $im = $this->image->getImagick()->coalesceImages();
+            $im->setFirstIterator();
 
             do {
-                $this->image->crop($point, $target);
+              $im->cropImage($target->getWidth(), $target->getHeight(), $point->getX(), $point->getY());
+              $im->setImagePage(0, 0, 0, 0);
             } while ($im->nextImage());
 
             $class = get_class($this->image);
-            $this->image = new $class($im->coalesceImages(), $this->image->palette(), $this->image->metadata());
+            $this->image = new $class($im->deconstructImages(), $this->image->palette(), $this->image->metadata());
 
         } elseif ($this->image instanceof \Imagine\Gmagick\Image && 1 < $this->image->getGmagick()->getNumberImages()) {
 
             $gm = $this->image->getGmagick();
 
             if (!method_exists($gm, 'coalesceImages')) {
+
                 foreach ($this->layers as $layer) {
                     $layer->crop($point, $target);
                 }
@@ -476,12 +316,12 @@ class Processor implements ProcessorInterface
             }
 
             $gm = $gm->coalesceImages();
-
             $gm->setImageIndex(0);
-            $num = $gm->getNumberImages();
+
             do {
                 try {
                     $gm->cropImage($target->getWidth(), $target->getHeight(), $point->getX(), $point->getY());
+                    $gm->setImagePage(0, 0, 0, 0);
                 } catch (\GmagickException $e) {
                     // strip frame?
                     $gm->removeImage();
@@ -489,7 +329,7 @@ class Processor implements ProcessorInterface
             } while ($gm->nextImage());
 
             $class = get_class($this->image);
-            $this->image = new $class($gm->coalesceImages(), $this->image->palette(), $this->image->metadata());
+            $this->image = new $class($gm->deconstructImages(), $this->image->palette(), $this->image->metadata());
 
         } else {
             $this->image->crop($point, $target);
@@ -548,8 +388,6 @@ class Processor implements ProcessorInterface
         $palette = $this->image->palette();
         $coalesce = $gm->coalesceImages();
 
-        $num = $gm->getNumberImages();
-
         $class = get_class($this->image);
         $this->image = new $class($coalesce, $this->image->palette(), $this->image->metadata());
     }
@@ -600,86 +438,5 @@ class Processor implements ProcessorInterface
         list ($w, $h) = $this->pixelLimit($size->getWidth(), $size->getHeight(), (int)$pixel);
 
         $this->image->resize(new Box($w, $h));
-    }
-
-    /**
-     * addFilter
-     *
-     * @param string $filter
-     * @param array $options
-     *
-     * @return void
-     */
-    protected function addFilter($filter, array $options = [])
-    {
-        if (null === $this->filters) {
-            return;
-        }
-
-        if ($filters = $this->filters->resolve($filter)) {
-            foreach ($filters as $filter) {
-                if ($filter->supports($this)) {
-                    $filter->apply($this, $options);
-                    break;
-                }
-
-                throw new \RuntimeException('No suitable Filter found');
-            }
-        } else {
-            throw new \RuntimeException('Filter "'.$filter.'" not found.' );
-        }
-    }
-
-    /**
-     * defaultParams
-     *
-     * @return array
-     */
-    protected function defaultParams()
-    {
-        return [
-            'mode'       => 0,
-            'width'      => 100,
-            'height'     => 100,
-            'gravity'    => 0,
-            'quality'    => 80,
-            'background' => null,
-            'filter'     => []
-        ];
-    }
-
-    /**
-     * translateFormatToMime
-     *
-     * @param string $format
-     *
-     * @return string
-     */
-    protected function translateFormatToMime($format)
-    {
-        $formats = static::formats();
-
-        if (array_key_exists($format, $formats)) {
-            return $formats[$format];
-        }
-    }
-
-    /**
-     * formats
-     *
-     * @return array
-     */
-    protected static function formats()
-    {
-        return [
-            'jpeg'  => 'image/jpeg',
-            'jpg'   => 'image/jpeg',
-            'png'   => 'image/png',
-            'gif'   => 'image/gif',
-            'tif'   => 'image/tiff',
-            'tiff'  => 'image/tiff',
-            'wbmp'  => 'image/vnd.wap.wbmp',
-            'xbm'   => 'image/xbm',
-        ];
     }
 }

@@ -43,6 +43,22 @@ trait ProviderHelperTrait
         throw new \InvalidArgumentException('Invalid driver "'. $driver .'".');
     }
 
+    private function getSourceClass($driver)
+    {
+        switch ($driver) {
+            case 'gd':
+                return '\Thapp\Image\Driver\Gd\Source';
+            case 'imagick':
+                return '\Thapp\Image\Driver\Imagick\Source';
+            case 'gmagick':
+                throw new \InvalidArgumentException('gmagick is not supported.');
+            default:
+                break;
+        }
+
+        throw new \InvalidArgumentException('Invalid driver "'. $driver .'".');
+    }
+
     /**
      * getPathRegexp
      *
