@@ -34,6 +34,7 @@ class Jmg
     private $generator;
     private $defaultPath;
     private $cachePrefix;
+    private $current;
 
     /**
      * Constructor.
@@ -51,6 +52,16 @@ class Jmg
         $this->pool = [];
     }
 
+    public function getImageResolver()
+    {
+        return $this->imageResolver;
+    }
+
+    public function getRecipesResolver()
+    {
+        return $this->recipes;
+    }
+
     /**
      * take
      *
@@ -61,6 +72,8 @@ class Jmg
      */
     public function take($source, $path = null)
     {
+        $this->current = null;
+
         $path = $path ?: $this->defaultPath;
         $gen = $this->newGenerator();
 
@@ -94,6 +107,26 @@ class Jmg
     }
 
     /**
+     * apply
+     *
+     *
+     * @return void
+     */
+    public function apply($path, $source, Parameters $parameters, FilterExpression $filters = null)
+    {
+        list ($params, $filter) = $parts = $this->listParamsAndFilter($parameters, $filters);
+        $pmStr = $this->getParamString($params, $source, $filter);
+
+        $cr = $this->imageResolver->getCacheResolver();
+
+        if (null !== $cr = $this->imageResolver->getCacheResolver() && ($cache = $cr->resolve($path))) {
+            return $this->resolveFromCache($cache, $path, $source, $parts, $parameters, $filters);
+        }
+
+        return $this->getUri($path, $pmStr);
+    }
+
+    /**
      * filter
      *
      * @param string $expr
@@ -115,24 +148,9 @@ class Jmg
         $this->imageResolver->getProcessor()->close();
     }
 
-    /**
-     * apply
-     *
-     *
-     * @return void
-     */
-    protected function apply($path, $source, Parameters $parameters, FilterExpression $filters = null)
+    public function getCurrent()
     {
-        list ($params, $filter) = $parts = $this->listParamsAndFilter($parameters, $filters);
-        $pmStr = $this->getParamString($params, $source, $filter);
-
-        $cr = $this->imageResolver->getCacheResolver();
-
-        if (null !== $cr = $this->imageResolver->getCacheResolver() && ($cache = $cr->resolve($path))) {
-            return $this->resolveFromCache($cache, $path, $source, $parts, $parameters, $filters);
-        }
-
-        return $this->getUri($path, $pmStr);
+        return $this->current;
     }
 
     /**
@@ -163,10 +181,13 @@ class Jmg
             $dir  = basename(dirname($cached->getPath()));
             $str = '/'. implode('/', [$path, $this->cacheSuffix, $dir, $file]);
 
-            $this->pool[$key] = $str;
+            $this->pool[$key]['url'] = $str;
+            $this->pool[$key]['resource'] = $cached;
         }
 
-        return $this->pool[$key];
+        $this->current = $this->pool[$key]['resource'];
+
+        return $this->pool[$key]['url'];
     }
 
     /**

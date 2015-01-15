@@ -47,19 +47,19 @@ class JitImageServiceProvider extends ServiceProvider
             'Thapp\JitImage\Resolver\ImageResolver'
         );
 
-        $this->app->singleton(
-            'Thapp\JitImage\ProcessorInterface',
-            'Thapp\JitImage\Image\Processor'
-            //'Thapp\JitImage\Imagine\Processor'
-        );
+        $procClass = 'imagine' === $this->app['config']->get('jmg.imagine', false) ?
+            'Thapp\JitImage\Imagine\Processor' :
+            'Thapp\JitImage\Image\Processor';
+
+        $this->app->singleton('Thapp\JitImage\ProcessorInterface', $procClass);
 
         $this->app->when('Thapp\JitImage\Image\Processor')
             ->needs('Thapp\Image\Driver\SourceInterface')
-            ->give($this->getSourceClass($this->app['config']->get('jmg.driver', 'gd')));
+            ->give($this->getSourceClass($this->app['config']->get('jmg.driver', 'imagick')));
 
         $this->app->when('Thapp\JitImage\Imagine\Processor')
             ->needs('Imagine\Image\ImagineInterface')
-            ->give($this->getImagineClass($this->app['config']->get('jmg.driver', 'gd')));
+            ->give($this->getImagineClass($this->app['config']->get('jmg.driver', 'imagick')));
 
         $this->app->singleton(
             'Thapp\JitImage\Resolver\FilterResolverInterface',

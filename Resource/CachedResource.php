@@ -81,6 +81,14 @@ class CachedResource extends AbstractResource implements \Serializable
     }
 
     /**
+     * {@inheritdoc}
+     */
+    public function getDimension()
+    {
+        return $this->dimensions;
+    }
+
+    /**
      * serialize
      *
      * @return string

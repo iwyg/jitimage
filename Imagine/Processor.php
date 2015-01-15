@@ -37,12 +37,11 @@ class Processor extends AbstractProcessor
     private $filters;
     private $image;
     private $imagine;
-    private $options;
     private $resource;
     private $processed;
-    private $quality;
-    private $targetFormat;
-    private $targetSize;
+    protected $targetFormat;
+    protected $targetSize;
+    protected $options;
 
     /**
      * Constructor.

@@ -179,29 +179,6 @@ abstract class AbstractProcessor implements ProcessorInterface
         return $this->resource->getLastModified();
     }
 
-    /**
-     * resize
-     *
-     * @return void
-     */
-    protected function resize()
-    {
-        $this->processed = true;
-
-        list ($w, $h) = $this->targetSize;
-
-        $ratio = $this->getRatio();
-
-        if (0 === max($h, $w)) {
-            throw new \InvalidArgumentException();
-        } elseif (0 === $w) {
-            $w = round($h * $ratio);
-        } elseif (0 === $h) {
-            $h = round($w / $ratio);
-        }
-
-        $this->doResize($nb = new Box($w, $h));
-    }
 
     /**
      * addFilter

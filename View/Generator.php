@@ -14,6 +14,7 @@ namespace Thapp\JitImage\View;
 use Thapp\JitImage\Parameters;
 use Thapp\JitImage\FilterExpression;
 use Thapp\JitImage\ProcessorInterface;
+use Thapp\JitImage\Resource\CachedResource;
 
 /**
  * @class Generator
@@ -29,9 +30,12 @@ class Generator
     protected $source;
     protected $filters;
     protected $parameters;
+    protected $asTag;
+    protected $tagAttrs;
 
     public function __construct(Jmg $jmg)
     {
+        $this->asTag = false;
         $this->jmg = $jmg;
         $this->filters = new FilterExpression([]);
         $this->parameters = new Parameters;
@@ -39,6 +43,8 @@ class Generator
 
     public function __clone()
     {
+        $this->tagAttrs = null;
+        $this->asTag = false;
         $this->path = null;
         $this->source = null;
         $this->filters = clone $this->filters;
@@ -90,6 +96,21 @@ class Generator
     }
 
     /**
+     * setTag
+     *
+     * @param array $attributes
+     *
+     * @return void
+     */
+    public function setTag(array $attributes = [])
+    {
+        $this->asTag = true;
+        $this->tagAttrs = $attributes;
+
+        return $this;
+    }
+
+    /**
      * filter
      *
      * @param mixed $expr
@@ -98,7 +119,7 @@ class Generator
      */
     public function filter($expr)
     {
-        $this->filter->setExpression($expr);
+        $this->filters->setExpression($expr);
 
         return $this;
     }
@@ -187,6 +208,20 @@ class Generator
         return $this->apply();
     }
 
+    public function make($recipe)
+    {
+        if (!$res = $this->jmg->getRecipesResolver()->resolve($recipe)) {
+            return '';
+        }
+
+        list ($prefix, $params, $filter) = $res;
+
+        $this->setPath($prefix);
+        $this->filter($filter);
+
+        return $this->apply(Parameters::fromString($params));
+    }
+
     /**
      * get
      *
@@ -221,8 +256,37 @@ class Generator
      *
      * @return void
      */
-    protected function apply()
+    protected function apply($params = null)
     {
-        return $this->jmg->apply($this->path, $this->source, $this->parameters, $this->filters);
+        $src = $this->jmg->apply($this->path, $this->source, $params ?: $this->parameters, $this->filters);
+
+        if ($this->asTag) {
+            $src =  $this->generateTag($src);
+        }
+
+        $this->asTag = false;
+        $this->tagAttrs = null;
+
+        return $src;
+    }
+
+    protected function generateTag($src)
+    {
+        if (($current = $this->jmg->getCurrent()) instanceof CachedResource) {
+            list ($w, $h) = $current->getDimension();
+        } else {
+            $w = null;
+            $h = null;
+        }
+
+        $options = array_merge($this->tagAttrs, ['src' => $src, 'width' => $w, 'height' => $h]);
+
+        $tag = '<img ';
+        foreach ($options as $attr => $value) {
+            $tag .= sprintf('%s="%s" ', $attr, $value);
+        }
+        $tag .= '/>';
+
+        return $tag;
     }
 }

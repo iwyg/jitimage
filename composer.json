@@ -12,12 +12,12 @@
   "type": "package",
   "require": {
     "php":">=5.4.0",
-    "imagine/imagine": "dev-master",
     "symfony/http-foundation": "~2.5"
   },
   "require-dev": {
     "phpunit/phpunit": "~4.0",
     "illuminate/contracts": "5.0.*@dev",
+    "imagine/imagine": "dev-master",
     "dropbox/dropbox-sdk": "dev-master"
   },
   "autoload": {
