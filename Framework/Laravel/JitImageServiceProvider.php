@@ -47,7 +47,9 @@ class JitImageServiceProvider extends ServiceProvider
             'Thapp\JitImage\Resolver\ImageResolver'
         );
 
-        $procClass = 'imagine' === $this->app['config']->get('jmg.imagine', false) ?
+        $useImagine = $this->app['config']->get('jmg.imagine', false);
+
+        $procClass = 'imagine' === $useImagine ?
             'Thapp\JitImage\Imagine\Processor' :
             'Thapp\JitImage\Image\Processor';
 
@@ -101,8 +103,14 @@ class JitImageServiceProvider extends ServiceProvider
             $app['events']->fire('jmg.processor.boot');
         });
 
+        // set options on imagine processor
         $this->app->resolving('Thapp\JitImage\Imagine\Processor', function ($proc, $app) {
             $proc->setOptions($app['config']->get('jmg.imagine'), []);
+        });
+
+        // set options on image processor
+        $this->app->resolving('Thapp\JitImage\Image\Processor', function ($proc, $app) {
+            $proc->setOptions($app['config']->get('jmg.image'), []);
         });
 
         $this->app->singleton('jmg', 'Thapp\JitImage\View\Jmg');
