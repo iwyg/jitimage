@@ -98,6 +98,9 @@ class Processor extends AbstractProcessor
         return $this->image->get($this->getFileFormat(), $this->options);
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function getFileFormat()
     {
         if (null === $this->targetFormat) {
