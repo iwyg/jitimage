@@ -13,6 +13,7 @@ namespace Thapp\JitImage\Imagine\Filter\Imagick;
 
 use Imagine\Image\Imagick\Image;
 use Thapp\JitImage\ProcessorInterface;
+use Thapp\JitImage\Filter\FilterInterface;
 
 /**
  * @class AbstractImagickFilter

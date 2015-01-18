@@ -165,13 +165,16 @@ class Processor extends AbstractProcessor
         $gravity = new Gravity($gravity);
         $this->image->gravity($gravity);
 
+        $color = $background ? new Hex($background) : null;
+
         if ($this->image->hasFrames()) {
             foreach ($this->image->frames()->coalesce() as $frame) {
                 $frame->gravity($gravity);
-                $frame->crop($size, null, new Hex($background));
+                $frame->crop($size, null, $color);
             }
         } else {
-            $this->image->crop($size, null, new Hex($background));
+            $this->image->gravity($gravity);
+            $this->image->crop($size, null, $color);
         }
     }
 
