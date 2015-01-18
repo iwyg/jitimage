@@ -9,9 +9,11 @@
  * that was distributed with this package.
  */
 
-namespace Thapp\JitImage\Filter\Imagick;
+namespace Thapp\JitImage\Image\Filter\Imagick;
 
+use Thapp\Image\Color\Hex;
 use Thapp\JitImage\ProcessorInterface;
+use Thapp\Image\Filter\Imagick\Colorize as ImageColorize;
 
 /**
  * @class Greyscale
@@ -20,27 +22,20 @@ use Thapp\JitImage\ProcessorInterface;
  * @version $Id$
  * @author iwyg <mail@thomas-appel.com>
  */
-class Greyscale extends AbstractImagickFilter
+class Colorize extends AbstractImagickFilter
 {
-    protected $availableOptions = ['h', 's', 'b', 'c'];
+    protected static $shortOpts = ['c' => 'color'];
 
     /**
      * {@inheritdoc}
      */
     public function apply(ProcessorInterface $proc, array $options = [])
     {
-        if (!$image = $proc->getCurrentImage()) {
-            return;
-        }
-
         $this->setOptions($options);
-        $this->applyEffects($image->getImagick());
+        $color = new Hex($this->getOption('c', 'ff00ff'));
 
+        $filter = new ImageColorize($color);
+        $filter->apply($proc->getCurrentImage());
     }
 
-    protected function applyEffects(\Imagick $img)
-    {
-        $img->modulateImage((int)$this->getOption('b', 100), (int)$this->getOption('s', 0), (int)$this->getOption('h', 100));
-        $img->contrastImage((bool)$this->getOption('c', 1));
-    }
 }

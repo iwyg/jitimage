@@ -9,9 +9,11 @@
  * that was distributed with this package.
  */
 
-namespace Thapp\JitImage\Filter\Gd;
+namespace Thapp\JitImage\Image\Filter\Gd;
 
+use Thapp\Image\Color\Hex;
 use Thapp\JitImage\ProcessorInterface;
+use Thapp\Image\Filter\Gd\Colorize as ImageColorize;
 
 /**
  * @class Greyscale
@@ -20,19 +22,19 @@ use Thapp\JitImage\ProcessorInterface;
  * @version $Id$
  * @author iwyg <mail@thomas-appel.com>
  */
-class Greyscale extends AbstractImagickFilter
+class Colorize extends AbstractGdFilter
 {
-    protected $availableOptions = [];
+    protected static $shortOpts = ['c' => 'color'];
 
     /**
      * {@inheritdoc}
      */
     public function apply(ProcessorInterface $proc, array $options = [])
     {
-        if (!$image = $proc->getCurrentImage()) {
-            return;
-        }
+        $this->setOptions($options);
+        $color = new Hex($this->getOption('c', 'ff00ff'));
 
-        imagefilter($image->getGdResource(), IMG_FILTER_GRAYSCALE);
+        $filter = new ImageColorize($color);
+        $filter->apply($proc->getCurrentImage());
     }
 }

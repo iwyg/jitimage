@@ -22,35 +22,29 @@ use Thapp\JitImage\ProcessorInterface;
  */
 abstract class AbstractFilter implements FilterInterface
 {
-    protected $availableOptions = [];
+    protected $options = [];
+    protected static $shortOpts = [];
 
     /**
-     * Get a filter option.
-     *
-     * @param string $option option name
-     * @param mixed  $default the default value to return
-     * @access public
-     * @return mixed
+     * {@inheritdoc}
      */
-    public function getOption($option, $default = null)
-    {
-        if (array_key_exists($option, $this->options)) {
-            return $this->options[$option];
-        }
-
-        return $default;
-    }
-
     public function supports(ProcessorInterface $proc)
     {
         return true;
     }
 
+    /**
+     * setOptions
+     *
+     * @param array $options
+     *
+     * @return void
+     */
     protected function setOptions(array $options)
     {
         $this->options = [];
         foreach ($options as $option => $value) {
-            if (!in_array($option, (array)$this->availableOptions)) {
+            if ($option !== static::translateOption($option)) {
                 throw new \InvalidArgumentException(
                     sprintf('filter %s has no option "%s"', get_class($this), $option)
                 );
@@ -60,19 +54,42 @@ abstract class AbstractFilter implements FilterInterface
         }
     }
 
-    public function hexToRgb($hex)
+    /**
+     * Set a filter option.
+     *
+     * @param string $option option name
+     * @param mixed  $default the default value to return
+     * @access public
+     * @return mixed
+     */
+    protected function getOption($option, $default = null)
     {
-        if (3 === ($len = strlen($hex))) {
-            $rgb = str_split($hex);
-            list($r, $g, $b) = $rgb;
-            $rgb = [hexdec($r.$r), hexdec($g.$g), hexdec($b.$b)];
-        } elseif (6 === $len) {
-            $rgb = str_split($hex, 2);
-            list($r, $g, $b) = $rgb;
-            $rgb = [hexdec($r), hexdec($g), hexdec($b)];
-        } else {
-            throw new \InvalidArgumentException(sprintf('invalid hex value %s', $hex));
+        if (!$option = static::translateOption($option)) {
+            return;
         }
-        return $rgb;
+
+        if (array_key_exists($option, $this->options)) {
+            return $this->options[$option];
+        }
+
+        return $default;
+    }
+
+    /**
+     * translateOption
+     *
+     * @param string $option
+     *
+     * @return string
+     */
+    protected static function translateOption($option)
+    {
+        if (isset(static::$shortOpts[$option])) {
+            return $option;
+        } elseif (in_array($option, static::$shortOpts)) {
+            $opts = array_flip(static::$shortOpts);
+
+            return $opts[$option];
+        }
     }
 }

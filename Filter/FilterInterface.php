@@ -31,5 +31,12 @@ interface FilterInterface
      */
     public function apply(ProcessorInterface $proc, array $options = []);
 
+    /**
+     * supports
+     *
+     * @param ProcessorInterface $proc
+     *
+     * @return boolean
+     */
     public function supports(ProcessorInterface $proc);
 }

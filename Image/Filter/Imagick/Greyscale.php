@@ -9,7 +9,7 @@
  * that was distributed with this package.
  */
 
-namespace Thapp\JitImage\Filter\Gmagick;
+namespace Thapp\JitImage\Filter\Imagick;
 
 use Thapp\JitImage\ProcessorInterface;
 
@@ -27,23 +27,16 @@ class Greyscale extends AbstractImagickFilter
     /**
      * {@inheritdoc}
      */
-    public function apply(ProcessorInterface $proc, array $options = [])
+    public function apply(ImageInterface $image, array $options = [])
     {
-        if (!$image = $proc->getCurrentImage()) {
-            return;
-        }
-
         $this->setOptions($options);
-        $this->applyEffects($image->getGmagick());
+        $this->applyEffects($image->getImagick());
 
     }
 
-    protected function applyEffects(\Gmagick $img)
+    protected function applyEffects(\Imagick $img)
     {
         $img->modulateImage((int)$this->getOption('b', 100), (int)$this->getOption('s', 0), (int)$this->getOption('h', 100));
-
-        if (method_exists($img, 'contrastImage')) {
-            $img->contrastImage((bool)$this->getOption('c', 1));
-        }
+        $img->contrastImage((bool)$this->getOption('c', 1));
     }
 }

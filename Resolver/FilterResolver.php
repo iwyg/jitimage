@@ -11,6 +11,8 @@
 
 namespace Thapp\JitImage\Resolver;
 
+use Thapp\JitImage\Filter\FilterInterface;
+
 /**
  * @class FilterResolver
  *
@@ -20,8 +22,8 @@ namespace Thapp\JitImage\Resolver;
  */
 class FilterResolver implements FilterResolverInterface
 {
-    private $aliases = [];
-    private $filters = [];
+    protected $aliases = [];
+    protected $filters = [];
 
     /**
      * {@inheritdoc}
@@ -36,19 +38,30 @@ class FilterResolver implements FilterResolverInterface
     }
 
     /**
-     * add
-     *
-     * @param mixed $filter
-     * @param string $name
-     * @param string $alias
-     *
-     * @return void
+     * {@inheritdoc}
      */
     public function add($filters, $name, $alias = null)
     {
         $alias = $alias ?: $name;
         $this->aliases[$alias] = $name;
 
-        $this->filters[$name] = is_array($filters) ? $filters : [$filters];
+        $filters = is_array($filters) ? $filters : [$filters];
+
+        foreach ($filters as $filter) {
+            $this->setFilter($filter, $name);
+        }
+    }
+
+    /**
+     * setFilter
+     *
+     * @param FilterInterface $filter
+     * @param mixed $name
+     *
+     * @return void
+     */
+    protected function setFilter(FilterInterface $filter, $name)
+    {
+        $this->filters[$name][] = $filter;
     }
 }

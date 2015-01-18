@@ -17,6 +17,8 @@ use Thapp\Image\Metrics\Point;
 use Thapp\Image\Metrics\Gravity;
 use Thapp\Image\Metrics\BoxInterface;
 use Thapp\Image\Metrics\PointInterface;
+use Thapp\Image\Color\ColorInterface;
+use Thapp\Image\Color\Hex;
 use Thapp\Image\Driver\ImageInterface;
 use Thapp\Image\Driver\SourceInterface;
 use Thapp\JitImage\ProcessorInterface;
@@ -96,6 +98,24 @@ class Processor extends AbstractProcessor
         return $this->image->get($this->getFileFormat(), $this->options);
     }
 
+    public function getFileFormat()
+    {
+        if (null === $this->targetFormat) {
+            $this->targetFormat = $this->image->getFormat();
+        }
+
+        return $this->targetFormat;
+    }
+
+    /**
+     * {@inheritdoc}
+     * @return ImageInterface
+     */
+    public function getCurrentImage()
+    {
+        return $this->image;
+    }
+
     /**
      * getRatio
      *
@@ -148,10 +168,10 @@ class Processor extends AbstractProcessor
         if ($this->image->hasFrames()) {
             foreach ($this->image->frames()->coalesce() as $frame) {
                 $frame->gravity($gravity);
-                $frame->crop($size);
+                $frame->crop($size, null, new Hex($background));
             }
         } else {
-            $this->image->crop($size);
+            $this->image->crop($size, null, new Hex($background));
         }
     }
 

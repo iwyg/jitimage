@@ -195,13 +195,19 @@ abstract class AbstractProcessor implements ProcessorInterface
         }
 
         if ($filters = $this->filters->resolve($filter)) {
+            $found = false;
+
             foreach ($filters as $filter) {
                 if ($filter->supports($this)) {
                     $filter->apply($this, $options);
+                    $found = true;
                     break;
                 }
 
-                throw new \RuntimeException('No suitable Filter found');
+            }
+
+            if (!$found) {
+                throw new \RuntimeException('No sutable filter found.' );
             }
         } else {
             throw new \RuntimeException('Filter "'.$filter.'" not found.' );

@@ -133,10 +133,17 @@ class Parameters
     public static function parseString($paramString, $separator = self::P_SEPARATOR)
     {
         list ($mode, $width, $height, $gravity, $background) = array_map(function ($value, $key = null) {
-            return is_numeric($value) ? (int)$value : $value;
+            return is_numeric($value) && !static::isHex($value) ? (int)$value : $value;
         }, array_pad(explode($separator, $paramString), 5, null));
 
         return static::sanitize($mode, $width, $height, $gravity, $background);
+    }
+
+    protected static function isHex($color)
+    {
+        $color = ltrim($color, '#');
+
+        return (boolean)preg_match('#^([[:xdigit:]]{6}|[[:xdigit:]]{3})$#', $color);
     }
 
     /**
@@ -148,7 +155,7 @@ class Parameters
      */
     protected function isColor($color)
     {
-        return 3 === $len = strlen($color) || 6 === $len && preg_match('#^[0-9a-fA-F]$#', $color);
+        return static::isHex($color);
     }
 
     /**

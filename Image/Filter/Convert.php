@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This File is part of the Thapp\JitImage\Filter package
+ * This File is part of the Thapp\JitImage\Image\Filter package
  *
  * (c) iwyg <mail@thomas-appel.com>
  *
@@ -9,36 +9,32 @@
  * that was distributed with this package.
  */
 
-namespace Thapp\JitImage\Filter;
+namespace Thapp\JitImage\Image\Filter;
 
 use Thapp\JitImage\ProcessorInterface;
+use Thapp\Image\Color\Hex;
+use Thapp\Image\Driver\ImageInterface;
+use Thapp\Image\Filter\Format as ImageFormat;
 
 /**
- * @class Format
+ * @class Rotate
  *
- * @package Thapp\JitImage\Filter
+ * @package Thapp\JitImage\Image\Filter
  * @version $Id$
  * @author iwyg <mail@thomas-appel.com>
  */
 class Convert extends AbstractFilter
 {
-    protected $shorOpts = ['f' => 'format'];
+    protected static $shortOpts = ['f' => 'format'];
 
     /**
-     * apply
-     *
-     * @param ProcessorInterface $proc
-     *
-     * @return void
+     * {@inheritdoc}
      */
     public function apply(ProcessorInterface $proc, array $options = [])
     {
         $this->setOptions($options);
 
-        if (null == $format = $this->getOption('f')) {
-            throw new \InvalidArgumentException;
-        }
-
-        $proc->setFileFormat($format);
+        $filter = new ImageFormat($this->getOption('f', 'jpeg'));
+        $filter->apply($proc->getCurrentImage());
     }
 }

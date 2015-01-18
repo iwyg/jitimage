@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This File is part of the Thapp\JitImage package
+ * This File is part of the Thapp\JitImage\Image\Filter\Imagick package
  *
  * (c) iwyg <mail@thomas-appel.com>
  *
@@ -9,22 +9,23 @@
  * that was distributed with this package.
  */
 
-namespace Thapp\JitImage\Filter\Gd;
+namespace Thapp\JitImage\Image\Filter\Gd;
 
 use Thapp\JitImage\ProcessorInterface;
 use Thapp\JitImage\Filter\AbstractFilter;
+use Thapp\JitImage\Filter\FilterInterface;
 
 /**
- * @class AbstractGdFilter
+ * @class AbstractImagickFilter
  *
- * @package Thapp\JitImage
+ * @package Thapp\JitImage\Image\Filter\Imagick
  * @version $Id$
  * @author iwyg <mail@thomas-appel.com>
  */
-abstract class AbstractGdFilter extends AbstractFilter
+abstract class AbstractGdFilter extends AbstractFilter implements FilterInterface
 {
     public function supports(ProcessorInterface $proc)
     {
-        return $proc->getCurrentImage() instanceof \Imagine\Gd\Image;
+        return $proc->getCurrentImage() instanceof \Thapp\Image\Driver\Gd\Image;
     }
 }

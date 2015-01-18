@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This File is part of the Thapp\JitImage\Filter\Imagick package
+ * This File is part of the Thapp\JitImage\Imagine\Filter\Gmagick package
  *
  * (c) iwyg <mail@thomas-appel.com>
  *
@@ -9,22 +9,23 @@
  * that was distributed with this package.
  */
 
-namespace Thapp\JitImage\Filter\Imagick;
+namespace Thapp\JitImage\Imagine\Filter\Gmagick;
 
-use Thapp\JitImage\Filter\AbstractFilter;
+use Imagine\Image\Gmagick\Image;
 use Thapp\JitImage\ProcessorInterface;
+use Thapp\JitImage\Filter\FilterInterface;
 
 /**
- * @class AbstractImagickFilter
+ * @class AbstractGmagickFilter
  *
- * @package Thapp\JitImage\Filter\Imagick
+ * @package Thapp\JitImage\Imagine\Filter\Gmagick
  * @version $Id$
  * @author iwyg <mail@thomas-appel.com>
  */
-abstract class AbstractImagickFilter extends AbstractFilter
+class AbstractGmagickFilter
 {
     public function supports(ProcessorInterface $proc)
     {
-        return $proc->getCurrentImage() instanceof \Imagine\Imagick\Image;
+        $proc->getCurrentImage() instanceof Image;
     }
 }

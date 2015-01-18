@@ -202,5 +202,7 @@ interface ProcessorInterface
      * @return mixed
      */
     public function getTargetSize();
+
+    public function getCurrentImage();
 }
 
