@@ -226,7 +226,7 @@ class Generator
         $this->setPath($prefix);
         $this->filter($filter);
 
-        return $this->apply(Parameters::fromString($params));
+        return $this->apply(Parameters::fromString($params), $recipe);
     }
 
     /**
@@ -263,9 +263,9 @@ class Generator
      *
      * @return void
      */
-    protected function apply($params = null)
+    protected function apply(Parameter $params = null, $recipe = null)
     {
-        $src = $this->jmg->apply($this->path, $this->source, $params ?: $this->parameters, $this->filters);
+        $src = $this->jmg->apply($this->path, $this->source, $params ?: $this->parameters, $this->filters, $recipe);
 
         if ($this->asTag) {
             $src =  $this->generateTag($src);

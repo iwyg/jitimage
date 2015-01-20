@@ -52,7 +52,8 @@ class JmgExtension extends \Twig_Extension
     public function getFunctions()
     {
         return [
-            new \Twig_SimpleFunction('jmg', [$this->jmg, 'take'])
+            new \Twig_SimpleFunction('jmg_take', [$this->jmg, 'take']),
+            new \Twig_SimpleFunction('jmg_male', [$this->jmg, 'make']),
         ];
     }
 }

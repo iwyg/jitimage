@@ -74,6 +74,8 @@ class ImageResolver implements ImageResolverInterface
      */
     private $urlSigner;
 
+    private $pool;
+
     /**
      * Create a new ImageResolver instance.
      *
@@ -91,6 +93,7 @@ class ImageResolver implements ImageResolverInterface
         $this->loaderResolver = $loaderResolver;
         $this->cacheResolver = $cacheResolver;
         $this->constraintValidator = $constraintValidator;
+        $this->pool = [];
     }
 
     /**
@@ -130,32 +133,11 @@ class ImageResolver implements ImageResolverInterface
      */
     public function resolve($src, Parameters $params, FilterExpression $filters = null, $prefix = '')
     {
-        $alias = trim($prefix, '/');
-
-        if (!$loader = $this->loaderResolver->resolve($alias)) {
-            return false;
+        if (!isset($this->pool[$pk = $this->poolKey($prefix, $src, $params, $filters)])) {
+            $this->pool[$pk] = $this->resolveImage($src, $params, $filters, $prefix);
         }
 
-        if (null === $path = $this->pathResolver->resolve($alias)) {
-            return false;
-        }
-
-        $cache = $this->cacheResolver ? $this->cacheResolver->resolve($alias) : null;
-        $path = $this->getPath($path, $src);
-
-        $key = null;
-
-        $filterStr = $filters ? (string)$filters : null;
-
-        if (null !== $cache && $cache->has($key = $this->makeCacheKey($cache, $path, (string)$params, $filterStr)) &&
-            $resource = $cache->get($key)
-        ) {
-            return $resource;
-        }
-
-        $this->validateParams($params);
-
-        return $this->applyProcessor($this->processor, $loader, $path, $params, $filters, $cache, $key);
+        return $this->pool[$pk];
     }
 
     /**
@@ -186,6 +168,45 @@ class ImageResolver implements ImageResolverInterface
     }
 
     /**
+     * resolveImage
+     *
+     * @param mixed $src
+     * @param Parameters $params
+     * @param FilterExpression $filters
+     * @param string $prefix
+     *
+     * @return ResourceInterface
+     */
+    protected function resolveImage($src, Parameters $params, FilterExpression $filters = null, $prefix = '')
+    {
+        $alias = trim($prefix, '/');
+
+        if (!$loader = $this->loaderResolver->resolve($alias)) {
+            return false;
+        }
+
+        if (null === $path = $this->pathResolver->resolve($alias)) {
+            return false;
+        }
+
+        $cache = $this->cacheResolver ? $this->cacheResolver->resolve($alias) : '';
+
+        $key = null;
+
+        $filterStr = $filters ? (string)$filters : null;
+
+        if (null !== $cache && $cache->has($key = $this->makeCacheKey($cache, $path, $src, (string)$params, $filterStr)) &&
+            $resource = $cache->get($key)
+        ) {
+            return $resource;
+        }
+
+        $this->validateParams($params);
+
+        return $this->applyProcessor($this->processor, $loader, $this->getPath($path, $src), $params, $filters, $cache, $key);
+    }
+
+    /**
      * Validate the url parameters against constraints.
      *
      * @param array $params
@@ -204,5 +225,13 @@ class ImageResolver implements ImageResolverInterface
         if (!$this->constraintValidator->validate($params['mode'], [$params['width'], $params['height']])) {
             throw new \OutOfBoundsException('Parameters exceed limit');
         }
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    private function poolKey($name, $source, Parameters $params, FilterExpression $filters = null)
+    {
+        return sprintf('%s/%s:%s%s', $name, $source, (string)$params, $filters ? '/filter:'.($filters) : '');
     }
 }

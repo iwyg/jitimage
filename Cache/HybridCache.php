@@ -151,7 +151,7 @@ class HybridCache extends FilesystemCache
      */
     private function createResource(ProcessorInterface $proc, $key, $prefix, $id)
     {
-        $resource = new CachedResource($proc, $file = $this->getImagePath($prefix, $id) . '.' . $proc->getFileFormat());
+        $resource = new CachedResource($proc, $id, $file = $this->getImagePath($prefix, $id) . '.' . $proc->getFileFormat());
 
         $this->dumpFile($file, $proc->getContents());
 

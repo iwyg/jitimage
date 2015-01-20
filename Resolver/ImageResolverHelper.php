@@ -91,7 +91,9 @@ trait ImageResolverHelper
      */
     private function createResource(ProcessorInterface $processor)
     {
-        $resource = new ImageResource;
+        list ($w, $h) = $processor->getTargetSize();
+
+        $resource = new ImageResource(null, $w, $h);
 
         $resource->setContents($processor->getContents());
         $resource->setFresh(!$processor->isProcessed());
@@ -171,8 +173,10 @@ trait ImageResolverHelper
      *
      * @return string
      */
-    private function makeCacheKey(CacheInterface $cache, $path, $paramStr, $filterStr)
+    private function makeCacheKey(CacheInterface $cache, $name, $src, $paramStr, $filterStr)
     {
+        $path = $this->getPath($name, $src);
+
         return $cache->createKey(
             $path,
             $paramStr.'/'.$filterStr,

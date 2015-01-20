@@ -25,11 +25,6 @@ use \Thapp\Image\Cache\Client\ClientInterface;
 class CacheClientResource extends CachedResource
 {
     /**
-     * @var string
-     */
-    private $id;
-
-    /**
      * @var ClientInterface
      */
     private $client;
@@ -37,18 +32,6 @@ class CacheClientResource extends CachedResource
     public function isLocal()
     {
         return false;
-    }
-
-    /**
-     * setId
-     *
-     * @param string $id
-     *
-     * @return void
-     */
-    public function setId($id)
-    {
-        $this->id = $id;
     }
 
     /**
@@ -71,7 +54,7 @@ class CacheClientResource extends CachedResource
     protected function initContent()
     {
         return function () {
-            return $this->client->get($this->id);
+            return $this->client->get($this->getKey());
         };
     }
 }

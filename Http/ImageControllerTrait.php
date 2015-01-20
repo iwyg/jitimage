@@ -13,12 +13,16 @@ namespace Thapp\JitImage\Http;
 
 use Thapp\JitImage\Parameters;
 use Thapp\JitImage\FilterExpression;
-use \Thapp\JitImage\Http\ImageResponse;
-use \Thapp\JitImage\Resource\ResourceInterface;
-use \Thapp\JitImage\Resolver\ResolverInterface;
-use \Thapp\JitImage\Resolver\ImageResolverInterface;
-use \Symfony\Component\HttpFoundation\Response;
-use \Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Thapp\JitImage\Http\ImageResponse;
+use Thapp\JitImage\Resource\ResourceInterface;
+use Thapp\JitImage\Resolver\ResolverInterface;
+use Thapp\JitImage\Resolver\ImageResolverInterface;
+use Thapp\JitImage\Http\HttpSignerInterface;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+use Thapp\JitImage\Exception\InvalidSignatureException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 /**
  * @class ImageControllerTrait
@@ -48,6 +52,13 @@ trait ImageControllerTrait
     private $imageResolver;
 
     /**
+     * urlSigner
+     *
+     * @var mixed
+     */
+    private $signer;
+
+    /**
      * @var ResolverInterface
      */
     private $recipes;
@@ -74,6 +85,18 @@ trait ImageControllerTrait
     public function setImageResolver(ImageResolverInterface $imageResolver)
     {
         $this->imageResolver  = $imageResolver;
+    }
+
+    /**
+     * setUlrSigner
+     *
+     * @param HttpSignerInterface $signer
+     *
+     * @return void
+     */
+    public function setUrlSigner(HttpSignerInterface $signer)
+    {
+        $this->signer  = $signer;
     }
 
     /**
@@ -111,13 +134,11 @@ trait ImageControllerTrait
      */
     public function getImage($path, $params = null, $source = null, $filters = null)
     {
-        if (!$resource = $this->imageResolver->resolve(
-            $source,
-            Parameters::fromString($params),
-            $filters ? new FilterExpression($filters) : null,
-            $path
-        )
-        ) {
+        list ($parameters, $filterExpr) = $this->getParamsAndFilters($params, $filters);
+
+        $this->validateRequest($this->getRequest(), $parameters, $filterExpr);
+
+        if (!$resource = $this->imageResolver->resolve($source, $parameters, $filterExpr, $path)) {
             $this->notFound($source);
         }
 
@@ -161,6 +182,43 @@ trait ImageControllerTrait
         }
 
         return $this->processResource($resource);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    private function validateRequest(Request $request, Parameters $params, FilterExpression $filters = null)
+    {
+        if (null === $this->signer) {
+            return true;
+        }
+
+        try {
+            return $this->signer->validate($request, $params, $filters);
+        } catch (InvalidSignatureException $e) {
+            throw new BadRequestHttpException($e->getMessage());
+        }
+    }
+
+    /**
+     * getParamsAndFilters
+     *
+     * @param string $params
+     * @param string $filters
+     *
+     * @return array
+     */
+    protected function getParamsAndFilters($params, $filters = null)
+    {
+        return [Parameters::fromString($params), $filters ? new FilterExpression($filters) : null];
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    protected function getRequest()
+    {
+        return $this->request;
     }
 
     /**

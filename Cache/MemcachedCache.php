@@ -53,7 +53,6 @@ class MemcachedCache extends AbstractCache
         $resource = $this->pool[$prefix][$id];
 
         $resource->setClient($this->client);
-        $resource->setId($key);
 
         return $resource;
     }
@@ -87,11 +86,9 @@ class MemcachedCache extends AbstractCache
 
     private function createResource($proc, $key, $prefix, $id)
     {
-        $resource = new CacheClientResource($proc, $prefix . '/'. $id . '.' . $proc->getFileFormat());
+        $resource = new CacheClientResource($proc, $id, $prefix . '/'. $id . '.' . $proc->getFileFormat());
 
         $resource->setClient($this->client);
-
-        $resource->setId($key);
 
         $this->client->set($key, $proc->getContents(), 0);
 

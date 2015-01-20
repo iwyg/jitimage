@@ -53,14 +53,29 @@ class Processor extends AbstractProcessor
         $this->options = $options;
     }
 
+    public function __destruct()
+    {
+        $this->unload();
+    }
+
     /**
      * {@inheritdoc}
      */
     public function load(FileResourceInterface $resource)
     {
-        $this->processed = false;
+        $this->unload();
         $this->image = $this->source->read($resource->getHandle());
         $this->resource = $resource;
+    }
+
+    protected function unload()
+    {
+        $this->image  = null;
+        $this->processed = false;
+
+        if (null !== $this->resource && is_resource($this->resource->getHandle())) {
+            fclose($this->resource->getHandle());
+        }
     }
 
     /**
@@ -70,6 +85,8 @@ class Processor extends AbstractProcessor
     {
         $this->targetFormat = null;
         $this->targetSize = null;
+
+        $this->unload();
     }
 
     /**

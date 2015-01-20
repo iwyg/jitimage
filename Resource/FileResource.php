@@ -44,6 +44,18 @@ class FileResource extends AbstractResource implements FileResourceInterface
     }
 
     /**
+     * Close open files handles
+     *
+     * @return void
+     */
+    public function __destruct()
+    {
+        if (is_resource($this->handle)) {
+            fclose($this->handle);
+        }
+    }
+
+    /**
      * {@inheritdoc}
      */
     public function getHandle()

@@ -14,9 +14,13 @@ namespace Thapp\JitImage\View;
 use Thapp\JitImage\Parameters;
 use Thapp\JitImage\FilterExpression;
 use Thapp\JitImage\Cache\CacheInterface;
+use Thapp\JitImage\Http\UrlResolverInterace;
 use Thapp\JitImage\Resolver\ImageResolverHelper;
 use Thapp\JitImage\Resolver\ImageResolverInterface;
 use Thapp\JitImage\Resolver\RecipeResolverInterface;
+use Thapp\JitImage\Http\UrlBuilderInterface;
+use Thapp\JitImage\Resource\ResourceInterface;
+use Thapp\JitImage\Resource\CachedResourceInterface;
 
 /**
  * @class Jmg
@@ -32,9 +36,13 @@ class Jmg
     private $pool;
     private $recipes;
     private $generator;
+    private $url;
+    private $imageResolver;
     private $defaultPath;
-    private $cachePrefix;
+    private $cacheSuffix;
     private $current;
+    private $asTag;
+    private $attributes;
 
     /**
      * Constructor.
@@ -44,14 +52,28 @@ class Jmg
      * @param string $default
      * @param string $cPrefix
      */
-    public function __construct(ImageResolverInterface $imageResolver, RecipeResolverInterface $recipes, $default = '', $cPrefix = 'cached')
-    {
+    public function __construct(
+        ImageResolverInterface $imageResolver,
+        RecipeResolverInterface $recipes,
+        UrlBuilderInterface $url,
+        $default = '',
+        $cacheSuffix = 'cached'
+) {
         $this->imageResolver = $imageResolver;
         $this->recipes = $recipes;
+        $this->url = $url;
         $this->defaultPath = $default;
-        $this->cacheSuffix = $cPrefix;
+        $this->cacheSuffix = $cacheSuffix;
 
         $this->pool = [];
+        $this->asTag = false;
+
+        $this->start = microtime(true);
+    }
+
+    protected function stop()
+    {
+        return '?time='. microtime(true) - $this->start;
     }
 
     /**
@@ -92,9 +114,10 @@ class Jmg
      *
      * @return Generator
      */
-    public function take($source, $path = null)
+    public function take($source, $path = null, $asTag = false, array $attributes = [])
     {
         $this->current = null;
+        $this->setAsTag($asTag, $attributes);
 
         $path = $path ?: $this->defaultPath;
         $gen = $this->newGenerator();
@@ -112,11 +135,13 @@ class Jmg
      *
      * @return string
      */
-    public function make($recipe, $source)
+    public function make($recipe, $source, $asTag = false, array $attributes = [])
     {
         if (!$res = $this->recipes->resolve($recipe)) {
             return '';
         }
+
+        $this->setAsTag($asTag, $attributes);
 
         list ($prefix, $params, $filter) = $res;
 
@@ -124,40 +149,77 @@ class Jmg
             $prefix,
             $source,
             Parameters::fromString($params),
-            $filter ? $this->filter($filter) : null
+            $filter ? $this->filter($filter) : null,
+            $recipe
         );
     }
 
     /**
      * apply
      *
-     *
      * @return void
      */
-    public function apply($path, $source, Parameters $parameters, FilterExpression $filters = null)
+    public function apply($name, $source, Parameters $params, FilterExpression $filters = null, $recipe = null)
     {
-        list ($params, $filter) = $parts = $this->listParamsAndFilter($parameters, $filters);
-        $pmStr = $this->getParamString($params, $source, $filter);
-
-        $cr = $this->imageResolver->getCacheResolver();
-
-        if (null !== $cr = $this->imageResolver->getCacheResolver() && ($cache = $cr->resolve($path))) {
-            return $this->resolveFromCache($cache, $path, $source, $parts, $parameters, $filters);
+        if (!$resource = $this->imageResolver->resolve($source, $params, $filters, $name)) {
+            return '';
         }
 
-        return $this->getUri($path, $pmStr);
+        $this->current = $resource;
+
+        if ($resource instanceof CachedResourceInterface) {
+            return $this->getCachedPath($resource, $name);
+        }
+
+        if (null !== $recipe) {
+            return $this->getRecipeUri($source, $name, $recipe, $params, $filters);
+        }
+
+        return $this->getUri($source, $name, $params, $filters);
     }
 
     /**
-     * filter
+     * getUri
      *
-     * @param string $expr
+     * @param mixed $source
+     * @param mixed $name
+     * @param Parameters $params
+     * @param FilterExpression $filters
      *
-     * @return Jmg
+     * @return string
      */
-    protected function filter($expr)
+    private function getUri($source, $name, Parameters $params, FilterExpression $filters = null)
     {
-        return new FilterExpression($expr);
+        return $this->getOutput($this->url->getUri($source, $params, $filters, $name));
+    }
+
+    /**
+     * getRecipeUri
+     *
+     * @param mixed $source
+     * @param mixed $name
+     * @param mixed $recipe
+     * @param Parameters $params
+     * @param FilterExpression $filters
+     *
+     * @return string
+     */
+    private function getRecipeUri($source, $name, $recipe, Parameters $params, FilterExpression $filters = null)
+    {
+        return $this->getOutput($this->url->getRecipeUri($source, $recipe, $params, $filters));
+    }
+
+    /**
+     * getCachedPath
+     *
+     * @param CachedResourceInterface $cached
+     * @param mixed $name
+     *
+     * @return string
+     */
+    private function getCachedPath(CachedResourceInterface $cached, $name)
+    {
+        return $this->getOutput($this->url->getCachedUri($cached, $name, $this->cacheSuffix));
     }
 
     /**
@@ -170,170 +232,45 @@ class Jmg
         $this->imageResolver->getProcessor()->close();
     }
 
-    /**
-     * resolveFromCache
-     *
-     * @param mixed $cache
-     * @param mixed $fragments
-     *
-     * @access protected
-     * @return mixed
-     */
-    protected function resolveFromCache(CacheInterface $cache, $path, $source, array $parts, Parameters $params, FilterExpression $filter = null)
+    protected function setAsTag($asTag, array $attributes)
     {
-        list ($pStr, $fStr) = $parts;
-        $src = $this->getPath($this->imageResolver->getPathResolver()->resolve($path), $source);
+        if (!$asTag) {
+            $this->clearTag();
 
-        if (!$cache->has($key = $this->createCacheKey($cache, $src, $pStr, $fStr))) {
-            $this->process($cache, $params, $src, $key, $path, $filter);
+            return;
         }
 
-        // If the image is not cached yet, this is the only time the processor
-        // is invoked:
-        if (!isset($this->pool[$key])) {
+        $this->asTag = true;
+        $this->attributes = $attributes;
+    }
 
-            $cached = $cache->get($key);
-
-            $file = $cached->getFileName();
-            $dir  = basename(dirname($cached->getPath()));
-            $str = '/'. implode('/', [$path, $this->cacheSuffix, $dir, $file]);
-
-            $this->pool[$key]['url'] = $str;
-            $this->pool[$key]['resource'] = $cached;
+    protected function getOutput($path)
+    {
+        if ($this->asTag) {
+            return $this->createTag($path, array_merge($this->attributes, $this->getResourceDimension()));
         }
 
-        $this->current = $this->pool[$key]['resource'];
-
-        return $this->pool[$key]['url'];
+        return $path;
     }
 
-    /**
-     * Process none cached images for caching.
-     *
-     * @param CacheInterface $cache the image cache
-     * @param string $src the image source string
-     * @param string $key the cache key to store the image
-     *
-     * @return void
-     */
-    protected function process(CacheInterface $cache, Parameters $params, $src, $key, $path, FilterExpression $filters = null)
+    protected function getResourceDimension()
     {
-        $proc = $this->imageResolver->getProcessor();
-        $proc->load($this->getImageLoader($path, $src)->load($src));
-        $proc->process($params, $filters);
-
-        $cache->set($key, $proc);
-
-        $this->close();
+        return ['width' => $this->current->getWidth(), 'height' => $this->current->getHeight()];
     }
 
-    /**
-     * Get an ImageLoader instance for a given path.
-     *
-     * @param string $path
-     * @param string $src
-     *
-     * @return ImageLoaderInterface
-     */
-    protected function getImageLoader($path, $src)
+    protected function clearTag()
     {
-        if (null === $loader = $this->imageResolver->getLoaderResolver()->resolve($path)) {
-            throw new \InvalidArgumentException(
-                sprintf('No loader found for source "%s".', $src)
-            );
+        $this->asTag = false;
+        $this->attributes = null;
+    }
+
+    private function createTag($path, array $attributes)
+    {
+        $parts = '';
+        foreach ($attributes as $attribute => $value) {
+            $parts .= sprintf('%s="%s" ', $attribute, $value);
         }
 
-        if (!$loader->supports($src)) {
-            throw new \InvalidArgumentException(
-                sprintf('Loader "%s" doesn\'t support source "%s".', get_class($loader), $src)
-            );
-        }
-
-        return $loader;
-    }
-
-    /**
-     * compileExpression
-     *
-     * @return array
-     */
-    protected function compileExpression(Parameters $parameters, FilterExpression $filters = null)
-    {
-        return array_merge($parameters->all(), ['filter' => $filters ? $filters->toArray() : []]);
-    }
-
-    /**
-     * getUri
-     *
-     * @param array $fragments
-     *
-     * @return string
-     */
-    private function getUri($path, $fragments)
-    {
-        return '/' . implode('/', [trim($path, '/'), $fragments]);
-    }
-
-    /**
-     * getParamString
-     *
-     * @param string $params
-     * @param string $source
-     * @param string $filter
-     *
-     * @return string
-     */
-    private function getParamString($params, $source, $filter = null)
-    {
-        return null !== $filter ? implode('/', [$params, $source, $filter]) : implode('/', [$params, $source]);
-    }
-
-    /**
-     * compileExpression
-     *
-     * @access protected
-     * @return array
-     */
-    protected function listParamsAndFilter(Parameters $params, FilterExpression $filter = null)
-    {
-        return [
-            $params->asString(),
-            !empty($filter ? $filter->toArray() : []) ? sprintf('filter:%s', $filter->compile()) : null
-        ];
-    }
-
-    /**
-     * createCacheKey
-     *
-     * @param CacheInterface $cache
-     * @param string $path
-     * @param string $paramStr
-     * @param string $filterStr
-     *
-     * @return string
-     */
-    private function createCacheKey(CacheInterface $cache, $path, $paramStr, $filterStr)
-    {
-        $p = $path.$paramStr.$filterStr;
-
-        if (isset($this->pool[$p])) {
-            return $this->pool[$p];
-        }
-
-        return $this->pool[$p] = $this->makeCacheKey($cache, $path, $paramStr, $filterStr);
-    }
-
-    /**
-     * newGenerator
-     *
-     * @return Generator
-     */
-    protected function newGenerator()
-    {
-        if (null === $this->generator) {
-            return $this->generator = new Generator($this);
-        }
-
-        return clone $this->generator;
+        return sprintf('<img src="%s" %s/>', $path, $parts);
     }
 }

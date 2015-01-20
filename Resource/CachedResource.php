@@ -21,9 +21,11 @@ use Thapp\JitImage\ProcessorInterface;
  * @version $Id$
  * @author Thomas Appel <mail@thomas-appel.com>
  */
-class CachedResource extends AbstractResource implements \Serializable
+class CachedResource extends AbstractResource implements CachedResourceInterface
 {
-    protected $dimensions;
+    protected $key;
+    protected $width;
+    protected $height;
 
     /**
      * @param string $path
@@ -31,22 +33,38 @@ class CachedResource extends AbstractResource implements \Serializable
      * @param int $lastModified
      * @param string $mime
      */
-    public function __construct(ProcessorInterface $proc, $path = null)
+    public function __construct(ProcessorInterface $proc, $key, $path = null)
     {
+        $this->key = $key;
         $this->path = $path;
         $this->contents = $proc->getContents();
 
         $this->mimeType     = $proc->getMimeType();
         $this->lastModified = $proc->getLastModTime();
-        $this->dimensions   = $proc->getTargetSize();
         $this->fresh = false;
+
+        $this->setSize($proc);
     }
 
+    /**
+     * {@inheritdoc}
+     */
+    public function getKey()
+    {
+        return $this->key;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function getFileName()
     {
         return basename($this->path);
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function getContents()
     {
         return $this->contents = is_callable($this->contents) ? call_user_func($this->contents) : $this->contents;
@@ -83,9 +101,17 @@ class CachedResource extends AbstractResource implements \Serializable
     /**
      * {@inheritdoc}
      */
-    public function getDimension()
+    public function getWidth()
     {
-        return $this->dimensions;
+        return $this->width;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getHeight()
+    {
+        return $this->height;
     }
 
     /**
@@ -96,10 +122,12 @@ class CachedResource extends AbstractResource implements \Serializable
     public function serialize()
     {
         return serialize([
+         'key'          => $this->key,
          'path'         => $this->path,
          'mimeType'     => $this->mimeType,
          'lastModified' => $this->lastModified,
-         'dimensions'   => $this->dimensions
+         'width'        => $this->width,
+         'height'       => $this->height
         ]);
     }
 
@@ -114,10 +142,12 @@ class CachedResource extends AbstractResource implements \Serializable
     {
         $data = unserialize($data);
 
+        $this->key          = $data['key'];
         $this->path         = $data['path'];
         $this->mimeType     = $data['mimeType'];
         $this->lastModified = $data['lastModified'];
-        $this->dimensions   = $data['dimensions'];
+        $this->width        = $data['width'];
+        $this->height       = $data['height'];
 
         $this->contents = $this->initContent();
     }
@@ -132,5 +162,20 @@ class CachedResource extends AbstractResource implements \Serializable
         return function () {
             return file_get_contents($this->path);
         };
+    }
+
+    /**
+     * setSize
+     *
+     * @param ProcessorInterface $proc
+     *
+     * @return void
+     */
+    protected function setSize(ProcessorInterface $proc)
+    {
+        list ($w, $h) = $proc->getTargetSize();
+
+        $this->width  = $w;
+        $this->height = $h;
     }
 }

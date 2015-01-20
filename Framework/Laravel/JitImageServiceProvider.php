@@ -80,6 +80,20 @@ class JitImageServiceProvider extends ServiceProvider
             //'Thapp\JitImage\Resolver\CacheResolver'
         );
 
+        $this->app->singleton(
+            'Thapp\JitImage\Http\UrlBuilderInterface',
+            'Thapp\JitImage\Http\UrlBuilder'
+        );
+
+        if ($this->app['config']->get('jmg.secure', false)) {
+            $this->app->singleton('Thapp\JitImage\Http\HttpSignerInterface', function ($app) {
+                return new \Thapp\JitImage\Http\UrlSigner(
+                    $app['config']->get('jmg.token_secret'),
+                    $app['config']->get('jmg.token_key', 'token')
+                );
+            });
+        }
+
         $this->app->singleton('Thapp\JitImage\Validator\ValidatorInterface', function ($app) {
             return new \Thapp\JitImage\Validator\ModeConstraints($app['config']['jmg']['mode_constraints']);
         });
@@ -96,6 +110,9 @@ class JitImageServiceProvider extends ServiceProvider
             $ctrl->setRouter($app['router']);
             $ctrl->setRequest($app['request']);
             $ctrl->setRecieps($app->make('Thapp\JitImage\Resolver\RecipeResolverInterface'));
+            if ($app['config']->get('jmg.secure', false)) {
+                $ctrl->setUrlSigner($app->make('Thapp\JitImage\Http\HttpSignerInterface'));
+            }
         });
 
         // fire an event in case the processor gets instantiated
@@ -113,7 +130,16 @@ class JitImageServiceProvider extends ServiceProvider
             $proc->setOptions($app['config']->get('jmg.image'), []);
         });
 
-        $this->app->singleton('jmg', 'Thapp\JitImage\View\Jmg');
+        $this->app->singleton('jmg', function ($app) {
+            return new \Thapp\JitImage\View\Jmg(
+                $app->make('Thapp\JitImage\Resolver\ImageResolverInterface'),
+                $app->make('Thapp\JitImage\Resolver\RecipeResolverInterface'),
+                $app->make('Thapp\JitImage\Http\UrlBuilderInterface'),
+                '',
+                $app['config']->get('jmg.cache_path_prefix', 'cached')
+            );
+        });
+
         $this->app->alias('Thapp\JitImage\Resolver\LoaderResolverInterface', 'jmg.loaders');
         $this->app->alias('Thapp\JitImage\Resolver\FilterResolverInterface', 'jmg.filters');
     }
@@ -298,7 +324,8 @@ class JitImageServiceProvider extends ServiceProvider
      */
     private function registerCachedController(Router $router, $ctrl, $path, $suffix)
     {
-        $r = $router->get(rtrim($path, '/') . '/{suffix}/{id}', $ctrl)
+        //$r = $router->get(rtrim($path, '/') . '/{suffix}/{id}', $ctrl)
+        $router->get('/'.trim($suffix, '/').'/{path}/{id}', $ctrl)
             ->where('id', '(.*\/){1}.*')
             ->where('suffix', $suffix)
             ->defaults('path', $path);

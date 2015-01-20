@@ -32,6 +32,7 @@ class UrlSigner implements HttpSignerInterface
      * Constructor.
      *
      * @param string $key
+     * @param qkey $key
      */
     public function __construct($key, $qkey = 'token')
     {
@@ -52,7 +53,7 @@ class UrlSigner implements HttpSignerInterface
      */
     public function validate(Request $request, Parameters $params, FilterExpression $filters = null)
     {
-        if (null === $token = $request->getQuery()->get($this->qkey)) {
+        if (null === $token = $request->query->get($this->qkey)) {
             throw InvalidSignatureException::missingSignature();
         }
 
@@ -74,15 +75,11 @@ class UrlSigner implements HttpSignerInterface
      */
     protected function createSignature($path, Parameters $params, FilterExpression $filters = null)
     {
+        $filterStr = null !== $filters && 0 < count($filters->all()) ? (string)$filters : '';
+
         return hash(
             'md5',
-            sprintf(
-                '%s:%s%sfilter:%s',
-                $this->key,
-                trim($path, '/'),
-                $params->asString(Parameters::P_SEPARATOR),
-                $filters ? (string)$filters : ''
-            )
+            sprintf('%s:%s%sfilter:%s', $this->key, trim($path, '/'), (string)$params, $filterStr)
         );
     }
 }
