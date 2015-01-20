@@ -154,7 +154,7 @@ return [
      * Imagine options passed when saving an image
      * ---------------------------------------------------------
      ====================================================================== */
-    'secure' => true,
+    'secure' => false,
     'token_key' => 'key',
     'token_secret' => 'my-secret-key',
 ];
