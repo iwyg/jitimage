@@ -250,4 +250,17 @@ class Jmg
 
         return sprintf('<img src="%s" %s/>', $path, $parts);
     }
+
+    /**
+     * newGenerator
+     *
+     * @return Generator
+     */
+    protected function newGenerator()
+    {
+        if (null === $this->generator) {
+            return $this->generator = new Generator($this);
+        }
+        return clone $this->generator;
+    }
 }

@@ -92,10 +92,11 @@ class UrlSignerTest extends \PHPUnit_Framework_TestCase
     {
         $q = $this->mockQuery();
         $q->method('get')->with($key)->willReturn($query);
-        $rq = $this->mockRequest(['getQuery', 'getPathInfo']);
+        $rq = $this->mockRequest(['getPathInfo']);
         $rq->method('getQuery')->willReturn($q);
 
         $rq->method('getPathInfo')->willReturn($path);
+        $rq->query = $q;
 
         return $rq;
     }

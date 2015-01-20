@@ -27,7 +27,6 @@ use Thapp\JitImage\Resolver\RecipeResolverInterface;
 class UrlBuilder implements UrlBuilderInterface
 {
     private $signer;
-    private $recipes;
     private $cachePrefix;
 
     /**
@@ -35,10 +34,9 @@ class UrlBuilder implements UrlBuilderInterface
      *
      * @param HttpSingerInterface $signer
      */
-    public function __construct(RecipeResolverInterface $recipes, HttpSignerInterface $signer = null)
+    public function __construct(HttpSignerInterface $signer = null)
     {
         $this->signer  = $signer;
-        $this->recipes = $recipes;
     }
 
     /**
