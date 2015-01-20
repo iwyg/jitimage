@@ -17,8 +17,9 @@ use Thapp\JitImage\Cache\CacheInterface;
 use Thapp\JitImage\Http\UrlResolverInterace;
 use Thapp\JitImage\Resolver\ImageResolverHelper;
 use Thapp\JitImage\Resolver\ImageResolverInterface;
-use Thapp\JitImage\Resolver\RecipeResolverInterface;
-use Thapp\JitImage\Http\UrlBuilderInterface;
+use Thapp\JitImage\Resolver\RecipeResolverInterface as Recipes;
+use Thapp\JitImage\Http\UrlBuilder;
+use Thapp\JitImage\Http\UrlBuilderInterface as Url;
 use Thapp\JitImage\Resource\ResourceInterface;
 use Thapp\JitImage\Resource\CachedResourceInterface;
 
@@ -39,7 +40,7 @@ class Jmg
     private $url;
     private $imageResolver;
     private $defaultPath;
-    private $cacheSuffix;
+    private $cachePrefix;
     private $current;
     private $asTag;
     private $attributes;
@@ -49,31 +50,17 @@ class Jmg
      *
      * @param ImageResolverInterface $imageResolver
      * @param RecipeResolverInterface $recipes
-     * @param string $default
-     * @param string $cPrefix
+     * @param UrlBuilderInterface $url
      */
-    public function __construct(
-        ImageResolverInterface $imageResolver,
-        RecipeResolverInterface $recipes,
-        UrlBuilderInterface $url,
-        $default = '',
-        $cacheSuffix = 'cached'
-) {
+    public function __construct(ImageResolverInterface $imageResolver, Recipes $recipes, Url $url = null, $cachePrefix = 'cached') {
         $this->imageResolver = $imageResolver;
         $this->recipes = $recipes;
-        $this->url = $url;
-        $this->defaultPath = $default;
-        $this->cacheSuffix = $cacheSuffix;
-
+        $this->url = $url ?: new UrlBuilder;
         $this->pool = [];
         $this->asTag = false;
 
         $this->start = microtime(true);
-    }
-
-    protected function stop()
-    {
-        return '?time='. microtime(true) - $this->start;
+        $this->cachePrefix = $cachePrefix;
     }
 
     /**
@@ -209,7 +196,7 @@ class Jmg
      */
     private function getCachedPath(CachedResourceInterface $cached, $name)
     {
-        return $this->getOutput($this->url->getCachedUri($cached, $name, $this->cacheSuffix));
+        return $this->getOutput($this->url->getCachedUri($cached, $name, $this->cachePrefix));
     }
 
     /**

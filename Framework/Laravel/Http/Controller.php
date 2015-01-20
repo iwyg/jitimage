@@ -48,9 +48,7 @@ class Controller extends BaseController
      */
     public function callAction($method, $parameters)
     {
-        array_unshift($parameters, $this->getCurrentPath());
-
-        return call_user_func_array([$this, $method], $parameters);
+        return parent::callAction($method, ['path' => $this->getCurrentPath()]+$parameters);
     }
 
     /**
@@ -61,6 +59,6 @@ class Controller extends BaseController
      */
     private function getCurrentPath()
     {
-        return static::$router->getCurrentRoute()->getCompiled()->getStaticPrefix();
+        return trim(static::$router->getCurrentRoute()->getCompiled()->getStaticPrefix(), '/');
     }
 }

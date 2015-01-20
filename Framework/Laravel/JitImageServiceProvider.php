@@ -135,7 +135,6 @@ class JitImageServiceProvider extends ServiceProvider
                 $app->make('Thapp\JitImage\Resolver\ImageResolverInterface'),
                 $app->make('Thapp\JitImage\Resolver\RecipeResolverInterface'),
                 $app->make('Thapp\JitImage\Http\UrlBuilderInterface'),
-                '',
                 $app['config']->get('jmg.cache_path_prefix', 'cached')
             );
         });
@@ -292,7 +291,8 @@ class JitImageServiceProvider extends ServiceProvider
      */
     private function registerDynamicController(Router $router, $ctrl, $path, $pattern, $params, $source, $filter)
     {
-        $router->get(rtrim($path, '/') . $pattern, $ctrl)
+        $router->get('/'.($path = trim($path, '/')) . $pattern, $ctrl)
+            ->defaults('path', $path)
             ->where('params', $params)
             ->where('source', $source)
             ->where('filter', $filter);
