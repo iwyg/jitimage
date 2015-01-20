@@ -19,7 +19,8 @@
   "require-dev": {
     "phpunit/phpunit": "~4.6@dev",
     "illuminate/contracts": "5.0.*@dev",
-    "imagine/imagine": "dev-master"
+    "imagine/imagine": "dev-master",
+    "league/phpunit-coverage-listener":"dev-master"
   },
   "autoload": {
     "psr-4": {
