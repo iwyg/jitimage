@@ -53,7 +53,7 @@ class JmgExtension extends \Twig_Extension
     {
         return [
             new \Twig_SimpleFunction('jmg_take', [$this->jmg, 'take']),
-            new \Twig_SimpleFunction('jmg_male', [$this->jmg, 'make']),
+            new \Twig_SimpleFunction('jmg_make', [$this->jmg, 'make']),
         ];
     }
 }
