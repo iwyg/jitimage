@@ -11,7 +11,7 @@
 
 namespace Thapp\JitImage\Twig;
 
-use \Thapp\JitImage\View\Jmg;
+use Thapp\JitImage\View\Jmg;
 
 /**
  * @class JitImageExtension

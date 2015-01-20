@@ -71,7 +71,7 @@ class JitImageControllerProvider implements ControllerProviderInterface
 
         foreach ($app['jmg.paths'] as $path => $filePath) {
             $path = rtrim($path, '/');
-            $route = $controllers->get($ptrn = $path. $pattern, [$app['jmg.controller'], 'getImage'])
+            $route = $controllers->get($ptrn = $path. $pattern, [$app['jmg.controller'], 'getImageAction'])
                 ->setDefault('path', $path)
                 ->setDefault('filter', '')
                 ->setRequirements([
@@ -83,7 +83,7 @@ class JitImageControllerProvider implements ControllerProviderInterface
             $route->before(function (Request $request) use ($app, $route) {
                 $route->setDefault('request', $request);
                 $app['jmg.controller']->setImageResolver($app['jmg.resolver_image']);
-                $app['jmg.controller']->setRecipeResolver($app['jmg.resolver_recipe']);
+                $app['jmg.controller']->setRecieps($app['jmg.resolver_recipe']);
             });
         }
     }
@@ -104,7 +104,7 @@ class JitImageControllerProvider implements ControllerProviderInterface
                 continue;
             }
 
-            $route = $controllers->get($recipe . '/{source}', [$app['jmg.controller'], 'getResource'])
+            $route = $controllers->get($recipe . '/{source}', [$app['jmg.controller'], 'getResourceAction'])
                 ->setDefault('recipe', $recipe)
                 ->setRequirements([
                     'source' => '(.*)'
@@ -135,8 +135,8 @@ class JitImageControllerProvider implements ControllerProviderInterface
                 continue;
             }
 
-            $route = $controllers->get($rr = rtrim($alias, '/') . '/{suffix}/{id}', [$app['jmg.controller'], 'getCached'])
-                ->setDefault('suffix', $suffix)
+            $route = $controllers->get('/'.trim($suffix).'/{'.trim($alias, '/').'}/{id}', [$app['jmg.controller'], 'getCachedAction'])
+                ->setDefault('path', $alias)
                 ->setRequirements(['id' => '(.*\/){1}.*']);
 
             $route->before(function (Request $request) use ($app, $route) {

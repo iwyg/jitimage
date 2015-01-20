@@ -56,10 +56,13 @@ class JitImageServiceProvider implements ServiceProviderInterface, BootableProvi
      */
     protected function registerProcessor(Container $app)
     {
-        $app['jmg.processor'] = function () use ($app) {
-            $imagine = $this->getImagineClass($app['jmg.driver']);
-            return new \Thapp\JitImage\Imagine\Processor(
-                new $imagine,
+        $useImagine = $app['jmg.use_imagine'];
+        $class  = $useImagine ? 'Thapp\JitImage\Imagine\Processor' : 'Thapp\JitImage\Image\Processor';
+
+        $app['jmg.processor'] = function () use ($app, $class, $useImagine) {
+            $source = $useImagine ? $this->getImagineClass($app['jmg.driver']) : $this->getSourceClass($app['jmg.driver']);
+            return new $class(
+                new $source,
                 $app['jmg.resolver_filter']
             );
         };

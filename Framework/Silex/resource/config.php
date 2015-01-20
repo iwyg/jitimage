@@ -15,6 +15,7 @@
  * Specify the processing driver, defaults to gd:
  *  - imagick: The imagick driver (http://php.net/manual/en/book.imagick.php).
  *  - gd:      The GD driver (http://php.net/manual/en/book.image.php).
+ * Imagine only:
  *  - gmagick: The gmagick driver (http://php.net/manual/en/book.gmagick.php).
  ====================================================================== */
 $app['jmg.driver'] = 'imagick';
@@ -26,6 +27,8 @@ $app['jmg.paths'] = [
     // 'images' => $local_path . '/images'
     // 'url'    => ''
 ];
+
+$app['jmg.use_imagine'] = false;
 
 /* ====================================================================
  * Default paths
@@ -112,7 +115,7 @@ $app['jmg.cache_prefix'] = 'jmg_';
  *
  *
  ====================================================================== */
-$app['jmg.cache_path_prefix'] = 'cached';
+$app['jmg.cache_path_prefix'] = 'media/cached';
 
 /* ====================================================================
  *

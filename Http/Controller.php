@@ -27,25 +27,7 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
  */
 class Controller
 {
-    protected $imageResolver;
-    protected $recipeResolver;
-
-    public function setImageResolver(ImageResolverInterface $imageResolver)
-    {
-        $this->imageResolver = $imageResolver;
-    }
-
-    /**
-     * setRecipeResolver
-     *
-     * @param RecipeResolverInterface $recipes
-     *
-     * @return void
-     */
-    public function setRecipeResolver(RecipeResolverInterface $recipes)
-    {
-        $this->recipeResolver = $recipes;
-    }
+    use ImageControllerTrait;
 
     /**
      * getImage
@@ -58,13 +40,11 @@ class Controller
      *
      * @return Response
      */
-    public function getImage(Request $request, $path, $params, $source, $filter = null)
+    public function getImageAction(Request $request, $path, $params, $source, $filter = null)
     {
-        if (!$resource = $this->imageResolver->resolveParameters([$path, $params, $source, $filter])) {
-            $this->notFound($source);
-        }
+        $this->request = $request;
 
-        return $this->processResource($resource, $request);
+        $this->getImage($path, $params, $source, $filter);
     }
 
     /**
@@ -78,13 +58,9 @@ class Controller
      */
     public function getResource(Request $request, $recipe, $source)
     {
-        if (null === $this->recipes) {
-            $this->notFound($source);
-        }
+        $this->request = $request;
 
-        list ($alias, $params, $filter) = $this->recipeResolver->resolve($recipe);
-
-        return $this->getImage($request, $alias, $params, $source, $filter);
+        $this->getResource($recipe, $source);
     }
 
     /**
@@ -96,30 +72,11 @@ class Controller
      *
      * @return Response
      */
-    public function getCached(Request $request, $suffix, $id)
+    public function getCachedAction(Request $request, $path, $id)
     {
-        if (!$resource = $this->imageResolver->resolveCached([$suffix, $id])) {
-            $this->notFound($id);
-        }
+        $this->request = $request;
 
-        return $this->processResource($resource, $request);
-    }
-
-    /**
-     * processResource
-     *
-     * @param mixed $resource
-     *
-     * @return Response
-     */
-    private function processResource(ResourceInterface $resource, Request $request)
-    {
-        $response = new ImageResponse($resource);
-
-        $response->prepare($request);
-        $response->send();
-
-        return $response;
+        $this->getCached(null, $path, $id);
     }
 
     /**
