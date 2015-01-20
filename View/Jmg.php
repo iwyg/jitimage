@@ -41,6 +41,8 @@ class Jmg
      *
      * @param ImageResolverInterface $imageResolver
      * @param RecipeResolverInterface $recipes
+     * @param string $default
+     * @param string $cPrefix
      */
     public function __construct(ImageResolverInterface $imageResolver, RecipeResolverInterface $recipes, $default = '', $cPrefix = 'cached')
     {
@@ -52,21 +54,41 @@ class Jmg
         $this->pool = [];
     }
 
+    /**
+     * The current resource
+     *
+     * @return ResourceInterace
+     */
+    public function getCurrent()
+    {
+        return $this->current;
+    }
+
+    /**
+     * Get the ImageResolver
+     *
+     * @return ImageResolverInterface
+     */
     public function getImageResolver()
     {
         return $this->imageResolver;
     }
 
+    /**
+     * Get the RecipesResolver
+     *
+     * @return RecipesResolverInterface
+     */
     public function getRecipesResolver()
     {
         return $this->recipes;
     }
 
     /**
-     * take
+     * Takes an image source stirng for manipulation.
      *
-     * @param string $source
-     * @param string $path
+     * @param string $source the image source path
+     * @param string $path the image base path
      *
      * @return Generator
      */
@@ -148,11 +170,6 @@ class Jmg
         $this->imageResolver->getProcessor()->close();
     }
 
-    public function getCurrent()
-    {
-        return $this->current;
-    }
-
     /**
      * resolveFromCache
      *
@@ -191,32 +208,48 @@ class Jmg
     }
 
     /**
-     * process
+     * Process none cached images for caching.
      *
-     * @param CacheInterface $cache
-     * @param string $src
-     * @param string $key
+     * @param CacheInterface $cache the image cache
+     * @param string $src the image source string
+     * @param string $key the cache key to store the image
      *
      * @return void
      */
     protected function process(CacheInterface $cache, Parameters $params, $src, $key, $path, FilterExpression $filters = null)
     {
         $proc = $this->imageResolver->getProcessor();
-
-        if (null === $loader = $this->imageResolver->getLoaderResolver()->resolve($path)) {
-            throw new \InvalidArgumentException;
-        }
-
-        if (!$loader->supports($src)) {
-            throw new \InvalidArgumentException;
-        }
-
-        $proc->load($loader->load($src));
-        $proc->process($this->compileExpression($params, $filters));
+        $proc->load($this->getImageLoader($path, $src)->load($src));
+        $proc->process($params, $filters);
 
         $cache->set($key, $proc);
 
         $this->close();
+    }
+
+    /**
+     * Get an ImageLoader instance for a given path.
+     *
+     * @param string $path
+     * @param string $src
+     *
+     * @return ImageLoaderInterface
+     */
+    protected function getImageLoader($path, $src)
+    {
+        if (null === $loader = $this->imageResolver->getLoaderResolver()->resolve($path)) {
+            throw new \InvalidArgumentException(
+                sprintf('No loader found for source "%s".', $src)
+            );
+        }
+
+        if (!$loader->supports($src)) {
+            throw new \InvalidArgumentException(
+                sprintf('Loader "%s" doesn\'t support source "%s".', get_class($loader), $src)
+            );
+        }
+
+        return $loader;
     }
 
     /**
@@ -303,5 +336,4 @@ class Jmg
 
         return clone $this->generator;
     }
-
 }

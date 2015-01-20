@@ -20,16 +20,19 @@ class Parameters
 {
     const P_SEPARATOR = '/';
 
+    private $str;
     private $params;
+    private $separator;
 
     /**
      * Constructor.
      *
      * @param array $params
      */
-    public function __construct(array $params = [])
+    public function __construct(array $params = [], $separator = self::P_SEPARATOR)
     {
         $this->params = $params;
+        $this->separator = $separator;
     }
 
     /**
@@ -37,6 +40,7 @@ class Parameters
      */
     public function __clone()
     {
+        $this->str = null;
         $this->params = [];
     }
 
@@ -50,6 +54,7 @@ class Parameters
      */
     public function setTargetSize($width = null, $height = null)
     {
+        $this->str = null;
         $this->params['width']  = $width;
         $this->params['height'] = $height;
     }
@@ -63,6 +68,7 @@ class Parameters
      */
     public function setMode($mode)
     {
+        $this->str = null;
         $this->params['mode']  = (int)$mode;
     }
 
@@ -75,6 +81,7 @@ class Parameters
      */
     public function setGravity($gravity = null)
     {
+        $this->str = null;
         $this->params['gravity'] = $gravity;
     }
 
@@ -87,6 +94,8 @@ class Parameters
      */
     public function setBackground($background = null)
     {
+        $this->str = null;
+
         if (null !== $background && $this->isColor($background)) {
             $this->params['background'] = $background;
         }
@@ -110,16 +119,36 @@ class Parameters
         );
     }
 
-    public function asString($separator = self::P_SEPARATOR)
+    /**
+     * __toString
+     *
+     * @return string
+     */
+    public function __toString()
     {
-        return implode($separator, array_filter(array_values($this->all()), function ($val) {
-            return null !== $val;
-        }));
+        return $this->asString();
     }
 
-    public function setFromString($str, $separator = self::P_SEPARATOR)
+    /**
+     * asString
+     *
+     * @return string
+     */
+    public function asString()
     {
-        $this->params = static::parseString($str, $separator);
+        if (null === $this->str) {
+            $this->str = implode($this->separator, array_filter(array_values($this->all()), function ($val) {
+            return null !== $val;
+            }));
+        }
+
+        return $this->str;
+    }
+
+    public function setFromString($str)
+    {
+        $this->str = null;
+        $this->params = static::parseString($str, $this->separator);
     }
 
     /**
@@ -139,13 +168,6 @@ class Parameters
         return static::sanitize($mode, $width, $height, $gravity, $background);
     }
 
-    protected static function isHex($color)
-    {
-        $color = ltrim($color, '#');
-
-        return (boolean)preg_match('#^([[:xdigit:]]{6}|[[:xdigit:]]{3})$#', $color);
-    }
-
     /**
      * isColor
      *
@@ -156,6 +178,20 @@ class Parameters
     protected function isColor($color)
     {
         return static::isHex($color);
+    }
+
+    /**
+     * isHex
+     *
+     * @param mixed $color
+     *
+     * @return boolean
+     */
+    private static function isHex($color)
+    {
+        $color = ltrim($color, '#');
+
+        return (boolean)preg_match('#^([[:xdigit:]]{6}|[[:xdigit:]]{3})$#', $color);
     }
 
     /**
@@ -217,6 +253,6 @@ class Parameters
      */
     public static function fromString($paramString, $separator = self::P_SEPARATOR)
     {
-        return new static(static::parseString($paramString, $separator));
+        return new static(static::parseString($paramString, $separator), $separator);
     }
 }

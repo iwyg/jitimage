@@ -37,8 +37,8 @@ class Processor extends AbstractProcessor
     private $filters;
     private $image;
     private $imagine;
-    private $resource;
-    private $processed;
+    protected $processed;
+    protected $resource;
     protected $targetFormat;
     protected $targetSize;
     protected $options;

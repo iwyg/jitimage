@@ -11,12 +11,14 @@
 
 namespace Thapp\JitImage\Resolver;
 
-use \Thapp\JitImage\Parameters;
-use \Thapp\JitImage\ProcessorInterface;
-use \Thapp\JitImage\Resource\ImageResource;
-use \Thapp\JitImage\Cache\CacheAwareInterface;
-use \Thapp\JitImage\Validator\ValidatorInterface;
-use \Thapp\JitImage\Response\GenericFileResponse as Response;
+use Thapp\JitImage\Parameters;
+use Thapp\JitImage\FilterExpression;
+use Thapp\JitImage\ProcessorInterface;
+use Thapp\JitImage\Resource\ImageResource;
+use Thapp\JitImage\Cache\CacheAwareInterface;
+use Thapp\JitImage\Validator\ValidatorInterface;
+use Thapp\JitImage\Response\GenericFileResponse as Response;
+use Thapp\JitImage\Http\HttpSingerInterface;
 
 /**
  * @class ImageResolver implements ResolverInterface
@@ -64,6 +66,13 @@ class ImageResolver implements ImageResolverInterface
      * @var ValidatorInterface
      */
     private $constraintValidator;
+
+    /**
+     * urlSigner
+     *
+     * @var mixed
+     */
+    private $urlSigner;
 
     /**
      * Create a new ImageResolver instance.
@@ -117,16 +126,10 @@ class ImageResolver implements ImageResolverInterface
     }
 
     /**
-     * Resolve the url parameters to a image resource.
-     *
-     * @param array $params
-     *
-     * @return ResourceInterface
+     * {@inheritdoc}
      */
-    public function resolveParameters(array $parameters)
+    public function resolve($src, Parameters $params, FilterExpression $filters = null, $prefix = '')
     {
-        list ($prefix, $params, $source, $filter) = array_pad($parameters, 5, null);
-
         $alias = trim($prefix, '/');
 
         if (!$loader = $this->loaderResolver->resolve($alias)) {
@@ -138,24 +141,21 @@ class ImageResolver implements ImageResolverInterface
         }
 
         $cache = $this->cacheResolver ? $this->cacheResolver->resolve($alias) : null;
-        $path = $this->getPath($path, $source);
+        $path = $this->getPath($path, $src);
 
         $key = null;
 
-        if (null !== $cache && $cache->has($key = $this->makeCacheKey($cache, $path, $params, $filter)) &&
+        $filterStr = $filters ? (string)$filters : null;
+
+        if (null !== $cache && $cache->has($key = $this->makeCacheKey($cache, $path, (string)$params, $filterStr)) &&
             $resource = $cache->get($key)
         ) {
             return $resource;
         }
 
-        $params = array_merge(
-            Parameters::fromString($params, '/')->all(),
-            ['filter' => $this->extractFilterString($filter)]
-        );
-
         $this->validateParams($params);
 
-        return $this->applyProcessor($this->processor, $loader, $path, $params, $cache, $key);
+        return $this->applyProcessor($this->processor, $loader, $path, $params, $filters, $cache, $key);
     }
 
     /**
@@ -165,22 +165,18 @@ class ImageResolver implements ImageResolverInterface
      *
      * @return ResourceInterface
      */
-    public function resolveCached(array $parameters)
+    public function resolveCached($prefix, $id)
     {
-        list ($path, $id) = $parameters;
+        $prefix = trim(substr($prefix, 0, strrpos($prefix, '/')), '/');
 
-        $prefix = trim(substr($path, 0, strrpos($path, '/')), '/');
-
-        if (null === ($cache = $this->cacheResolver->resolve($parameters[0]))) {
+        if (null === ($cache = $this->cacheResolver->resolve($prefix))) {
             return;
         }
-
 
         $pos = strrpos($id, '.');
         $key = strtr($id, ['/' => '.']);
 
         $key = false !== $pos ? substr($key, 0, $pos) : $key;
-
 
         if (!$cache->has($key)) {
             return;
@@ -197,11 +193,13 @@ class ImageResolver implements ImageResolverInterface
      * @throws \OutOfBoundsException if validation fails
      * @return void
      */
-    private function validateParams(array $params = [])
+    private function validateParams(Parameters $parameters)
     {
         if (null === $this->constraintValidator) {
             return;
         }
+
+        $params = $parameters->all();
 
         if (!$this->constraintValidator->validate($params['mode'], [$params['width'], $params['height']])) {
             throw new \OutOfBoundsException('Parameters exceed limit');

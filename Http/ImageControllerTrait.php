@@ -11,10 +11,12 @@
 
 namespace Thapp\JitImage\Http;
 
+use Thapp\JitImage\Parameters;
+use Thapp\JitImage\FilterExpression;
 use \Thapp\JitImage\Http\ImageResponse;
 use \Thapp\JitImage\Resource\ResourceInterface;
 use \Thapp\JitImage\Resolver\ResolverInterface;
-use \Thapp\JitImage\Resolver\ParameterResolverInterface;
+use \Thapp\JitImage\Resolver\ImageResolverInterface;
 use \Symfony\Component\HttpFoundation\Response;
 use \Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
@@ -69,7 +71,7 @@ trait ImageControllerTrait
      *
      * @return void
      */
-    public function setImageResolver(ParameterResolverInterface $imageResolver)
+    public function setImageResolver(ImageResolverInterface $imageResolver)
     {
         $this->imageResolver  = $imageResolver;
     }
@@ -107,15 +109,13 @@ trait ImageControllerTrait
      * @throws NotFoundHttpException if image was not found
      * @return Response
      */
-    public function getImage($path, $params = null, $source = null, $filter = null)
+    public function getImage($path, $params = null, $source = null, $filters = null)
     {
-        if (!$resource = $this->imageResolver->resolveParameters(
-            [
-                trim($path, '/'),
-                $params,
-                $source,
-                $filter
-            ]
+        if (!$resource = $this->imageResolver->resolve(
+            $source,
+            Parameters::fromString($params),
+            $filters ? new FilterExpression($filters) : null,
+            $path
         )
         ) {
             $this->notFound($source);
@@ -156,7 +156,7 @@ trait ImageControllerTrait
      */
     public function getCached($path, $prefix, $id)
     {
-        if (!$resource = $this->imageResolver->resolveCached([$path, $id])) {
+        if (!$resource = $this->imageResolver->resolveCached($path, $id)) {
             $this->notFound($id);
         }
 

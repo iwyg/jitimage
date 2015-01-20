@@ -11,6 +11,9 @@
 
 namespace Thapp\JitImage\Resolver;
 
+use Thapp\JitImage\Parameters;
+use Thapp\JitImage\FilterExpression;
+
 /**
  * @interface ImageResolverInterface
  *
@@ -18,8 +21,18 @@ namespace Thapp\JitImage\Resolver;
  * @version $Id$
  * @author iwyg <mail@thomas-appel.com>
  */
-interface ImageResolverInterface extends ParameterResolverInterface
+interface ImageResolverInterface
 {
+    /**
+     * resolve
+     *
+     * @param Parameters $parameters
+     * @param FilterExpression $filters
+     *
+     * @return void
+     */
+    public function resolve($src, Parameters $params, FilterExpression $filters = null, $prefix = '');
+
     /**
      * resolverCache
      *
@@ -27,7 +40,7 @@ interface ImageResolverInterface extends ParameterResolverInterface
      *
      * @return void
      */
-    public function resolveCached(array $parameters);
+    public function resolveCached($prefix, $key);
 
     /**
      * Get the image processor.

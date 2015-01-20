@@ -64,6 +64,14 @@ class FilterExpression
         $this->params = $expr;
     }
 
+    /**
+     * addFilter
+     *
+     * @param string $filter
+     * @param array $options
+     *
+     * @return void
+     */
     public function addFilter($filter, array $options = [])
     {
         if (0 === strlen($filter)) {
@@ -108,6 +116,16 @@ class FilterExpression
         }
 
         return $this->transFormString($this->params);
+    }
+
+    /**
+     * @see toArray
+     *
+     * @return array
+     */
+    public function all()
+    {
+        return $this->toArray();
     }
 
     /**

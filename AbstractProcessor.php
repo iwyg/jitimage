@@ -46,9 +46,9 @@ abstract class AbstractProcessor implements ProcessorInterface
     /**
      * {@inheritdoc}
      */
-    public function process(array $parameters)
+    public function process(Parameters $parameters, FilteExpression $filters = null)
     {
-        $params = array_merge($this->defaultParams(), $parameters);
+        $params = array_merge($this->defaultParams(), $parameters->all());
 
         $this->targetSize = [$params['width'], $params['height']];
 
@@ -75,7 +75,11 @@ abstract class AbstractProcessor implements ProcessorInterface
                 break;
         }
 
-        foreach ((array)$params['filter'] as $f => $parameter) {
+        if (null === $filters) {
+            return;
+        }
+
+        foreach ($filters->all() as $f => $parameter) {
             $this->addFilter($f, (array)$parameter);
         }
     }
@@ -104,6 +108,14 @@ abstract class AbstractProcessor implements ProcessorInterface
         }
 
         return $this->targetFormat;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getFileExtension()
+    {
+        return static::formatToExtension($this->getFileFormat());
     }
 
     /**
@@ -219,7 +231,7 @@ abstract class AbstractProcessor implements ProcessorInterface
      *
      * @return array
      */
-    protected function defaultParams()
+    private function defaultParams()
     {
         return [
             'mode'       => 0,
@@ -228,7 +240,6 @@ abstract class AbstractProcessor implements ProcessorInterface
             'gravity'    => 0,
             'quality'    => 80,
             'background' => null,
-            'filter'     => []
         ];
     }
 
@@ -246,6 +257,22 @@ abstract class AbstractProcessor implements ProcessorInterface
         if (array_key_exists($format, $formats)) {
             return $formats[$format];
         }
+    }
+
+    /**
+     * formatToExtension
+     *
+     * @param mixed $format
+     *
+     * @return string
+     */
+    protected static function formatToExtension($format)
+    {
+        if ('jpeg' === $format) {
+            return 'jpg';
+        }
+
+        return $format;
     }
 
     /**

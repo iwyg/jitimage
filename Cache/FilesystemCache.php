@@ -193,7 +193,7 @@ class FilesystemCache extends AbstractCache
     {
         $fname = $this->getPath($id);
 
-        $file = $fname.'.'.$proc->getFileFormat();
+        $file = $fname.'.'.$proc->getFileExtension();
         $meta = $this->getMetaPath($id);
 
         $metaContent = serialize($resource = new CachedResource($proc, $file));

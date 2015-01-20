@@ -11,6 +11,7 @@
 
 namespace Thapp\JitImage\Resolver;
 
+use Thapp\JitImage\Parameters;
 use Thapp\JitImage\FilterExpression;
 use Thapp\JitImage\Cache\CacheInterface;
 use Thapp\JitImage\ProcessorInterface;
@@ -54,8 +55,15 @@ trait ImageResolverHelper
      * @access private
      * @return ResourceInterface
      */
-    private function applyProcessor(ProcessorInterface $processor, LoaderInterface $loader, $source, array $params, $cache = null, $key = null)
-    {
+    private function applyProcessor(
+        ProcessorInterface $processor,
+        LoaderInterface $loader,
+        $source,
+        Parameters $params,
+        FilterExpression $filters = null,
+        CacheInterface $cache = null,
+        $key = null
+    ) {
         if (!$loader->supports($source)) {
             throw new \InvalidArgumentException(
                 sprintf('Loader "%s" does not support file "%s"', get_class($loader), $source)
@@ -63,7 +71,7 @@ trait ImageResolverHelper
         }
 
         $this->processor->load($loader->load($source));
-        $this->processor->process($params);
+        $this->processor->process($params, $filters);
 
         if (null === $cache) {
             return $this->createResource($this->processor);
@@ -143,17 +151,15 @@ trait ImageResolverHelper
      */
     private function extractFilterString($filterStr = null)
     {
-        $filters = [];
-
         if (null === $filterStr) {
-            return $filters;
+            return;
         }
 
         if (0 === strpos($filterStr, 'filter:')) {
             $filterStr = substr($filterStr, 7);
         }
 
-        return (new FilterExpression($filterStr))->toArray();
+        return new FilterExpression;
     }
 
     /**

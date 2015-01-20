@@ -208,6 +208,13 @@ class Generator
         return $this->apply();
     }
 
+    /**
+     * make
+     *
+     * @param string $recipe
+     *
+     * @return string
+     */
     public function make($recipe)
     {
         if (!$res = $this->jmg->getRecipesResolver()->resolve($recipe)) {

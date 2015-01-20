@@ -109,7 +109,7 @@ interface ProcessorInterface
      *
      * @return void
      */
-    public function process(array $parameters);
+    public function process(Parameters $parameters, FilteExpression $filters = null);
 
     /**
      * Get the image driver
