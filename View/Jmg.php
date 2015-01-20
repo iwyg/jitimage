@@ -77,16 +77,6 @@ class Jmg
     }
 
     /**
-     * The current resource
-     *
-     * @return ResourceInterace
-     */
-    public function getCurrent()
-    {
-        return $this->current;
-    }
-
-    /**
      * Get the ImageResolver
      *
      * @return ImageResolverInterface

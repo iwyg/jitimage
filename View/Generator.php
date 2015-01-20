@@ -30,12 +30,9 @@ class Generator
     protected $source;
     protected $filters;
     protected $parameters;
-    protected $asTag;
-    protected $tagAttrs;
 
     public function __construct(Jmg $jmg)
     {
-        $this->asTag = false;
         $this->jmg = $jmg;
         $this->filters = new FilterExpression([]);
         $this->parameters = new Parameters;
@@ -43,8 +40,6 @@ class Generator
 
     public function __clone()
     {
-        $this->tagAttrs = null;
-        $this->asTag = false;
         $this->path = null;
         $this->source = null;
         $this->filters = clone $this->filters;
@@ -93,21 +88,6 @@ class Generator
     public function setSource($source)
     {
         $this->source = $source;
-    }
-
-    /**
-     * setTag
-     *
-     * @param array $attributes
-     *
-     * @return void
-     */
-    public function setTag(array $attributes = [])
-    {
-        $this->asTag = true;
-        $this->tagAttrs = $attributes;
-
-        return $this;
     }
 
     /**
@@ -209,27 +189,6 @@ class Generator
     }
 
     /**
-     * make
-     *
-     * @param string $recipe
-     *
-     * @return string
-     */
-    public function make($recipe)
-    {
-        if (!$res = $this->jmg->getRecipesResolver()->resolve($recipe)) {
-            return '';
-        }
-
-        list ($prefix, $params, $filter) = $res;
-
-        $this->setPath($prefix);
-        $this->filter($filter);
-
-        return $this->apply(Parameters::fromString($params), $recipe);
-    }
-
-    /**
      * get
      *
      * @return string
@@ -248,7 +207,7 @@ class Generator
      * @param mixed $height
      * @param int $gravity
      *
-     * @return void
+     * @return string
      */
     public function resize($width, $height, $gravity = 5)
     {
@@ -261,39 +220,10 @@ class Generator
     /**
      * apply
      *
-     * @return void
+     * @return string
      */
-    protected function apply(Parameter $params = null, $recipe = null)
+    protected function apply()
     {
-        $src = $this->jmg->apply($this->path, $this->source, $params ?: $this->parameters, $this->filters, $recipe);
-
-        if ($this->asTag) {
-            $src =  $this->generateTag($src);
-        }
-
-        $this->asTag = false;
-        $this->tagAttrs = null;
-
-        return $src;
-    }
-
-    protected function generateTag($src)
-    {
-        if (($current = $this->jmg->getCurrent()) instanceof CachedResource) {
-            list ($w, $h) = $current->getDimension();
-        } else {
-            $w = null;
-            $h = null;
-        }
-
-        $options = array_merge($this->tagAttrs, ['src' => $src, 'width' => $w, 'height' => $h]);
-
-        $tag = '<img ';
-        foreach ($options as $attr => $value) {
-            $tag .= sprintf('%s="%s" ', $attr, $value);
-        }
-        $tag .= '/>';
-
-        return $tag;
+        return $this->jmg->apply($this->path, $this->source, $this->parameters, $this->filters);
     }
 }
