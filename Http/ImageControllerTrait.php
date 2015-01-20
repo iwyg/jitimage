@@ -21,7 +21,7 @@ use Thapp\JitImage\Http\HttpSignerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Thapp\JitImage\Exception\InvalidSignatureException;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Thapp\JitImage\Exception\ImageNotFoundException;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 /**
@@ -136,13 +136,13 @@ trait ImageControllerTrait
     {
         list ($parameters, $filterExpr) = $this->getParamsAndFilters($params, $filters);
 
-        $this->validateRequest($this->getRequest(), $parameters, $filterExpr);
+        $this->validateRequest($req = $this->getRequest(), $parameters, $filterExpr);
 
         if (!$resource = $this->imageResolver->resolve($source, $parameters, $filterExpr, $path)) {
             $this->notFound($source);
         }
 
-        return $this->processResource($resource);
+        return $this->processResource($resource, $req);
     }
 
     /**
@@ -175,13 +175,13 @@ trait ImageControllerTrait
      * @throws NotFoundHttpException if image was not found
      * @return Response
      */
-    public function getCached($path, $prefix, $id)
+    public function getCached($prefix = null, $path, $id)
     {
         if (!$resource = $this->imageResolver->resolveCached($path, $id)) {
             $this->notFound($id);
         }
 
-        return $this->processResource($resource);
+        return $this->processResource($resource, $this->getRequest());
     }
 
     /**
@@ -229,11 +229,11 @@ trait ImageControllerTrait
      * @access private
      * @return Response
      */
-    private function processResource(ResourceInterface $resource)
+    private function processResource(ResourceInterface $resource, Request $request)
     {
         $response = new ImageResponse($resource);
 
-        $response->prepare($this->request);
+        $response->prepare($request);
         $response->send();
 
         return $response;
@@ -248,6 +248,6 @@ trait ImageControllerTrait
      */
     private function notFound($source)
     {
-        throw new NotFoundHttpException(sprintf('resource "%s" not found', $source));
+        throw new ImageNotFoundException(sprintf('Resource "%s" could not be found.', $source));
     }
 }
