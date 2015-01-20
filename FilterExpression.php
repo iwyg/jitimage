@@ -11,6 +11,8 @@
 
 namespace Thapp\JitImage;
 
+use Thapp\Image\Color\Parser;
+
 /**
  * @class FilterExpression
  * @package Thapp\Image\Filter
@@ -201,9 +203,15 @@ class FilterExpression
             return $val;
         }
 
+        if (0 === strpos($val, '#')) {
+            $val = substr($val, 1);
+        }
+
         switch (true) {
             case 0 === strlen($val) || 'null' === $val:
                 return null;
+            case Parser::isHex($val):
+                return ltrim(Parser::normalize($val), '#');
             case is_numeric($val):
                 return $this->getNumVal($val);
             case in_array($val, ['true', 'false']):

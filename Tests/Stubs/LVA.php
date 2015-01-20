@@ -22,4 +22,7 @@ use Illuminate\Contracts\Foundation\Application;
  */
 abstract class LVA implements Application, \ArrayAccess
 {
+    public function version()
+    {
+    }
 }

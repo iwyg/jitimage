@@ -209,9 +209,17 @@ class Jmg
         $this->imageResolver->getProcessor()->close();
     }
 
+    /**
+     * setAsTag
+     *
+     * @param boolean $asTag
+     * @param array $attributes
+     *
+     * @return void
+     */
     protected function setAsTag($asTag, array $attributes)
     {
-        if (!$asTag) {
+        if (!(boolean)$asTag) {
             $this->clearTag();
 
             return;
@@ -221,7 +229,14 @@ class Jmg
         $this->attributes = $attributes;
     }
 
-    protected function getOutput($path)
+    /**
+     * getOutput
+     *
+     * @param string $path
+     *
+     * @return string
+     */
+    private function getOutput($path)
     {
         if ($this->asTag) {
             return $this->createTag($path, array_merge($this->attributes, $this->getResourceDimension()));
@@ -230,17 +245,35 @@ class Jmg
         return $path;
     }
 
-    protected function getResourceDimension()
+    /**
+     * getResourceDimension
+     *
+     * @return arra
+     */
+    private function getResourceDimension()
     {
         return ['width' => $this->current->getWidth(), 'height' => $this->current->getHeight()];
     }
 
-    protected function clearTag()
+    /**
+     * clearTag
+     *
+     * @return void
+     */
+    private function clearTag()
     {
         $this->asTag = false;
         $this->attributes = null;
     }
 
+    /**
+     * createTag
+     *
+     * @param string $path
+     * @param array $attributes
+     *
+     * @return string
+     */
     private function createTag($path, array $attributes)
     {
         $parts = '';
@@ -256,7 +289,7 @@ class Jmg
      *
      * @return Generator
      */
-    protected function newGenerator()
+    private function newGenerator()
     {
         if (null === $this->generator) {
             return $this->generator = new Generator($this);

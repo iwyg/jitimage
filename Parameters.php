@@ -11,6 +11,8 @@
 
 namespace Thapp\JitImage;
 
+use Thapp\Image\Color\Parser;
+
 /**
  * @class Parameters
  * @package Thapp\Image\Driver
@@ -161,9 +163,19 @@ class Parameters
      */
     public static function parseString($paramString, $separator = self::P_SEPARATOR)
     {
+        $parts = array_pad(explode($separator, $paramString), 5, null);
+
+        if (isset($parts[4])) {
+            if (3 === (int)$parts[0] && static::isHex($parts[4])) {
+                $parts[4] = ltrim(Parser::normalize($parts[4]), '#');
+            } else {
+                $parts[4] = null;
+            }
+        }
+
         list ($mode, $width, $height, $gravity, $background) = array_map(function ($value, $key = null) {
-            return is_numeric($value) && !static::isHex($value) ? (int)$value : $value;
-        }, array_pad(explode($separator, $paramString), 5, null));
+            return is_numeric($value) ? (int)$value : $value;
+        }, $parts);
 
         return static::sanitize($mode, $width, $height, $gravity, $background);
     }
@@ -191,7 +203,7 @@ class Parameters
     {
         $color = ltrim($color, '#');
 
-        return (boolean)preg_match('#^([[:xdigit:]]{6}|[[:xdigit:]]{3})$#', $color);
+        return Parser::isHex($color);
     }
 
     /**
