@@ -59,7 +59,7 @@ class CachedResource extends AbstractResource implements CachedResourceInterface
      */
     public function getFileName()
     {
-        return basename($this->path);
+        return null !== $this->path ? basename($this->path) : null;
     }
 
     /**
@@ -173,7 +173,7 @@ class CachedResource extends AbstractResource implements CachedResourceInterface
      */
     protected function setSize(ProcessorInterface $proc)
     {
-        list ($w, $h) = $proc->getTargetSize();
+        list ($w, $h) = array_values($proc->getTargetSize());
 
         $this->width  = $w;
         $this->height = $h;

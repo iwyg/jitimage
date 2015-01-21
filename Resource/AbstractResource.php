@@ -71,7 +71,7 @@ abstract class AbstractResource implements ResourceInterface
      */
     public function isFresh($time = null)
     {
-        return $this->getLastModified() < $time ?: time();
+        return $this->getLastModified() < ($time ?: time());
     }
 
     /**

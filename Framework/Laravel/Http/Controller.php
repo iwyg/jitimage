@@ -48,7 +48,11 @@ class Controller extends BaseController
      */
     public function callAction($method, $parameters)
     {
-        return parent::callAction($method, ['path' => $this->getCurrentPath()]+$parameters);
+        if (!isset($parameters['path'])) {
+            $parameters = ['prefix' => $this->getCurrentPath()]+$parameters;
+        }
+
+        return parent::callAction($method, $parameters);
     }
 
     /**

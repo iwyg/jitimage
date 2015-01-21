@@ -34,7 +34,7 @@ class FileResource extends AbstractResource implements FileResourceInterface
      * @param string $mime
      * @param string $content
      */
-    public function __construct($handle, $mime = null, $content = null)
+    public function __construct($handle, $mime = null)
     {
         $this->handle = $handle;
         $meta = stream_get_meta_data($handle);
@@ -58,9 +58,75 @@ class FileResource extends AbstractResource implements FileResourceInterface
     /**
      * {@inheritdoc}
      */
+    public function isLocal()
+    {
+        if (null === ($path = $this->getPath())) {
+            return false;
+        }
+
+        return stream_is_local($path);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function setFresh($fresh)
+    {
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function setContents($contents)
+    {
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function setLastModified($time)
+    {
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getLastModified()
+    {
+        return $this->isLocal() ? filemtime($this->getPath()) : time();
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function isValid()
+    {
+        return is_resource($this->handle);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function getHandle()
     {
         return $this->handle;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getContents()
+    {
+        if (!$this->isValid()) {
+            return '';
+        }
+
+        $pos = ftell($this->handle);
+        rewind($this->handle);
+        $contents = stream_get_contents($this->handle);
+        fseek($this->handle, $pos);
+
+        return $contents;
     }
 
     /**
@@ -74,7 +140,7 @@ class FileResource extends AbstractResource implements FileResourceInterface
     protected function findMimeType(array $meta, $mime = null)
     {
         if (null === $mime && $this->isLocal()) {
-            $mime = finfo_file($info = finfo_open(FILEINFO_MIME), $this->getPath());
+            list($mime,) = explode(';', finfo_file($info = finfo_open(FILEINFO_MIME), $this->getPath()));
 
             finfo_close($info);
         }

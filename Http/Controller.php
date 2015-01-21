@@ -76,7 +76,7 @@ class Controller
     {
         $this->request = $request;
 
-        $this->getCached(null, $path, $id);
+        $this->getCached($path, $id);
     }
 
     /**

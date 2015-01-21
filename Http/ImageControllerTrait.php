@@ -175,7 +175,7 @@ trait ImageControllerTrait
      * @throws NotFoundHttpException if image was not found
      * @return Response
      */
-    public function getCached($prefix = null, $path, $id)
+    public function getCached($path, $id)
     {
         if (!$resource = $this->imageResolver->resolveCached($path, $id)) {
             $this->notFound($id);

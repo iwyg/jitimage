@@ -41,6 +41,14 @@ class ModeConstraintsTest extends \PHPUnit_Framework_TestCase
         $this->assertSame($expected, $validator->validate($mode, $parameters));
     }
 
+    /** @test */
+    public function itShouldReportTrueIfNoConstraints()
+    {
+        $validator = new ModeConstraints([]);
+
+        $this->assertTrue($validator->validate(5, []));
+    }
+
     public function constraintsProvider()
     {
         return [

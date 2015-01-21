@@ -25,4 +25,33 @@ class ImageResourceTest extends \PHPUnit_Framework_TestCase
     {
         $this->assertInstanceof('Thapp\JitImage\Resource\ResourceInterface', new ImageResource);
     }
+
+    /** @test */
+    public function itShouldGetDiminsions()
+    {
+        $res = new ImageResource(null, 200, 100);
+
+        $this->assertEquals(200, $res->getWidth());
+        $this->assertEquals(100, $res->getHeight());
+    }
+
+    /** @test */
+    public function itShouldGetDiminsionsIfOnlyPathIsGiven()
+    {
+        $res = new ImageResource(__DIR__.'/../Fixures/pattern.png');
+
+        $this->assertEquals(600, $res->getWidth());
+        $this->assertEquals(600, $res->getHeight());
+    }
+
+    /** @test */
+    public function itShouldGetDiminsionsIfOnlyContentIsGiven()
+    {
+        $file = __DIR__.'/../Fixures/pattern.png';
+        $res = new ImageResource;
+        $res->setContents(file_get_contents($file));
+
+        $this->assertEquals(600, $res->getHeight());
+        $this->assertEquals(600, $res->getWidth());
+    }
 }

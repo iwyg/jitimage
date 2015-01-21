@@ -103,10 +103,4 @@ class ImageResource extends AbstractResource implements ImageResourceInterface
         $this->width = $size[0];
         $this->height = $size[1];
     }
-
-    protected function setDimenstion($width, $height)
-    {
-        $this->width = $width;
-        $this->height = $height;
-    }
 }

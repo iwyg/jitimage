@@ -26,4 +26,11 @@ interface FileResourceInterface extends ResourceInterface
      * @return resource
      */
     public function getHandle();
+
+    /**
+     * isValid
+     *
+     * @return void
+     */
+    public function isValid();
 }

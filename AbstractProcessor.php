@@ -46,7 +46,7 @@ abstract class AbstractProcessor implements ProcessorInterface
     /**
      * {@inheritdoc}
      */
-    public function process(Parameters $parameters, FilteExpression $filters = null)
+    public function process(Parameters $parameters, FilterExpression $filters = null)
     {
         $params = array_merge($this->defaultParams(), $parameters->all());
 

@@ -109,7 +109,7 @@ interface ProcessorInterface
      *
      * @return void
      */
-    public function process(Parameters $parameters, FilteExpression $filters = null);
+    public function process(Parameters $parameters, FilterExpression $filters = null);
 
     /**
      * Get the image driver
@@ -145,6 +145,13 @@ interface ProcessorInterface
      * @return string
      */
     public function getFileFormat();
+
+    /**
+     * get the image output extension
+     *
+     * @return string
+     */
+    public function getFileExtension();
 
     /**
      * getSourceFormat

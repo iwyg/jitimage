@@ -93,7 +93,8 @@ class ModeConstraints implements ValidatorInterface
             return $this->validateValue($a, $cA);
         }
 
-        throw new \InvalidArgumentException(sprintf('Invalid mode "%s"', $mode));
+        //never gets executed:
+        //throw new \InvalidArgumentException(sprintf('Invalid mode "%s"', $mode));
     }
 
     /**
