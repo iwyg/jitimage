@@ -84,7 +84,7 @@ class ClientCache extends AbstractCache
     /**
      * {@inheritdoc}
      */
-    public function get($key, $raw = false)
+    public function get($key, $raw = self::CONTENT_RESOURCE)
     {
         if (!$this->has($key)) {
             return;
@@ -93,6 +93,11 @@ class ClientCache extends AbstractCache
         list ($prefix, $id) = $this->getKeyAndPrefix($key);
 
         $resource = $this->pool[$prefix][$id];
+
+        if ($raw) {
+            return $resource->getContents();
+        }
+
         $resource->setClient($this->client);
 
         return $resource;

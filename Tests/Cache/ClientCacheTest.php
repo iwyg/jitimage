@@ -38,6 +38,7 @@ class ClientCacheTest extends \PHPUnit_Framework_TestCase
     public function itShouldRetriveItems()
     {
         $rA = $this->mockResource('a.b');
+        $rA->method('getContents')->willReturn('image');
         $client = $this->mockClient();
         $client->expects($this->once())->method('get')->with($this->getKey('jitimage'))->willReturn([
             'a' => ['b' => $rA],
@@ -45,10 +46,11 @@ class ClientCacheTest extends \PHPUnit_Framework_TestCase
 
         $cache = new ClientCache($client, 'jitimage');
 
-        $client->expects($this->exactly(1))->method('has')->with('jitimage_a.b')->willReturn(true);
+        $client->expects($this->exactly(2))->method('has')->with('jitimage_a.b')->willReturn(true);
 
         $this->assertFalse($cache->has('b.c'));
         $this->assertSame($rA, $cache->get('a.b'));
+        $this->assertSame('image', $cache->get('a.b', true));
     }
 
     /** @test */
