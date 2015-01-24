@@ -32,7 +32,6 @@ class LazyCacheResolver extends AbstractLazyCacheResolver
     public function __construct(Application $app)
     {
         $this->app = $app;
-
         parent::__construct();
     }
 
@@ -91,5 +90,13 @@ class LazyCacheResolver extends AbstractLazyCacheResolver
     protected function getDefaultCachePath()
     {
         return $this->app['config']['jmg.default_cache_path'];
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    protected function getCacheExpiryTime()
+    {
+        return $this->app['config']->get('jmg.cache_expiry_time', -1);
     }
 }

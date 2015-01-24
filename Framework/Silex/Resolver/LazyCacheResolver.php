@@ -91,4 +91,12 @@ class LazyCacheResolver extends AbstractLazyCacheResolver
     {
         return $this->app['jmg.default_cache_path'];
     }
+
+    /**
+     * {@inheritdoc}
+     */
+    protected function getCacheExpiryTime()
+    {
+        return isset($this->app['jmg.cache_expiry_time']) ? $this->app['jmg.cache_expiry_time'] : -1;
+    }
 }

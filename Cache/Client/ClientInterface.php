@@ -11,6 +11,8 @@
 
 namespace Thapp\JitImage\Cache\Client;
 
+use Thapp\JitImage\Cache\CacheInterface;
+
 /**
  * @class ClientInterface
  * @package Thapp\Image
@@ -18,11 +20,50 @@ namespace Thapp\JitImage\Cache\Client;
  */
 interface ClientInterface
 {
+    /**
+     * Gets an item by key from the store.
+     *
+     * @param string $key
+     *
+     * @return mixed
+     */
     public function get($key);
 
-    public function set($key, $content);
+    /**
+     * Saves an item to the store.
+     *
+     * @param stirng $key
+     * @param mixed $content
+     * @param int $expires lifetime in minutes
+     *
+     * @return void
+     */
+    public function set($key, $content, $expires = CacheInterface::EXPIRY_NONE);
 
+    /**
+     * Item exists.
+     *
+     * @param string $key
+     *
+     * @return boolean
+     */
     public function has($key);
 
+    /**
+     * Deletes an item from the store.
+     *
+     * @param string $key
+     *
+     * @return boolean
+     */
     public function delete($key);
+
+    /**
+     * Deletes multiple items from the store.
+     *
+     * @param array $keys
+     *
+     * @return boolean
+     */
+    public function deleteKeys(array $keys);
 }

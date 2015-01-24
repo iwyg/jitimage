@@ -30,6 +30,13 @@ abstract class AbstractCache implements CacheInterface
     protected $pool;
 
     /**
+     * expires
+     *
+     * @var mixed
+     */
+    protected $expires;
+
+    /**
      * prefix
      *
      * @var string
@@ -155,5 +162,17 @@ abstract class AbstractCache implements CacheInterface
     protected function poolHas($key)
     {
         return array_key_exists($key, $this->pool);
+    }
+
+    /**
+     * setExpires
+     *
+     * @param mixed $minutes
+     *
+     * @return void
+     */
+    protected function setExpires($minutes)
+    {
+        $this->expires = max(self::EXPIRY_NONE, (60 * (int)$minutes));
     }
 }

@@ -24,6 +24,8 @@ interface CacheInterface
 
     const CONTENT_RESOURCE = false;
 
+    const EXPIRY_NONE = -1;
+
     /**
      * Get a cached resource by id.
      *

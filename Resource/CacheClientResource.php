@@ -11,8 +11,8 @@
 
 namespace Thapp\JitImage\Resource;
 
-use \Thapp\Image\ProcessorInterface;
-use \Thapp\Image\Cache\Client\ClientInterface;
+use \Thapp\JitImage\ProcessorInterface;
+use \Thapp\JitImage\Cache\Client\ClientInterface;
 
 /**
  * @class CachedResource extends AbstractResource

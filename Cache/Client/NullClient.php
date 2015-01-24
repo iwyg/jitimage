@@ -55,6 +55,16 @@ class NullClient implements ClientInterface
     }
 
     /**
+     * {@inheritdoc}
+     */
+    public function deleteKeys(array $keys)
+    {
+        foreach ($keys as $key) {
+            $this->delete($key);
+        }
+    }
+
+    /**
      * init
      *
      * @param mixed $persist

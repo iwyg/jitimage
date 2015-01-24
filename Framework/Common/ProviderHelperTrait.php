@@ -51,7 +51,7 @@ trait ProviderHelperTrait
             case 'imagick':
                 return '\Thapp\Image\Driver\Imagick\Source';
             case 'gmagick':
-                throw new \InvalidArgumentException('gmagick is not supported.');
+                return '\Thapp\Image\Driver\Gmagick\Source';
             default:
                 break;
         }

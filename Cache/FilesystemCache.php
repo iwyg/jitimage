@@ -68,16 +68,20 @@ class FilesystemCache extends AbstractCache
      */
     protected $metaKey;
 
+    protected $time;
+
     /**
      * Create a new FilesystemCache instance.
      *
+     * @param int $expires in minutes
      * @param string $location
      * @param string $metaPath
      * @param string $prefix
      * @param string $metaKey
      */
-    public function __construct($location = null, $metaPath = null, $prefix = 'fs_', $metaKey = 'meta')
+    public function __construct($location = null, $metaPath = null, $expires = 10080, $prefix = 'fs_', $metaKey = 'meta')
     {
+        $this->setExpires($expires);
         $this->path   = $location ?: getcwd();
         $this->metaPath = $metaPath ?: $this->path;
 
@@ -119,7 +123,7 @@ class FilesystemCache extends AbstractCache
             return true;
         }
 
-        if (file_exists($path = $this->getMetaPath($key))) {
+        if (file_exists($path = $this->getMetaPath($key)) && $this->isValid($path)) {
             $this->pool[$key] = $path;
 
             return true;
@@ -149,6 +153,24 @@ class FilesystemCache extends AbstractCache
         $dir = substr($key, 0, strpos($key, '.'));
 
         return $this->deleteDir($this->path . DIRECTORY_SEPARATOR . $dir);
+    }
+
+    protected function setExpires($minutes)
+    {
+        $this->time = time();
+        parent::setExpires($minutes);
+    }
+
+    /**
+     * isValid
+     *
+     * @param mixed $meta
+     *
+     * @return void
+     */
+    protected function isValid($meta)
+    {
+         return self::EXPIRY_NONE === $this->expires ? true : ($this->time - filemtime($meta)) <= $this->expires;
     }
 
     /**

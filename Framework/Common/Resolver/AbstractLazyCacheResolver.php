@@ -90,8 +90,9 @@ abstract class AbstractLazyCacheResolver extends CacheResolver
     protected function createFileCache()
     {
         $path =  $this->getDefaultCachePath();
+        $expries = $this->getCacheExpiryTime();
 
-        return new \Thapp\JitImage\Cache\FilesystemCache($path);
+        return new \Thapp\JitImage\Cache\FilesystemCache($path, $expires);
     }
 
     /**
@@ -107,4 +108,5 @@ abstract class AbstractLazyCacheResolver extends CacheResolver
      * @return void
      */
     abstract protected function getDefaultCachePath();
+    abstract protected function getCacheExpiryTime();
 }
