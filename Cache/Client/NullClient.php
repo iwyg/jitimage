@@ -1,16 +1,25 @@
 <?php
 
-/**
- * This File is part of the Thapp\Image package
+/*
+ * This File is part of the Thapp\JitImage package
  *
- * (c) Thomas Appel <mail@thomas-appel.com>
+ * (c) iwyg <mail@thomas-appel.com>
  *
  * For full copyright and license information, please refer to the LICENSE file
  * that was distributed with this package.
  */
 
-namespace Thapp\Image\Cache;
 
+namespace Thapp\JitImage\Cache\Client;
+
+/**
+ * @class NullClient
+ * @see ClientInterface
+ *
+ * @package Thapp\JitImage
+ * @version $Id$
+ * @author iwyg <mail@thomas-appel.com>
+ */
 class NullClient implements ClientInterface
 {
     private $file;
