@@ -41,4 +41,13 @@ interface CacheResolverInterface extends ResolverInterface
      * @return void
      */
     public function set(array $caches);
+
+    /**
+     * A cache was registered with this name.
+     *
+     * @param string $alias
+     *
+     * @return boolean
+     */
+    public function has($alias);
 }

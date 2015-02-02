@@ -147,9 +147,9 @@ class FilesystemCache extends AbstractCache
      *
      * @return boolean
      */
-    public function delete($file)
+    public function delete($file, $prefix = '')
     {
-        $key = $this->createKey($file);
+        $key = $this->createKey($file, $prefix);
         $dir = substr($key, 0, strpos($key, '.'));
 
         return $this->deleteDir($this->path . DIRECTORY_SEPARATOR . $dir);

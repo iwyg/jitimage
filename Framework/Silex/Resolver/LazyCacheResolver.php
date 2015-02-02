@@ -12,6 +12,7 @@
 namespace Thapp\JitImage\Framework\Silex\Resolver;
 
 use Silex\Application;
+use Thapp\JitImage\Resolver\PathResolverInterface;
 use Thapp\JitImage\Framework\Common\Resolver\AbstractLazyCacheResolver;
 
 /**
@@ -23,14 +24,17 @@ use Thapp\JitImage\Framework\Common\Resolver\AbstractLazyCacheResolver;
  */
 class LazyCacheResolver extends AbstractLazyCacheResolver
 {
+    private $paths;
+
     /**
      * Constructor.
      *
      * @param Application $app
      */
-    public function __construct(Application $app)
+    public function __construct(Application $app, PathResolverInterface $paths)
     {
         $this->app = $app;
+        $this->paths = $paths;
 
         parent::__construct();
     }
@@ -47,6 +51,10 @@ class LazyCacheResolver extends AbstractLazyCacheResolver
         $caches = $this->getCaches();
 
         if (!array_key_exists($alias, $caches)) {
+            if (!(boolean)$this->paths->resolve($alias)) {
+                return;
+            }
+
             return $this->app['jmg.default_cache'];
         }
 
@@ -70,6 +78,11 @@ class LazyCacheResolver extends AbstractLazyCacheResolver
         }
 
         return $this->settings;
+    }
+
+    protected function getAliases()
+    {
+        return array_keys($this->paths->all());
     }
 
     /**

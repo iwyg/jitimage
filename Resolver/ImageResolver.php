@@ -149,10 +149,12 @@ class ImageResolver implements ImageResolverInterface
      */
     public function resolveCached($prefix, $id)
     {
-        $prefix = trim(substr($prefix, 0, strrpos($prefix, '/')), '/');
+        if (null === $this->cacheResolver) {
+            return false;
+        }
 
-        if (null === ($cache = $this->cacheResolver->resolve($prefix))) {
-            return;
+        if (null === ($cache = $this->cacheResolver->resolve($prefix = trim($prefix, '/')))) {
+            return false;
         }
 
         $pos = strrpos($id, '.');
@@ -161,7 +163,7 @@ class ImageResolver implements ImageResolverInterface
         $key = false !== $pos ? substr($key, 0, $pos) : $key;
 
         if (!$cache->has($key)) {
-            return;
+            return false;
         }
 
         return $cache->get($key);
@@ -189,13 +191,11 @@ class ImageResolver implements ImageResolverInterface
             return false;
         }
 
-        $cache = $this->cacheResolver ? $this->cacheResolver->resolve($alias) : '';
-
         $key = null;
-
+        $cache = $this->cacheResolver ? $this->cacheResolver->resolve($alias) : null;
         $filterStr = $filters ? (string)$filters : null;
 
-        if (null !== $cache && $cache->has($key = $this->makeCacheKey($cache, $path, $src, (string)$params, $filterStr)) &&
+        if (null !== $cache && $cache->has($key = $this->makeCacheKey($cache, $alias, $src, (string)$params, $filterStr)) &&
             $resource = $cache->get($key)
         ) {
             return $resource;
@@ -222,9 +222,11 @@ class ImageResolver implements ImageResolverInterface
 
         $params = $parameters->all();
 
-        if (!$this->constraintValidator->validate($params['mode'], [$params['width'], $params['height']])) {
-            throw new \OutOfBoundsException('Parameters exceed limit');
+        if (false !== $this->constraintValidator->validate($params['mode'], [$params['width'], $params['height']])) {
+            return true;
         }
+
+        throw new \OutOfBoundsException('Parameters exceed limit');
     }
 
     /**

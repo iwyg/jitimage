@@ -139,9 +139,9 @@ class ClientCache extends AbstractCache
     /**
      * {@inheritdoc}
      */
-    public function delete($file)
+    public function delete($file, $prefix = null)
     {
-        list ($prefix, $id) = $this->getKeyAndPrefix($key = $this->createKey($file));
+        list ($prefix, $id) = $this->getKeyAndPrefix($key = $this->createKey($file, $prefix));
 
         if (!isset($this->pool[$prefix])) {
             return;

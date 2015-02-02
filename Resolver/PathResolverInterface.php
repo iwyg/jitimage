@@ -18,4 +18,10 @@ namespace Thapp\JitImage\Resolver;
  */
 interface PathResolverInterface extends ResolverInterface
 {
+    /**
+     * all
+     *
+     * @return array
+     */
+    public function all();
 }

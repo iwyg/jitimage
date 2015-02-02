@@ -140,7 +140,7 @@ class Parameters
     {
         if (null === $this->str) {
             $this->str = implode($this->separator, array_filter(array_values($this->all()), function ($val) {
-            return null !== $val;
+                return null !== $val;
             }));
         }
 
@@ -165,19 +165,24 @@ class Parameters
     {
         $parts = array_pad(explode($separator, $paramString), 5, null);
 
-        if (isset($parts[4])) {
-            if (3 === (int)$parts[0] && static::isHex($parts[4])) {
-                $parts[4] = ltrim(Parser::normalize($parts[4]), '#');
-            } else {
-                $parts[4] = null;
-            }
+        if (isset($parts[4]) && (!is_numeric($parts[0]) && !static::isHex($parts[4]))) {
+            $parts[4] = null;
         }
 
         list ($mode, $width, $height, $gravity, $background) = array_map(function ($value, $key = null) {
-            return is_numeric($value) ? (int)$value : $value;
+            return is_numeric($value) ? (int)$value : ltrim($value, ' #');
         }, $parts);
 
         return static::sanitize($mode, $width, $height, $gravity, $background);
+    }
+
+    private static function parseBackground($background)
+    {
+        //$alpha = null;
+        //if (is_string($background) && (5 === $len = strlen($alpha) || 8 === $len)) {
+            //$alpha = substr($background, 0, 2);
+            //$background = substr($background, 2);
+        //}
     }
 
     /**
@@ -232,6 +237,10 @@ class Parameters
 
         if ($mode !== 3) {
             $background = null;
+        } elseif (null !== $background) {
+            $background = (is_int($background) && !Parser::isHex((string)$background)) ?
+                $background :
+                hexdec(Parser::normalizeHex($background));
         }
 
         if (4 < $mode || 0 === $mode) {

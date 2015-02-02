@@ -29,6 +29,33 @@ class CacheResolverTest extends \PHPUnit_Framework_TestCase
     }
 
     /** @test */
+    public function itShouldbeInitializableWithcaches()
+    {
+        $caches = [
+            'foo' => $this->mockCache(),
+            'bar' => $this->mockCache(),
+        ];
+        $resolver = new CacheResolver($caches);
+        $this->assertTrue($resolver->has('foo'));
+    }
+
+    /** @test */
+    public function itShouldBeIteratable()
+    {
+        $caches = [
+            'foo' => $this->mockCache(),
+            'bar' => $this->mockCache(),
+        ];
+
+        $resolver = new CacheResolver($caches);
+
+        foreach ($resolver as $key => $cache) {
+            $this->assertTrue(isset($caches[$key]));
+            $this->assertSame($caches[$key], $cache);
+        }
+    }
+
+    /** @test */
     public function itShouldResolverACacheByAlias()
     {
         $res = $this->newResolver();
@@ -38,6 +65,15 @@ class CacheResolverTest extends \PHPUnit_Framework_TestCase
         $res->add('bar', $cache = $this->mockCache());
 
         $this->assertSame($cache, $res->resolve('bar'));
+    }
+
+    /** @test */
+    public function itShouldHaveCache()
+    {
+        $res = $this->newResolver();
+        $this->assertFalse($res->has('bar'));
+        $res->add('bar', $cache = $this->mockCache());
+        $this->assertTrue($res->has('bar'));
     }
 
     /**

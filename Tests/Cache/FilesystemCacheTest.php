@@ -78,7 +78,7 @@ class FileystemCacheTest extends \PHPUnit_Framework_TestCase
     /** @test */
     public function itShouldBeAbleToCreateKeys()
     {
-        $key = $this->cache->createKey('image.jpg', 'string/image.jpg', 'jpg');
+        $key = $this->cache->createKey('image.jpg', 'prefix', 'string/image.jpg', 'jpg');
 
         $this->assertSame(31, strlen($key));
         $this->assertTrue(1 === substr_count($key, '.'));
@@ -87,8 +87,8 @@ class FileystemCacheTest extends \PHPUnit_Framework_TestCase
     /** @test */
     public function itShouldPurgeCached()
     {
-        $keyA = $this->cache->createKey('image.jpg', 'string/image.jpg', 'jpg');
-        $keyB = $this->cache->createKey('image.png', 'string/image.png', 'png');
+        $keyA = $this->cache->createKey('image.jpg', 'prefix', 'string/image.jpg', 'jpg');
+        $keyB = $this->cache->createKey('image.png', 'prefix', 'string/image.png', 'png');
 
         $this->cache->set($keyA, $this->getProcMock());
         $this->cache->set($keyB, $this->getProcMock());
@@ -105,8 +105,8 @@ class FileystemCacheTest extends \PHPUnit_Framework_TestCase
     /** @test */
     public function itShouldDeleteSelectivly()
     {
-        $keyA = $this->cache->createKey('image.jpg', 'string/image.jpg', 'jpg');
-        $keyB = $this->cache->createKey('image.png', 'string/image.png', 'png');
+        $keyA = $this->cache->createKey('image.jpg', 'prefix', 'string/image.jpg', 'jpg');
+        $keyB = $this->cache->createKey('image.png', 'prefix', 'string/image.png', 'png');
 
         $this->cache->set($keyA, $this->getProcMock());
         $this->cache->set($keyB, $this->getProcMock());
@@ -114,7 +114,7 @@ class FileystemCacheTest extends \PHPUnit_Framework_TestCase
         $ra = $this->cache->get($keyA);
         $rb = $this->cache->get($keyB);
 
-        $this->cache->delete('image.jpg');
+        $this->cache->delete('image.jpg', 'prefix');
 
         $this->assertFalse(file_exists($ra->getPath()));
         $this->assertTrue(file_exists($rb->getPath()));
@@ -123,13 +123,13 @@ class FileystemCacheTest extends \PHPUnit_Framework_TestCase
     /** @test */
     public function deletingNonFilesShouldReturnFalse()
     {
-        $key = $this->cache->createKey('image.jpg', 'string/image.jpg', 'jpg');
+        $key = $this->cache->createKey('image.jpg', 'prefix', 'string/image.jpg', 'jpg');
 
-        $this->assertFalse($this->cache->delete('image.jpg'));
+        $this->assertFalse($this->cache->delete('image.jpg', 'prefix'));
 
         $this->cache->set($key, $this->getProcMock());
 
-        $this->assertTrue($this->cache->delete('image.jpg'));
+        $this->assertTrue($this->cache->delete('image.jpg', 'prefix'));
     }
 
     /** @test */

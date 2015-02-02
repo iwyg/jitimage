@@ -211,7 +211,7 @@ class FilterExpression
             case 0 === strlen($val) || 'null' === $val:
                 return null;
             case Parser::isHex($val):
-                return ltrim(Parser::normalize($val), '#');
+                return ltrim(Parser::normalizeHex($val), '#');
             case is_numeric($val):
                 return $this->getNumVal($val);
             case in_array($val, ['true', 'false']):

@@ -11,6 +11,8 @@
 
 namespace Thapp\JitImage;
 
+use Thapp\JitImage\Exception\ProcessorException;
+
 /**
  * @class AbstractProcessor
  *
@@ -37,6 +39,14 @@ abstract class AbstractProcessor implements ProcessorInterface
     /**
      * {@inheritdoc}
      */
+    public function setOption($option, $value)
+    {
+        $this->options[$option] = $value;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function close()
     {
         $this->targetFormat = null;
@@ -48,6 +58,8 @@ abstract class AbstractProcessor implements ProcessorInterface
      */
     public function process(Parameters $parameters, FilterExpression $filters = null)
     {
+        $this->loaded();
+
         $params = array_merge($this->defaultParams(), $parameters->all());
 
         $this->targetSize = [$params['width'], $params['height']];
@@ -107,7 +119,7 @@ abstract class AbstractProcessor implements ProcessorInterface
             $this->targetFormat = $this->getSourceFormat();
         }
 
-        return $this->targetFormat;
+        return static::formatToExtension($this->targetFormat);
     }
 
     /**
@@ -215,16 +227,26 @@ abstract class AbstractProcessor implements ProcessorInterface
                     $found = true;
                     break;
                 }
-
             }
 
             if (!$found) {
-                throw new \RuntimeException('No sutable filter found.' );
+                throw new \RuntimeException('No sutable filter found.');
             }
         } else {
-            throw new \RuntimeException('Filter "'.$filter.'" not found.' );
+            throw new \RuntimeException('Filter "' . $filter . '" not found.');
         }
     }
+
+    /**
+     * {@inheritdoc}
+     */
+    protected function loaded()
+    {
+        if (null === $this->getDriver()) {
+            throw new ProcessorException('No image loaded.');
+        }
+    }
+
 
     /**
      * defaultParams

@@ -42,7 +42,7 @@ class NullCache extends AbstractCache
     {
     }
 
-    public function delete($file)
+    public function delete($file, $prefix = '')
     {
     }
 }

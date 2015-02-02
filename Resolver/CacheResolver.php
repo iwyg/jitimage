@@ -54,12 +54,7 @@ class CacheResolver implements CacheResolverInterface, IteratorAggregate
     }
 
     /**
-     * Add an array of cache instances to the resolver
-     *
-     * @param sting $alias
-     * @param CacheInterface $cache
-     *
-     * @return void
+     * {@inheritdoc}
      */
     public function set(array $caches)
     {
@@ -68,6 +63,14 @@ class CacheResolver implements CacheResolverInterface, IteratorAggregate
         foreach ($caches as $alias => $cache) {
             $this->add($alias, $cache);
         }
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function has($alias)
+    {
+        return array_key_exists($alias, $this->caches);
     }
 
     /**

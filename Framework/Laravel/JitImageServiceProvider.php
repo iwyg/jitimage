@@ -141,6 +141,8 @@ class JitImageServiceProvider extends ServiceProvider
 
         $this->app->alias('Thapp\JitImage\Resolver\LoaderResolverInterface', 'jmg.loaders');
         $this->app->alias('Thapp\JitImage\Resolver\FilterResolverInterface', 'jmg.filters');
+
+        $this->registerCommands();
     }
 
     /**
@@ -148,8 +150,11 @@ class JitImageServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-
         $this->registerRoutes();
+
+        $this->publishes([
+            __DIR__.'/resource/config.php' => config_path('jmg.php'),
+        ]);
     }
 
     /**
@@ -259,22 +264,23 @@ class JitImageServiceProvider extends ServiceProvider
      */
     protected function prepareConfig()
     {
-        if (!file_exists($path = storage_path().'/jmg/config/config.php')) {
-        }
-
-        $config = array_merge($this->getDefaultConfig(), $this->app['config']->get('jmg', []));
-        $this->app['config']->set('jmg', $config);
+        $this->mergeConfigFrom(__DIR__.'/resource/config.php', 'jmg');
     }
 
     /**
-     * getDefaultConfig
-     *
+     * registerCommands
      *
      * @return void
      */
-    protected function getDefaultConfig()
+    protected function registerCommands()
     {
-        return include __DIR__.'/resource/config.php';
+        $this->app->singleton('command.jmg.clearcache', function ($app) {
+            return new \Thapp\JitImage\Framework\Laravel\Console\ClearCacheCommand(
+                $app->make('Thapp\JitImage\Cache\CacheClearer')
+            );
+        });
+
+        $this->commands('command.jmg.clearcache');
     }
 
     /**
@@ -324,8 +330,8 @@ class JitImageServiceProvider extends ServiceProvider
      */
     private function registerCachedController(Router $router, $ctrl, $path, $suffix)
     {
-        //$r = $router->get(rtrim($path, '/') . '/{suffix}/{id}', $ctrl)
         $router->get('/'.trim($suffix, '/').'/{path}/{id}', $ctrl)
+            ->where('path', '(.*)')
             ->where('id', '(.*\/){1}.*')
             ->where('suffix', $suffix)
             ->defaults('path', $path);

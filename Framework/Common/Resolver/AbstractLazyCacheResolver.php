@@ -46,6 +46,15 @@ abstract class AbstractLazyCacheResolver extends CacheResolver
         return $cache;
     }
 
+    public function has($alias)
+    {
+        if (parent::has($alias)) {
+            return true;
+        }
+
+        return (boolean)$this->resolveCache($alias);
+    }
+
     /**
      * resolveCache
      *
@@ -65,6 +74,7 @@ abstract class AbstractLazyCacheResolver extends CacheResolver
             return $this->callCustomCreator($name, [$this->app]);
         }
     }
+
 
     /**
      * getCacheName
@@ -90,10 +100,24 @@ abstract class AbstractLazyCacheResolver extends CacheResolver
     protected function createFileCache()
     {
         $path =  $this->getDefaultCachePath();
-        $expries = $this->getCacheExpiryTime();
+        $expires = $this->getCacheExpiryTime();
 
-        return new \Thapp\JitImage\Cache\FilesystemCache($path, $expires);
+        return new \Thapp\JitImage\Cache\FilesystemCache($path, null, $expires);
     }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getIterator()
+    {
+        foreach ($this->getAliases() as $alias) {
+            $this->resolve($alias);
+        }
+
+        return parent::getIterator();
+    }
+
+    abstract protected function getAliases();
 
     /**
      * createHybridCache

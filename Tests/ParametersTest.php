@@ -45,8 +45,8 @@ class ParametersTest extends \PHPUnit_Framework_TestCase
         return [
             ['2/300/300/5', ['mode' => 2, 'width' => 300, 'height' => 300, 'gravity' => 5, 'background' => null]],
             ['0/400/499/4/19', ['mode' => 0, 'width' => null, 'height' => null, 'gravity' => null, 'background' => null]],
-            ['3/300/300/5/fff', ['mode' => 3, 'width' => 300, 'height' => 300, 'gravity' => 5, 'background' => 'ffffff']],
-            ['3/300/300/5/#fe0', ['mode' => 3, 'width' => 300, 'height' => 300, 'gravity' => 5, 'background' => 'ffee00']],
+            ['3/300/300/5/fff', ['mode' => 3, 'width' => 300, 'height' => 300, 'gravity' => 5, 'background' => hexdec('ffffff')]],
+            ['3/300/300/5/#fe0', ['mode' => 3, 'width' => 300, 'height' => 300, 'gravity' => 5, 'background' => hexdec('ffee00')]],
         ];
     }
 
@@ -187,7 +187,7 @@ class ParametersTest extends \PHPUnit_Framework_TestCase
             'width'      => 200,
             'height'     => 400,
             'gravity'    => 5,
-            'background' => 'fff',
+            'background' => hexdec('ffffff'),
         ], $params->all());
 
         $params = new Parameters;

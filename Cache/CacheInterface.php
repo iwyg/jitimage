@@ -69,7 +69,7 @@ interface CacheInterface
      *
      * @return boolean
      */
-    public function delete($image);
+    public function delete($image, $prefix = '');
 
     /**
      * Set the filename prefix
@@ -98,5 +98,5 @@ interface CacheInterface
      * @access public
      * @return mixed
      */
-    public function createKey($src, $fingerprint = null);
+    public function createKey($src, $prefix = '', $fingerprint = null);
 }

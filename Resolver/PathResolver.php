@@ -38,11 +38,19 @@ class PathResolver implements PathResolverInterface
     }
 
     /**
+     * {@inheritdoc}
+     */
+    public function all()
+    {
+        return $this->mappings;
+    }
+
+    /**
      * Resolve a route path to a file base path.
      *
      * @param string $path
      *
-     * @return string
+     * @return string the resolved path, `NULL` on error
      */
     public function resolve($path)
     {
@@ -50,7 +58,7 @@ class PathResolver implements PathResolverInterface
             return $this->mappings[$alias];
         }
 
-        return $path;
+        return null;//$path;
     }
 
     private function hasAlias($alias)

@@ -85,14 +85,14 @@ abstract class AbstractCache implements CacheInterface
     /**
      * {@inheritdoc}
      */
-    public function createKey($src, $fingerprint = null)
+    public function createKey($src, $prefix = '', $fingerprint = null)
     {
         return sprintf(
             '%s.%s%s%s',
-            substr(hash('sha1', $src), 0, 8),
+            substr(hash('sha1', $name = $prefix.':'.$src), 0, 8),
             $this->prefix,
-            $this->pad($src, $fingerprint),
-            $this->pad($src, $this->suffix, 3)
+            $this->pad($name, $fingerprint),
+            $this->pad($name, $this->suffix, 3)
         );
     }
 

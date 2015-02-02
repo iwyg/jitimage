@@ -175,12 +175,11 @@ trait ImageResolverHelper
      */
     private function makeCacheKey(CacheInterface $cache, $name, $src, $paramStr, $filterStr)
     {
-        $path = $this->getPath($name, $src);
-
         return $cache->createKey(
-            $path,
+            $src,
+            $name,
             $paramStr.'/'.$filterStr,
-            pathinfo($path, PATHINFO_EXTENSION)
+            pathinfo($src, PATHINFO_EXTENSION)
         );
     }
 }

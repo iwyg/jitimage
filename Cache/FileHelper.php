@@ -80,7 +80,11 @@ trait FileHelper
             return false;
         }
 
-        return false !== @rmdir($dir);
+        if (false !== @rmdir($dir)) {
+            return !$this->isDir($dir);
+        }
+
+        return false;
     }
 
     /**
@@ -97,8 +101,10 @@ trait FileHelper
         }
 
         foreach (new \FilesystemIterator($dir, \FilesystemIterator::SKIP_DOTS) as $path => $item) {
+
             if ($item->isFile()) {
                 unlink($item);
+                continue;
             }
 
             if ($item->isDir()) {
@@ -106,7 +112,7 @@ trait FileHelper
             }
         }
 
-        return true;
+        return $this->isDir($dir);
     }
 
     /**

@@ -12,13 +12,12 @@
 namespace Thapp\JitImage\Image;
 
 use Thapp\JitImage\AbstractProcessor;
-use Thapp\Image\Metrics\Box;
-use Thapp\Image\Metrics\Point;
-use Thapp\Image\Metrics\Gravity;
-use Thapp\Image\Metrics\BoxInterface;
-use Thapp\Image\Metrics\PointInterface;
+use Thapp\Image\Geometry\Size;
+use Thapp\Image\Geometry\Point;
+use Thapp\Image\Geometry\Gravity;
+use Thapp\Image\Geometry\SizeInterface;
+use Thapp\Image\Geometry\PointInterface;
 use Thapp\Image\Color\ColorInterface;
-use Thapp\Image\Color\Hex;
 use Thapp\Image\Driver\ImageInterface;
 use Thapp\Image\Driver\SourceInterface;
 use Thapp\JitImage\ProcessorInterface;
@@ -53,6 +52,11 @@ class Processor extends AbstractProcessor
         $this->options = $options;
     }
 
+    /**
+     * __destruct
+     *
+     * @return void
+     */
     public function __destruct()
     {
         $this->unload();
@@ -70,11 +74,15 @@ class Processor extends AbstractProcessor
 
     protected function unload()
     {
-        $this->image  = null;
+        if (null !== $this->image) {
+            $this->image->destroy();
+            $this->image  = null;
+        }
+
         $this->processed = false;
 
-        if (null !== $this->resource && is_resource($this->resource->getHandle())) {
-            fclose($this->resource->getHandle());
+        if (null !== $this->resource && is_resource($handle = $this->resource->getHandle())) {
+            fclose($handle);
         }
     }
 
@@ -96,6 +104,8 @@ class Processor extends AbstractProcessor
      */
     public function getTargetSize()
     {
+        $this->loaded();
+
         return [$this->image->getWidth(), $this->image->getHeight()];
     }
 
@@ -112,7 +122,7 @@ class Processor extends AbstractProcessor
      */
     public function getContents()
     {
-        return $this->image->get($this->getFileFormat(), $this->options);
+        return $this->image->getBlob($this->getFileFormat(), $this->options);
     }
 
     /**
@@ -124,16 +134,7 @@ class Processor extends AbstractProcessor
             $this->targetFormat = $this->image->getFormat();
         }
 
-        return $this->targetFormat;
-    }
-
-    /**
-     * {@inheritdoc}
-     * @return ImageInterface
-     */
-    public function getCurrentImage()
-    {
-        return $this->image;
+        return static::formatToExtension($this->targetFormat);
     }
 
     /**
@@ -169,32 +170,37 @@ class Processor extends AbstractProcessor
         } elseif (0 === $h) {
             $size = $this->image->getSize()->increaseByWidth($w);
         } else {
-            $size = new Box($w, $h);
+            $size = new Size($w, $h);
         }
 
         $this->doResize($size);
     }
 
+    /**
+     * crop
+     *
+     * @param mixed $gravity
+     * @param mixed $background
+     *
+     * @return void
+     */
     protected function crop($gravity, $background = null)
     {
         $this->processed = true;
 
         list ($w, $h) = $this->targetSize;
-        $size = new Box($w, $h);
+        $size = new Size($w, $h);
 
-        $gravity = new Gravity($gravity);
-        $this->image->gravity($gravity);
+        $this->image->setGravity($gravity = new Gravity($gravity));
 
-        $color = $background ? new Hex($background) : null;
+        $color = $background ? $this->image->getPalette()->getColor($background) : null;
 
         if ($this->image->hasFrames()) {
             foreach ($this->image->frames()->coalesce() as $frame) {
-                $frame->gravity($gravity);
-                $frame->crop($size, null, $color);
+                $frame->edit()->crop($size, null, $color);
             }
         } else {
-            $this->image->gravity($gravity);
-            $this->image->crop($size, null, $color);
+            $this->image->edit()->crop($size, null, $color);
         }
     }
 
@@ -211,7 +217,7 @@ class Processor extends AbstractProcessor
 
         list ($w, $h) = $this->targetSize;
 
-        $target = new Box($w, $h);
+        $target = new Size($w, $h);
         $size = $this->image->getSize();
 
         $this->doResize($size->fill($target));
@@ -231,7 +237,7 @@ class Processor extends AbstractProcessor
         list ($w, $h) = $this->targetSize;
 
         $size = $this->image->getSize();
-        $this->doResize($size->fit(new Box($w, $h)));
+        $this->doResize($size->fit(new Size($w, $h)));
     }
 
     /**
@@ -266,18 +272,18 @@ class Processor extends AbstractProcessor
     /**
      * doResize
      *
-     * @param BoxInterface $size
+     * @param Size $size
      *
      * @return void
      */
-    protected function doResize(BoxInterface $size)
+    protected function doResize(SizeInterface $size)
     {
         if ($this->image->hasFrames()) {
             foreach ($this->image->frames()->coalesce() as $frame) {
-                $frame->resize($size);
+                $frame->edit()->resize($size);
             }
         } else {
-            $this->image->resize($size);
+            $this->image->edit()->resize($size);
         }
     }
 }
