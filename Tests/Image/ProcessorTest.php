@@ -16,6 +16,7 @@ use Thapp\JitImage\Image\Processor;
 use Thapp\Image\Geometry\Size;
 use Thapp\Image\Geometry\Point;
 use Thapp\Image\Geometry\Gravity;
+use Thapp\JitImage\Tests\ProcessorTest as AbstractProcessorTest;
 
 /**
  * @class ProcessorTest
@@ -24,7 +25,7 @@ use Thapp\Image\Geometry\Gravity;
  * @version $Id$
  * @author iwyg <mail@thomas-appel.com>
  */
-class ProcessorTest extends \PHPUnit_Framework_TestCase
+class ProcessorTest extends AbstractProcessorTest
 {
     protected $source;
     protected $image;
@@ -44,21 +45,6 @@ class ProcessorTest extends \PHPUnit_Framework_TestCase
         $proc->load($this->mockFileresource());
 
         $this->assertInstanceof('Thapp\Image\Driver\ImageInterface', $proc->getDriver());
-    }
-
-    /** @test */
-    public function itShouldCloseHandleAfterUnload()
-    {
-        $handle = tmpfile();
-
-        $proc = $this->newProcessor();
-        $proc->load($res = $this->mockFileresource());
-
-        $res->expects($this->any())->method('getHandle')->willReturn($handle);
-
-        $proc->close();
-
-        $this->assertFalse(is_resource($handle));
     }
 
     /** @test */
@@ -112,6 +98,12 @@ class ProcessorTest extends \PHPUnit_Framework_TestCase
 
         $edit->expects($this->exactly(1))->method('crop');
 
+        list (, , , $gravity) = explode('/', $params);
+
+        $image->expects($this->once())->method('setGravity')->will($this->returnCallBack(function ($g) use ($gravity) {
+            $this->assertSame($g->getMode(), (int)$gravity);
+        }));
+
         try {
             $proc->process(Parameters::fromString($params));
         } catch (\InvalidArgumentException $e) {
@@ -134,12 +126,38 @@ class ProcessorTest extends \PHPUnit_Framework_TestCase
         $image->expects($this->any())->method('getSize')->willReturn(new Size($w, $h));
         $times = (0 !== $tw || 0 !== $th) ? 1 : 0;
 
+        list (, , , $gravity, $color) = array_pad(explode('/', $params), 5, null);
+
+        if (null !== $color) {
+            $image->expects($this->once())->method('getPalette')->willreturn($p = $this->getMock('FakePalette', ['getColor']));
+        }
+
         try {
             $proc->process(Parameters::fromString($params));
         } catch (\InvalidArgumentException $e) {
             $this->assertTrue(0 === $tw &&  0 === $th);
             return;
         }
+    }
+
+    /** @test */
+    public function itShouldPassColorToCrop()
+    {
+        list ($proc, $image, $resource, $edit) = $this->prepareLoaded();
+
+        $image->expects($this->any())->method('getSize')->willReturn(new Size(100, 100));
+
+        $image->expects($this->once())->method('getPalette')->willreturn($p = $this->getMock('FakePalette', ['getColor']));
+        $p->method('getColor')->willreturn($color = $this->getMock('Thapp\Image\Color\ColorInterface'));
+
+        $edit->expects($this->exactly(1))->method('crop')->will($this->returnCallback(function () use ($color) {
+            $args = func_get_args();
+            $c = array_pop($args);
+
+            $this->assertSame($color, $c);
+        }));
+
+        $proc->process(Parameters::fromString('3/100/100/5/#ff00ff'));
     }
 
     /**
@@ -224,19 +242,6 @@ class ProcessorTest extends \PHPUnit_Framework_TestCase
         $proc->getContents();
     }
 
-    /** @test */
-    public function itShouldGetImageFormat()
-    {
-        list ($proc, $image, $resource, $edit) = $this->prepareLoaded();
-
-        $image->expects($this->exactly(1))->method('getFormat')->willReturn('png');
-        $resource->expects($this->exactly(2))->method('getMimeType')->willReturn('image/jpeg');
-
-        $this->assertSame('image/png', $proc->getMimeType());
-        $this->assertSame('image/jpeg', $proc->getSourceMimeType());
-        $this->assertSame('jpg', $proc->getSourceFormat());
-        $this->assertSame('png', $proc->getFileFormat());
-    }
 
     /** @test */
     public function itShouldGetSourcePath()
@@ -266,6 +271,20 @@ class ProcessorTest extends \PHPUnit_Framework_TestCase
         $this->assertFalse($proc->isProcessed());
     }
 
+    /** @test */
+    public function itShouldGetImageFormat()
+    {
+        list ($proc, $image, $resource, $edit) = $this->prepareLoaded();
+
+        $image->expects($this->exactly(1))->method('getFormat')->willReturn('png');
+        $resource->expects($this->exactly(2))->method('getMimeType')->willReturn('image/jpeg');
+
+        $this->assertSame('image/png', $proc->getMimeType());
+        $this->assertSame('image/jpeg', $proc->getSourceMimeType());
+        $this->assertSame('jpg', $proc->getSourceFormat());
+        $this->assertSame('png', $proc->getFileFormat());
+    }
+
     public function resizeParamProvider()
     {
         return [
@@ -280,14 +299,16 @@ class ProcessorTest extends \PHPUnit_Framework_TestCase
     public function scaleCropParamProvider()
     {
         return [
-            [100, 200, '2/100/100/5', 100, 100]
+            [100, 200, '2/100/100/5', 100, 100],
+            [50, 50, '2/100/100/5', 100, 100]
         ];
     }
 
     public function cropParamProvider()
     {
         return [
-            [100, 200, '3/100/100/5', 100, 100]
+            [100, 200, '3/100/100/5', 100, 100],
+            [100, 200, '3/100/100/5/fff', 100, 100]
         ];
     }
 
@@ -340,25 +361,9 @@ class ProcessorTest extends \PHPUnit_Framework_TestCase
         return [$proc, $image, $resource, $edit];
     }
 
-    /**
-     * @test
-     * @expectedException \Thapp\JitImage\Exception\ProcessorException
-     */
-    public function itShouldThrowIfNoImageIsLoaded()
-    {
-        $proc = $this->newProcessor();
-        $proc->process(Parameters::fromString('0'));
-    }
-
     protected function newProcessor()
     {
         return new Processor($this->source = $this->mockSource());
-    }
-
-    protected function mockFileResource()
-    {
-        return $this->getMockBuilder('Thapp\JitImage\Resource\Fileresource')
-            ->disableOriginalConstructor()->getMock();
     }
 
     protected function mockSource()
@@ -377,5 +382,10 @@ class ProcessorTest extends \PHPUnit_Framework_TestCase
     {
         return $this->getMockBuilder('Thapp\Image\Driver\FramesInterface')
             ->disableOriginalConstructor()->getMock();
+    }
+
+    protected function getDriverClass()
+    {
+        return 'Thapp\Image\Driver\ImageInterface';
     }
 }

@@ -72,31 +72,6 @@ class Processor extends AbstractProcessor
         $this->resource = $resource;
     }
 
-    protected function unload()
-    {
-        if (null !== $this->image) {
-            $this->image->destroy();
-            $this->image  = null;
-        }
-
-        $this->processed = false;
-
-        if (null !== $this->resource && is_resource($handle = $this->resource->getHandle())) {
-            fclose($handle);
-        }
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function close()
-    {
-        $this->targetFormat = null;
-        $this->targetSize = null;
-
-        $this->unload();
-    }
-
     /**
      * Get output dimensions in width and height
      *
@@ -286,4 +261,15 @@ class Processor extends AbstractProcessor
             $this->image->edit()->resize($size);
         }
     }
+
+    protected function unload()
+    {
+        if (null !== $this->image) {
+            $this->image->destroy();
+            $this->image  = null;
+        }
+
+        parent::unload();
+    }
+
 }

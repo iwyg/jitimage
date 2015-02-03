@@ -18,6 +18,7 @@ use Imagine\Image\BoxInterface;
 use Imagine\Image\PointInterface;
 use Imagine\Image\ImageInterface;
 use Imagine\Image\ImagineInterface;
+use Imagine\Image\Palette\Color\ColorInterface;
 use Thapp\JitImage\AbstractProcessor;
 use Thapp\JitImage\ProcessorInterface;
 use Thapp\JitImage\Resolver\FilterResolverInterface;
@@ -48,6 +49,7 @@ class Processor extends AbstractProcessor
      *
      * @param ImagineInterface $imagine
      * @param FilterResolverInterface $filters
+     * @param array $options
      */
     public function __construct(ImagineInterface $imagine, FilterResolverInterface $filters = null, array $options = [])
     {
@@ -65,22 +67,6 @@ class Processor extends AbstractProcessor
         $this->processed = false;
         $this->image = $this->imagine->read($resource->getHandle());
         $this->resource = $resource;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function setCurrentImage(ImageInterface $image)
-    {
-        $this->image = $image;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function getCurrentImage()
-    {
-        return $this->image;
     }
 
     /**
@@ -139,17 +125,19 @@ class Processor extends AbstractProcessor
 
         list ($w, $h) = $this->targetSize;
 
-        $ratio = $this->getRatio();
-
         if (0 === max($h, $w)) {
             throw new \InvalidArgumentException();
-        } elseif (0 === $w) {
-            $w = round($h * $ratio);
-        } elseif (0 === $h) {
-            $h = round($w / $ratio);
         }
 
-        $this->doResize(new Box($w, $h));
+        if (0 === $w) {
+            $size = $this->image->getSize()->heighten($h);
+        } elseif (0 === $h) {
+            $size = $this->image->getSize()->widen($w);
+        } else {
+            $size = new Box($w, $h);
+        }
+
+        $this->doResize($size);
     }
 
     /**
@@ -165,96 +153,31 @@ class Processor extends AbstractProcessor
         $this->processed = true;
 
         list ($w, $h) = $this->targetSize;
-
-        $gravity = new Gravity($gravity);
+        // flatten image:
         $target = new Box($w, $h);
+        $gravity = new Gravity($gravity);
+
         $size = $this->image->getSize();
 
-        if (!$size->contains($target)) {
-            $color = null !== $background ? $this->image->palette()->color($background) : null;
-            $image = $this->imagine->create($target, $color);
-            $image->usePalette($this->image->palette());
-            $image->strip();
+        if (false === $size->contains($target)) {
+            $color = $background ? $this->image->palette()->color($background) : null;
 
-            if (($size->getWidth() < $target->getWidth() && $size->getHeight() > $target->getHeight()) ||
-                ($size->getHeight() < $target->getHeight() && $size->getWidth() > $target->getWidth())) {
-                $this->doCrop(new Point(0, 0), $target);
-                $size = $this->image->getSize();
-                $point = $gravity->getPoint($target, $size);
-            } else {
-                $point = $gravity->getPoint($target, $size);
+            if (null !== $color) {
+                $alpha = ($background & 0xFF000000) >> 24;
+                $color->dissolve(-(int)(100 - ($alpha / 127) * 100));
             }
 
-            if (1 < $this->image->layers()->count()) {
-                $this->doPaste($image, $point);
-            } else {
-                $image->paste($this->image, $point);
-            }
+            $size = $this->image->getSize();
+            $this->extent($size, $target, $gravity->getPoint($size, $target), $color);
 
-            $this->image = $image;
-        } else {
-            $point = $gravity->getPoint($size, $target);
-            $this->doCrop($point, $target);
+            return;
         }
+
+        $point = $gravity->getPoint($size, $target);
+
+        $this->doCrop($point, $target);
     }
 
-    /**
-     * doPaste
-     *
-     * @param ImageInterface $image
-     * @param mixed $layers
-     * @param PointInterface $point
-     *
-     * @return void
-     */
-    protected function doPaste(ImageInterface &$image, PointInterface $point)
-    {
-        $palette = $image->palette();
-        $meta    = $image->metadata();
-
-        $w = $image->getSize()->getWidth();
-        $h = $image->getSize()->getHeight();
-
-        if ($image instanceof \Imagine\Imagick\Image) {
-
-            $im = $image->getImagick();
-            $bk = $im->getImageBackgroundColor();
-            $frames = $this->image->getImagick()->coalesceImages();
-            $fmt = $frames->getImageFormat();
-            $im->setFirstIterator();
-            $im->removeImage();
-
-            $frames->setFirstIterator();
-
-            do {
-                $im->newImage($w, $h, $bk, $fmt);
-                $im->setIteratorIndex($frames->getIteratorIndex());
-                $im->compositeimage($frames->getImage(), \Imagick::COMPOSITE_DEFAULT, $point->getX(), $point->getY());
-            } while ($frames->nextImage());
-
-            $im->setImageFormat($fmt);
-
-        } elseif ($image instanceof \Imagine\Gmagick\Image && method_exists($image->getGmgick(), 'coalesceImages')) {
-
-            $gm = $image->getGmagick();
-            $bk = $gm->getImageBackgroundColor()->getColor(false);
-            $frames = $this->image->getGmagick()->coalesceImages();
-            $fmt = $frames->getImageFormat();
-            $frames->setImageIndex(0);
-            $gm->setImageIndex(0);
-            $gm->removeImage();
-
-            do {
-                $gm->newImage($w, $h, $bk, $fmt);
-                $gm->setImageIndex($frames->getImageIndex());
-                $gm->compositeimage($frames->getImage(), \Gmagick::COMPOSITE_DEFAULT, $point->getX(), $point->getY());
-            } while ($frames->nextImage());
-
-            $gm->setImageFormat($fmt);
-        } else {
-            $image->copy($this->image, $point);
-        }
-    }
 
     /**
      * cropScale
@@ -271,124 +194,11 @@ class Processor extends AbstractProcessor
 
         $size = $this->image->getSize();
 
-        $this->fillArea($w, $h, $ow = $size->getWidth(), $oh = $size->getHeight());
+        $fill = (new Size($size->getWidth(), $size->getHeight()))->fill(new Box($w, $h));
 
-        $this->doResize(new Box($w, $h));
+        $this->doResize($fill);
 
         $this->crop($gravity);
-    }
-
-    /**
-     * doCrop
-     *
-     * @param mixed $point
-     * @param mixed $target
-     *
-     * @return void
-     */
-    protected function doCrop(PointInterface $point, BoxInterface $target)
-    {
-        if ($this->image instanceof \Imagine\Imagick\Image && 1 < $this->image->getImagick()->getNumberImages()) {
-
-            $im = $this->image->getImagick()->coalesceImages();
-            $im->setFirstIterator();
-
-            do {
-              $im->cropImage($target->getWidth(), $target->getHeight(), $point->getX(), $point->getY());
-              $im->setImagePage(0, 0, 0, 0);
-            } while ($im->nextImage());
-
-            $class = get_class($this->image);
-            $this->image = new $class($im->deconstructImages(), $this->image->palette(), $this->image->metadata());
-
-        } elseif ($this->image instanceof \Imagine\Gmagick\Image && 1 < $this->image->getGmagick()->getNumberImages()) {
-
-            $gm = $this->image->getGmagick();
-
-            if (!method_exists($gm, 'coalesceImages')) {
-
-                foreach ($this->layers as $layer) {
-                    $layer->crop($point, $target);
-                }
-
-                return;
-            }
-
-            $gm = $gm->coalesceImages();
-            $gm->setImageIndex(0);
-
-            do {
-                try {
-                    $gm->cropImage($target->getWidth(), $target->getHeight(), $point->getX(), $point->getY());
-                    $gm->setImagePage(0, 0, 0, 0);
-                } catch (\GmagickException $e) {
-                    // strip frame?
-                    $gm->removeImage();
-                }
-            } while ($gm->nextImage());
-
-            $class = get_class($this->image);
-            $this->image = new $class($gm->deconstructImages(), $this->image->palette(), $this->image->metadata());
-
-        } else {
-            $this->image->crop($point, $target);
-        }
-    }
-
-    /**
-     * doResize
-     *
-     * @param BoxInterface $size
-     *
-     * @return void
-     */
-    protected function doResize(BoxInterface $size)
-    {
-        if ($this->image instanceof \Imagine\Imagick\Image && 1 < $this->image->getImagick()->getNumberImages()) {
-
-            $this->image->layers()->coalesce();
-
-            foreach ($this->image->layers() as $frame) {
-                $frame->resize($size);
-            }
-
-        } elseif ($this->image instanceof \Imagine\Gmagick\Image && 1 < $this->image->getGmagick()->getNumberImages()) {
-
-            $gm = $this->image->getGmagick();
-
-            if (!method_exists($gm, 'coalesceImages')) {
-                foreach ($this->layers as $layer) {
-                    $layer->resize($size);
-                }
-
-                return;
-            }
-
-            $gm->setImageIndex(0);
-
-            do {
-                $this->image->resize($size);
-            } while ($gm->nextImage());
-
-            $class = get_class($this->image);
-            $this->image = new $class($gm->coalesceImages(), $this->image->palette(), $this->image->metadata());
-        } else {
-            $this->image->resize($size);
-        }
-    }
-
-    protected function coalesceGmagick(\Gmagick $gm)
-    {
-        if (!method_exists($gm, 'coalesceImages')) {
-            return;
-        }
-
-        $meta = $this->image->metadata();
-        $palette = $this->image->palette();
-        $coalesce = $gm->coalesceImages();
-
-        $class = get_class($this->image);
-        $this->image = new $class($coalesce, $this->image->palette(), $this->image->metadata());
     }
 
     /**
@@ -403,10 +213,9 @@ class Processor extends AbstractProcessor
         list ($w, $h) = $this->targetSize;
 
         $size = $this->image->getSize();
+        $fit = (new Size($size->getWidth(), $size->getHeight()))->fit(new Box($w, $h));
 
-        list ($nw, $nh) = $this->fitInBounds($w, $h, $size->getWidth(), $size->getHeight());
-
-        $this->image->resize(new Box($nw, $nh));
+        $this->doResize($fit);
     }
 
     /**
@@ -418,9 +227,13 @@ class Processor extends AbstractProcessor
      */
     protected function resizePercentual($percent)
     {
+        if (100.0 === (float)$percent) {
+            return;
+        }
+
         $this->processed = true;
 
-        $this->image->resize($this->image->getSize()->scale($percent / 100));
+        $this->doResize($this->image->getSize()->scale($percent / 100));
     }
 
     /**
@@ -434,8 +247,203 @@ class Processor extends AbstractProcessor
     {
         $this->processed = true;
         $size = $this->image->getSize();
-        list ($w, $h) = $this->pixelLimit($size->getWidth(), $size->getHeight(), (int)$pixel);
+        $px = (new Size($size->getWidth(), $size->getHeight()))->pixel($pixel);
 
-        $this->image->resize(new Box($w, $h));
+        $this->targetSize = [$px->getWidth(), $px->getHeight()];
+
+        $this->doResize($px);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    protected function unload()
+    {
+        if (null !== $this->image) {
+            $this->image->destroy();
+            $this->image = null;
+        }
+
+        parent::unload();
+    }
+
+    /**
+     * doResize
+     *
+     * @param BoxInterface $size
+     *
+     * @return void
+     */
+    private function doResize(BoxInterface $size)
+    {
+        if (1 < count($layers = $this->image->layers())) {
+            try {
+                $layers->coalesce();
+            } catch (\Exception $e) {
+            }
+
+            foreach ($layers as $frame) {
+                $frame->resize($size);
+            }
+
+            $layers->merge();
+        } else {
+            $this->image->resize($size);
+        }
+    }
+
+    /**
+     * createMask
+     *
+     * @param BoxInterface $size
+     * @param BoxInterface $image
+     * @param PointInterface $point
+     *
+     * @return void
+     */
+    private function createMask(BoxInterface $size, BoxInterface $image, PointInterface $point)
+    {
+        $white = $this->image->palette()->color([255, 255, 255]);
+        $black = $this->image->palette()->color([0, 0, 0]);
+
+        $mask  = $this->imagine->create($size, $black);
+        $fill  = $this->imagine->create($image, $white);
+
+        $mask->paste($fill, $point);
+        $mask->strip();
+
+        return $mask;
+    }
+
+    /**
+     * doCrop
+     *
+     * @param PointInterface $point
+     * @param BoxInterface $target
+     *
+     * @return void
+     */
+    private function doCrop(PointInterface $point, BoxInterface $target)
+    {
+        if (1 < count($layers = $this->image->layers())) {
+            try {
+                $layers->coalesce();
+            } catch (\Exception $e) {
+            }
+
+            foreach ($layers as $frame) {
+                $frame->crop($point, $target);
+            }
+
+            return;
+        }
+
+        $this->image->crop($point, $target);
+    }
+
+    /**
+     * createCanvas
+     *
+     * @param BoxInterface $size
+     * @param ColorInterface $color
+     *
+     * @return ImageInterface
+     */
+    private function createCanvas(BoxInterface $size, ColorInterface $color)
+    {
+        $canvas = $this->imagine->create($size, $color);
+        $canvas->usePalette($this->image->palette());
+        $canvas->strip();
+
+        return $canvas;
+    }
+
+    /**
+     * extent
+     *
+     * @param BoxInterface $size
+     * @param BoxInterface $target
+     * @param PointInterface $point
+     * @param ColorInterface $color
+     *
+     * @return void
+     */
+    private function extent(
+        BoxInterface $size,
+        BoxInterface $target,
+        PointInterface $point,
+        ColorInterface $color = null
+    ) {
+        $transp = $this->image->palette()->color([255, 255, 255]);
+        $c = $transp->dissolve(-100);
+        $canvas = $this->createCanvas($target, $c);
+
+        if ($canvas instanceof \Imagine\Imagick\Image) {
+            $canvas->getImagick()->setImageFormat($this->image->getImagick()->getImageFormat());
+        } elseif ($canvas instanceof \Imagine\Gmagick\Image) {
+            $canvas->getGmagick()->setImageFormat($this->image->getGmagick()->getImageFormat());
+        }
+
+        $canvas = $this->doExtent($this->image, $canvas, $size, $target, $point, $color);
+
+        if (1 < $count = count($layers = $this->image->layers())) {
+            try {
+                $layers->coalesce();
+            } catch (\Exception $e) {
+            }
+
+            $cl = $canvas->layers();
+            $copy = $canvas->copy();
+
+            foreach ($layers as $index => $layer) {
+                $fm = $this->doExtent($layer, $copy->copy(), $size, $target, $point, $color);
+                $cl->add($fm);
+            }
+        }
+
+        $this->image = $canvas;
+    }
+
+    /**
+     * doExtent
+     *
+     * @param mixed $image
+     * @param mixed $canvas
+     * @param BoxInterface $size
+     * @param BoxInterface $target
+     * @param PointInterface $point
+     * @param ColorInterface $color
+     *
+     * @return ImageInterface
+     */
+    private function doExtent(
+        ImageInterface $image,
+        ImageInterface $canvas,
+        BoxInterface $size,
+        BoxInterface $target,
+        PointInterface $point,
+        ColorInterface $color = null
+    ) {
+        if ($size->getHeight() > $target->getHeight()) {
+            $image->crop(new Point(0, $point->getY()), new Box($size->getWidth(), $target->getHeight()));
+            $size = $this->image->getSize();
+            $point = new Point($point->getX(), 0);
+        } elseif ($size->getWidth() > $target->getWidth()) {
+            $image->crop(new Point($point->getX(), 0), new Box($target->getWidth(), $size->getHeight()));
+            $size = $this->image->getSize();
+            $point = new Point(0, $point->getY());
+        }
+
+        if (null !== $color) {
+            $frame = $this->createCanvas($target, $color);
+            $mask = $this->createMask($target, $size, $point);
+            $frame->applyMask($mask, $point);
+            $canvas = $frame;
+            unset($mask);
+        }
+
+        $canvas->paste($image, $point);
+
+        return $canvas;
     }
 }

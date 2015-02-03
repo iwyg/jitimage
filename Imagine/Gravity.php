@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This File is part of the Thapp\Image\Metrics package
+ * This File is part of the Thapp\JitImage package
  *
  * (c) iwyg <mail@thomas-appel.com>
  *
@@ -13,16 +13,20 @@ namespace Thapp\JitImage\Imagine;
 
 use Imagine\Image\Point;
 use Imagine\Image\BoxInterface;
+use Thapp\Image\Geometry\Size;
+use Thapp\Image\Geometry\Gravity as BaseGravity;
 
 /**
  * @class Gravity
  *
- * @package Thapp\Image\Metrics
+ * @package Thapp\JitImage
  * @version $Id$
  * @author iwyg <mail@thomas-appel.com>
  */
 class Gravity implements GravityInterface
 {
+    private $gravity;
+
     /**
      * Constructor
      *
@@ -30,74 +34,27 @@ class Gravity implements GravityInterface
      */
     public function __construct($mode)
     {
-        $this->mode = max(1, min(9, (int)$mode));
-    }
-
-    public function getMode()
-    {
-        return $this->mode;
-    }
-
-    /**
-     * getPoints
-     *
-     * @param BoxInterface $source
-     * @param BoxInterface $target
-     *
-     * @return void
-     */
-    public function getPoint(BoxInterface $source, BoxInterface $target)
-    {
-        return $this->getCropFromGravity($source, $target);
+        $this->gravity = new BaseGravity($mode);
     }
 
     /**
      * {@inheritdoc}
      */
-    public function getCropFromGravity(BoxInterface $source, BoxInterface $box)
+    public function getMode()
     {
-        $x = $y = 0;
+        return $this->gravity->getMode();
+    }
 
-        $width  = $source->getWidth();
-        $height = $source->getHeight();
+    /**
+     * {@inheritdoc}
+     */
+    public function getPoint(BoxInterface $source, BoxInterface $target)
+    {
+        $point = $this->gravity->getPoint(
+            new Size($source->getWidth(), $source->getHeight()),
+            new Size($target->getWidth(), $target->getHeight())
+        );
 
-        $w = $box->getWidth();
-        $h = $box->getHeight();
-
-        switch ($this->getMode()) {
-            case GravityInterface::GRAVITY_NORTHWEST:
-                break;
-            case GravityInterface::GRAVITY_NORTHEAST:
-                $x = ($width) - $w;
-                break;
-            case GravityInterface::GRAVITY_NORTH:
-                $x = ($width / 2) - ($w / 2);
-                break;
-            case GravityInterface::GRAVITY_WEST:
-                $y = ($height / 2) - ($h / 2);
-                break;
-            case GravityInterface::GRAVITY_CENTER:
-                $x = ($width / 2) - ($w / 2);
-                $y = $height / 2  - ($h / 2);
-                break;
-            case GravityInterface::GRAVITY_EAST:
-                $x = $width - $w;
-                $y = ($height / 2)  - ($h / 2);
-                break;
-            case GravityInterface::GRAVITY_SOUTHWEST:
-                $x = 0;
-                $y = $height - $h;
-                break;
-            case GravityInterface::GRAVITY_SOUTH:
-                $x = ($width / 2) - ($w / 2);
-                $y = $height - $h;
-                break;
-            case GravityInterface::GRAVITY_SOUTHEAST:
-                $x = $width - $w;
-                $y = $height - $h;
-                break;
-        }
-
-        return new Point((int)ceil($x), (int)ceil($y));
+        return new Point(abs($point->getX()), abs($point->getY()));
     }
 }

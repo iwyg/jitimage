@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This File is part of the Thapp\Image\Metrics package
+ * This File is part of the Thapp\JitImage package
  *
  * (c) iwyg <mail@thomas-appel.com>
  *
@@ -14,24 +14,14 @@ namespace Thapp\JitImage\Imagine;
 use Imagine\Image\BoxInterface;
 
 /**
- * @interface GravityInterface
+ * @class GravityInterface
  *
- * @package Thapp\Image\Metrics
+ * @package Thapp\JitImage
  * @version $Id$
  * @author iwyg <mail@thomas-appel.com>
  */
 interface GravityInterface
 {
-    const GRAVITY_NORTHWEST = 1;
-    const GRAVITY_NORTH = 2;
-    const GRAVITY_NORTHEAST = 3;
-    const GRAVITY_WEST = 4;
-    const GRAVITY_CENTER = 5;
-    const GRAVITY_EAST = 6;
-    const GRAVITY_SOUTHWEST = 7;
-    const GRAVITY_SOUTH = 8;
-    const GRAVITY_SOUTHEAST = 9;
-
     /**
      * getMode
      *
@@ -39,5 +29,13 @@ interface GravityInterface
      */
     public function getMode();
 
+    /**
+     * getPoint
+     *
+     * @param BoxInterface $source
+     * @param BoxInterface $target
+     *
+     * @return Imagine\Image\PointInterface
+     */
     public function getPoint(BoxInterface $source, BoxInterface $target);
 }

@@ -47,9 +47,9 @@ class JitImageServiceProvider extends ServiceProvider
             'Thapp\JitImage\Resolver\ImageResolver'
         );
 
-        $useImagine = $this->app['config']->get('jmg.imagine', false);
+        $proc = $this->app['config']->get('jmg.processor', 'image');
 
-        $procClass = 'imagine' === $useImagine ?
+        $procClass = 'imagine' === $proc ?
             'Thapp\JitImage\Imagine\Processor' :
             'Thapp\JitImage\Image\Processor';
 

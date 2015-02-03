@@ -49,8 +49,22 @@ abstract class AbstractProcessor implements ProcessorInterface
      */
     public function close()
     {
+        $this->processed = false;
         $this->targetFormat = null;
         $this->targetSize = null;
+
+        $this->unload();
+
+        $this->resource = null;
+    }
+
+    protected function unload()
+    {
+        if (null !== $this->resource && is_resource($handle = $this->resource->getHandle())) {
+            fclose($handle);
+        }
+
+        $this->resource     = null;
     }
 
     /**

@@ -35,8 +35,6 @@ class ClearCacheCommand extends Command
         $alias = $this->input->getOption('cache');
         $image = $this->input->getOption('image');
 
-        var_dump($alias);
-
         if (null !== $image) {
             if ($this->clearer->clearImage($image, $alias)) {
                 $this->info('Cache for "'.$image . '" cleared.');
@@ -57,60 +55,6 @@ class ClearCacheCommand extends Command
         } else {
             $this->error('Cache "'. $alias . '" could not be cleared.');
         }
-    }
-    /**
-     * @param string $image
-     * @param string $alias
-     *
-     * @return void
-     */
-    private function deleteImage($image, $alias = null)
-    {
-        $cache = $this->resolver->resolve($alias);
-
-        if (null !== $cache) {
-            $this->deleteImageCache($cache, $image, $alias);
-            return;
-        }
-        foreach ($this->resolver as $alias => $cache) {
-            $this->deleteImageCache($cache, $image, $alias);
-        }
-    }
-    /**
-     * @param CacheInterface $cache
-     * @param string $image
-     * @param string $alias
-     *
-     * @return void
-     */
-    private function deleteImageCache(CacheInterface $cache, $image, $alias = 'cache')
-    {
-        if ($cache->delete($image)) {
-            $this->info($image . ' cleared');
-        }
-
-        $this->info($alias . ': nothing to delete');
-    }
-
-    /**
-     * @param CacheInterface $cache
-     * @param string $alias
-     *
-     * @return void
-     */
-    private function clearCache(CacheInterface $cache, $alias)
-    {
-        $this->info('clear cache for '. $alias);
-
-        try {
-            if (false !== $cache->purge()) {
-                return true;
-            }
-        } catch (\Exception $e) {
-            $this->error($e->getMessage());
-        }
-
-        return false;
     }
 
     /**
