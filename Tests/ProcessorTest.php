@@ -49,7 +49,7 @@ abstract class ProcessorTest extends \PHPUnit_Framework_TestCase
 
     protected function mockFileResource()
     {
-        return $this->getMockBuilder('Thapp\JitImage\Resource\Fileresource')
+        return $this->getMockBuilder('Thapp\JitImage\Resource\FileResource')
             ->disableOriginalConstructor()->getMock();
     }
 
