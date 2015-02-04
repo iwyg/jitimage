@@ -20,6 +20,7 @@
       <directory suffix=".php">./Tests</directory>
     </blacklist>
   </filter>
+  <!--
   <listeners>
     <listener class="League\PHPUnitCoverageListener\Listener">
       <arguments>
@@ -46,8 +47,10 @@
       </arguments>
     </listener>
   </listeners>
+  -->
   <logging>
+    <log type="coverage-html" target="report" showUncoveredFiles="true"/>
     <log type="coverage-text" target="php://stdout" showUncoveredFiles="true"/>
-    <log type="coverage-clover" target="/tmp/coverage/coverage.xml" />
+    <!--<log type="coverage-clover" target="/tmp/coverage/coverage.xml" />-->
   </logging>
 </phpunit>
