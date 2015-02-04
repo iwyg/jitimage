@@ -78,6 +78,7 @@ class ModeConstraints implements ValidatorInterface
             return true;
         }
 
+        // mode 0 has no constraints.
         if (0 === $mode) {
             return true;
         }
@@ -89,12 +90,12 @@ class ModeConstraints implements ValidatorInterface
             return $this->validateValue($a, $cA) && $this->validateValue($b, $cB);
         }
 
-        if (4 < $mode && 7 > $mode) {
-            return $this->validateValue($a, $cA);
-        }
+        //if (4 < $mode && 7 > $mode) {
+        //    return $this->validateValue($a, $cA);
+        //}
 
-        //never gets executed:
-        //throw new \InvalidArgumentException(sprintf('Invalid mode "%s"', $mode));
+        //if mode 4 < $mode && 7 > $mode:
+        return $this->validateValue($a, $cA);
     }
 
     /**

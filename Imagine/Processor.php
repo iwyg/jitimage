@@ -33,16 +33,8 @@ use Thapp\JitImage\Resource\FileResourceInterface;
  */
 class Processor extends AbstractProcessor
 {
-    use Scaling;
-
-    private $filters;
     private $image;
     private $imagine;
-    protected $processed;
-    protected $resource;
-    protected $targetFormat;
-    protected $targetSize;
-    protected $options;
 
     /**
      * Constructor.

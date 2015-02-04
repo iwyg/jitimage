@@ -22,63 +22,21 @@ use Thapp\JitImage\Resource\FileResourceInterface;
  */
 interface ProcessorInterface
 {
-    /**
-     * @var int
-     */
     const IM_NOSCALE      = 0;
-
-    /**
-     * @var int
-     */
     const IM_RESIZE       = 1;
-
-    /**
-     * @var int
-     */
     const IM_SCALECROP    = 2;
-
-    /**
-     * @var int
-     */
     const IM_CROP         = 3;
-
-    /**
-     * @var int
-     */
     const IM_RSIZEFIT     = 4;
-
-    /**
-     * @var int
-     */
     const IM_RSIZEPERCENT = 5;
-
-    /**
-     * @var int
-     */
     const IM_RSIZEPXCOUNT = 6;
 
-    /**
-     * @var string
-     */
     const FORMAT_JPG = 'jpg';
-
-    /**
-     * @var string
-     */
     const FORMAT_PNG = 'png';
-
-    /**
-     * @var string
-     */
     const FORMAT_GIF = 'gif';
-
-    /**
-     * @var string
-     */
     const FORMAT_TIF = 'tif';
 
     /**
-     * setOptions
+     * Set output options.
      *
      * @param array $options
      *
@@ -87,7 +45,17 @@ interface ProcessorInterface
     public function setOptions(array $options);
 
     /**
-     * load the source file
+     * Set an output option.
+     *
+     * @param string $option
+     * @param mixed $value
+     *
+     * @return void
+     */
+    public function setOption($option, $value);
+
+    /**
+     * Load the source file.
      *
      * @param string $source source url
      *
@@ -96,14 +64,16 @@ interface ProcessorInterface
     public function load(FileResourceInterface $source);
 
     /**
-     * close
+     * Close the processor
+     *
+     * Clears resource and drivers.
      *
      * @return void
      */
     public function close();
 
     /**
-     * process the image source give with an ImageResolver instance
+     * Process the image source give with an ImageResolver instance.
      *
      * @param \Thapp\JitImage\ResolverInterface $resolver
      *
@@ -119,19 +89,7 @@ interface ProcessorInterface
     public function getDriver();
 
     /**
-     * set the image compression quality.
-     *
-     * This typically is a value between
-     * 0 and 100
-     *
-     * @param int $quality
-     *
-     * @return void
-     */
-    //public function setQuality($quality);
-
-    /**
-     * set the output image format
+     * Set the output image format
      *
      * @param string $format
      *
@@ -140,50 +98,49 @@ interface ProcessorInterface
     public function setFileFormat($format);
 
     /**
-     * get the image output format
+     * Get the image output format
      *
      * @return string
      */
     public function getFileFormat();
 
     /**
-     * get the image output extension
+     * Get the image output extension
      *
      * @return string
      */
     public function getFileExtension();
 
     /**
-     * getSourceFormat
+     * Get the original image format.
      *
      * @return string
      */
     public function getSourceFormat();
 
     /**
-     * get the filecontents of the image
+     * Get the image contents.
      *
      * @return string
      */
     public function getContents();
 
     /**
-     * getSourceMimeTime
-     *
+     * Get the mimetype of the input image.
      *
      * @return string
      */
     public function getSourceMimeType();
 
     /**
-     * get the image output MimeType
+     * Get the image output MimeType.
      *
      * @return string
      */
     public function getMimeType();
 
     /**
-     * get the image input source path
+     * Get the image input source path.
      *
      * @return string
      */
@@ -192,21 +149,21 @@ interface ProcessorInterface
     /**
      * Determine if the image has been processed yet.
      *
-     * @return bool
+     * @return boolean
      */
     public function isProcessed();
 
     /**
-     * getLastModTime
+     * Get the last modification time of the image.
      *
-     * @return integet
+     * @return integer
      */
     public function getLastModTime();
 
     /**
      * Get output dimensions in width and height
      *
-     * @return mixed
+     * @return array int[$width, $height].
      */
     public function getTargetSize();
 }

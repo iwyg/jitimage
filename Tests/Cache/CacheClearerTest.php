@@ -68,6 +68,14 @@ class CacheClearerTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue($cleare->clear('my_name'));
     }
 
+    /** @test */
+    public function itShouldClearAllIfNameIsOmitted()
+    {
+        $res = $this->mockResolver();
+        $cleare = new CacheClearer($res);
+        $this->assertTrue($cleare->clear());
+    }
+
     protected function mockResolver()
     {
         return $this->getMockBuilder('Thapp\JitImage\Resolver\CacheResolverInterface')

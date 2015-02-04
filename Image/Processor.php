@@ -42,8 +42,6 @@ class Processor extends AbstractProcessor
      * @param SourceInterface $source
      * @param FilterResolverInterface $filters
      * @param array $options
-     *
-     * @return void
      */
     public function __construct(SourceInterface $source, FilterResolverInterface $filters = null, array $options = [])
     {

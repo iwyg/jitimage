@@ -44,4 +44,11 @@ class PathResolverTest extends \PHPUnit_Framework_TestCase
 
         $this->assertNull($resolver->resolve('path'));
     }
+
+    /** @test */
+    public function itShouldReturnMappings()
+    {
+        $resolver = new PathResolver;
+        $this->assertInternalType('array', $resolver->all());
+    }
 }

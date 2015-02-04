@@ -22,6 +22,7 @@ use Thapp\JitImage\Exception\ProcessorException;
  */
 abstract class AbstractProcessor implements ProcessorInterface
 {
+    protected $filters;
     protected $options;
     protected $resource;
     protected $processed;
