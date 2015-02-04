@@ -26,6 +26,6 @@ abstract class AbstractGdFilter extends AbstractFilter implements FilterInterfac
 {
     public function supports(ProcessorInterface $proc)
     {
-        return $proc->getCurrentImage() instanceof \Thapp\Image\Driver\Gd\Image;
+        return $proc->getDriver() instanceof \Thapp\Image\Driver\Gd\Image;
     }
 }

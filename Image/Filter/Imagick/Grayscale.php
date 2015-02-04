@@ -12,20 +12,19 @@
 namespace Thapp\JitImage\Image\Filter\Imagick;
 
 use Thapp\JitImage\ProcessorInterface;
-use Thapp\JitImage\Filter\AbstractFilter;
-use Thapp\JitImage\Filter\FilterInterface;
+use Thapp\Image\Filter\Imagick\Grayscale as ImageGrayscale;
 
 /**
- * @class AbstractImagickFilter
+ * @class Grayscale
  *
  * @package Thapp\JitImage\Image\Filter\Imagick
  * @version $Id$
  * @author iwyg <mail@thomas-appel.com>
  */
-abstract class AbstractImagickFilter extends AbstractFilter implements FilterInterface
+class Grayscale extends AbstractImagickFilter
 {
-    public function supports(ProcessorInterface $proc)
+    public function apply(ProcessorInterface $proc, array $options = [])
     {
-        return $proc->getDriver() instanceof \Thapp\Image\Driver\Imagick\Image;
+        $proc->getDriver()->filter(new ImageGrayscale);
     }
 }

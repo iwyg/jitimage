@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This File is part of the Thapp\JitImage package
+ * This File is part of the Thapp\JitImage\Image\Filter package
  *
  * (c) iwyg <mail@thomas-appel.com>
  *
@@ -11,25 +11,24 @@
 
 namespace Thapp\JitImage\Image\Filter;
 
-use Thapp\Image\Driver\ImageInterface;
 use Thapp\JitImage\ProcessorInterface;
-use Thapp\JitImage\Filter\AbstractFilter as BaseFilter;
+use Thapp\Image\Color\Hex;
+use Thapp\Image\Filter\AutoRotate as ImageAutoRotate;
 
 /**
- * @class AbstractFilter
+ * @class Rotate
  *
- * @package Thapp\JitImage
+ * @package Thapp\JitImage\Image\Filter
  * @version $Id$
  * @author iwyg <mail@thomas-appel.com>
  */
-abstract class AbstractFilter extends BaseFilter
+class Rotate extends AbstractFilter
 {
     /**
      * {@inheritdoc}
      */
-    public function supports(ProcessorInterface $proc)
+    public function apply(ProcessorInterface $proc, array $options = [])
     {
-        return $proc->getDriver() instanceof ImageInterface;
+        $proc->getDriver()->filter(new ImageAutoRotate);
     }
-
 }

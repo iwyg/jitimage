@@ -11,33 +11,28 @@
 
 namespace Thapp\JitImage\Image\Filter;
 
+use Thapp\Image\Color\ColorInterface;
 use Thapp\JitImage\ProcessorInterface;
-use Thapp\Image\Color\Hex;
-use Thapp\Image\Driver\ImageInterface;
-use Thapp\Image\Filter\Format as ImageFormat;
+use Thapp\JitImage\Filter\ColorizeFilterTrait as ColorizeHelper;
 
 /**
- * @class Rotate
+ * @trait ColorizeFilterTrait
  *
  * @package Thapp\JitImage\Image\Filter
  * @version $Id$
  * @author iwyg <mail@thomas-appel.com>
  */
-class Convert extends AbstractFilter
+trait ColorizeFilterTrait
 {
-    /**
-     * {@inheritdoc}
-     */
+    use ColorizeHelper;
+
     public function apply(ProcessorInterface $proc, array $options = [])
     {
         $this->setOptions($options);
-
-        $filter = new ImageFormat($this->getOption('f', 'jpeg'));
-        $filter->apply($proc->getDriver());
+        $image = $proc->getDriver();
+        $color = $image->getPalette()->getColor($this->getOption('c', hexdec('ffffff')));
+        $image->filter($this->newFilter($color));
     }
 
-    protected function getShortOpts()
-    {
-        return ['f' => 'format'];
-    }
+    abstract protected function newFilter(ColorInterface $color);
 }

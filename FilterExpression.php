@@ -20,28 +20,20 @@ use Thapp\Image\Color\Parser;
  */
 class FilterExpression
 {
-    /**
-     * expr
-     *
-     * @var string
-     */
     private $expr;
-
-    /**
-     * params
-     *
-     * @var array
-     */
     private $params;
+    private $prefix;
 
     /**
      * Constructor.
      *
      * @param mixed $params
+     * @param string $prefix
      */
-    public function __construct($params)
+    public function __construct($params, $prefix = 'filter')
     {
-        $this->params = $params;
+        $this->prefix = $prefix;
+        $this->setExpression($params);
     }
 
     /**
@@ -60,14 +52,32 @@ class FilterExpression
         $this->params = null;
     }
 
+    /**
+     * Sets the filter expression
+     *
+     * @param mixed $expr array of parameters or string.
+     *
+     * @return void
+     */
     public function setExpression($expr)
     {
         $this->expr = null;
+
+        if (is_string($expr)) {
+            if (0 === $pos = strpos($expr, $this->prefix.':')) {
+                $expr = substr($expr, strlen($this->prefix.':'));
+            }
+        } elseif (!is_array($expr)) {
+            throw new \InvalidArgumentException(
+                sprintf('%s expects argument 1 to be a string or a array, %s given.', __METHOD__, gettype($expr))
+            );
+        }
+
         $this->params = $expr;
     }
 
     /**
-     * addFilter
+     * Add a filter to the expression.
      *
      * @param string $filter
      * @param array $options
@@ -210,10 +220,14 @@ class FilterExpression
         switch (true) {
             case 0 === strlen($val) || 'null' === $val:
                 return null;
-            case Parser::isHex($val):
-                return ltrim(Parser::normalizeHex($val), '#');
             case is_numeric($val):
-                return $this->getNumVal($val);
+                if (0 !== substr_count($val, '.')) {
+                    return (float)$val;
+                } elseif (0 === strpos($val, '0x') || strlen((string)(int)$val) === strlen($val)) {
+                    return $this->getNumVal($val);
+                }
+            case Parser::isHex($val):
+                return hexdec(ltrim(Parser::normalizeHex($val), '#'));
             case in_array($val, ['true', 'false']):
                 return 'true' === $val ? true : false;
             default:
@@ -230,13 +244,11 @@ class FilterExpression
      */
     private function getNumVal($val)
     {
-        if (0 !== substr_count($val, '.')) {
-            return (float)$val;
-        } elseif (0 === strpos($val, '0x')) {
+        if (0 === strpos((string)$val, '0x')) {
             return hexdec($val);
         }
 
-        return $val;
+        return (int)$val;
     }
 
     /**

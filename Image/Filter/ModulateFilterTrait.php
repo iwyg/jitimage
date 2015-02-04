@@ -12,32 +12,28 @@
 namespace Thapp\JitImage\Image\Filter;
 
 use Thapp\JitImage\ProcessorInterface;
-use Thapp\Image\Color\Hex;
-use Thapp\Image\Driver\ImageInterface;
-use Thapp\Image\Filter\Format as ImageFormat;
+use Thapp\JitImage\Filter\ModulateFilterTrait as ModulateFilterHelper;
 
 /**
- * @class Rotate
+ * @trait ModulateFilterTrait
  *
  * @package Thapp\JitImage\Image\Filter
  * @version $Id$
  * @author iwyg <mail@thomas-appel.com>
  */
-class Convert extends AbstractFilter
+trait ModulateFilterTrait
 {
-    /**
-     * {@inheritdoc}
-     */
+    use ModulateFilterHelper;
+
     public function apply(ProcessorInterface $proc, array $options = [])
     {
         $this->setOptions($options);
+        $bri = $this->getOption('b', 100.0);
+        $sat = $this->getOption('s', 100.0);
+        $hue = $this->getOption('h', 100.0);
 
-        $filter = new ImageFormat($this->getOption('f', 'jpeg'));
-        $filter->apply($proc->getDriver());
+        $proc->getDriver()->filter($this->newModulate($bri, $sat, $hue));
     }
 
-    protected function getShortOpts()
-    {
-        return ['f' => 'format'];
-    }
+    abstract protected function newModulate($bri, $sat, $hue);
 }

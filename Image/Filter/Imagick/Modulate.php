@@ -12,20 +12,22 @@
 namespace Thapp\JitImage\Image\Filter\Imagick;
 
 use Thapp\JitImage\ProcessorInterface;
-use Thapp\JitImage\Filter\AbstractFilter;
-use Thapp\JitImage\Filter\FilterInterface;
+use Thapp\Image\Filter\Imagick\Modulate as ImagickModulate;
+use Thapp\JitImage\Image\Filter\ModulateFilterTrait;
 
 /**
- * @class AbstractImagickFilter
+ * @class Modulate
  *
  * @package Thapp\JitImage\Image\Filter\Imagick
  * @version $Id$
  * @author iwyg <mail@thomas-appel.com>
  */
-abstract class AbstractImagickFilter extends AbstractFilter implements FilterInterface
+class Modulate extends AbstractImagickFilter
 {
-    public function supports(ProcessorInterface $proc)
+    use ModulateFilterTrait;
+
+    protected function newModulate($bri, $sat, $hue)
     {
-        return $proc->getDriver() instanceof \Thapp\Image\Driver\Imagick\Image;
+        return new ImagickModulate($bri, $sat, $hue);
     }
 }

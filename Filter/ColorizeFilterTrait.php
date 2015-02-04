@@ -9,27 +9,27 @@
  * that was distributed with this package.
  */
 
-namespace Thapp\JitImage\Image\Filter;
-
-use Thapp\Image\Driver\ImageInterface;
-use Thapp\JitImage\ProcessorInterface;
-use Thapp\JitImage\Filter\AbstractFilter as BaseFilter;
+namespace Thapp\JitImage\Filter;
 
 /**
- * @class AbstractFilter
+ * @class ColorizeFilterTrait
  *
  * @package Thapp\JitImage
  * @version $Id$
  * @author iwyg <mail@thomas-appel.com>
  */
-abstract class AbstractFilter extends BaseFilter
+trait ColorizeFilterTrait
 {
     /**
      * {@inheritdoc}
      */
-    public function supports(ProcessorInterface $proc)
+    protected function parseOption($option, $value)
     {
-        return $proc->getDriver() instanceof ImageInterface;
+        return hexdec(ltrim((string)$value, '#'));
     }
 
+    protected function getShortOpts()
+    {
+        return ['c' => 'color'];
+    }
 }

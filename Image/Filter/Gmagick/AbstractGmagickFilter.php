@@ -9,7 +9,7 @@
  * that was distributed with this package.
  */
 
-namespace Thapp\JitImage\Image\Filter\Imagick;
+namespace Thapp\JitImage\Image\Filter\Gmagick;
 
 use Thapp\JitImage\ProcessorInterface;
 use Thapp\JitImage\Filter\AbstractFilter;
@@ -22,10 +22,10 @@ use Thapp\JitImage\Filter\FilterInterface;
  * @version $Id$
  * @author iwyg <mail@thomas-appel.com>
  */
-abstract class AbstractImagickFilter extends AbstractFilter implements FilterInterface
+abstract class AbstractGmagickFilter extends AbstractFilter implements FilterInterface
 {
     public function supports(ProcessorInterface $proc)
     {
-        return $proc->getDriver() instanceof \Thapp\Image\Driver\Imagick\Image;
+        return $proc->getDriver() instanceof \Thapp\Image\Driver\Gmagick\Image;
     }
 }

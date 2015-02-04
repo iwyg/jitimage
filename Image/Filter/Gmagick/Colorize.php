@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This File is part of the Thapp\JitImage\Filter package
+ * This File is part of the Thapp\JitImage package
  *
  * (c) iwyg <mail@thomas-appel.com>
  *
@@ -9,21 +9,21 @@
  * that was distributed with this package.
  */
 
-namespace Thapp\JitImage\Image\Filter\Gd;
+namespace Thapp\JitImage\Image\Filter\Gmagick;
 
 use Thapp\JitImage\ProcessorInterface;
 use Thapp\JitImage\Image\Filter\ColorizeFilterTrait;
 use Thapp\Image\Color\ColorInterface;
-use Thapp\Image\Filter\Gd\Colorize as GdColorize;
+use Thapp\Image\Filter\Gmagick\Colorize as GmagickColorize;
 
 /**
  * @class Greyscale
  *
- * @package Thapp\JitImage\Filter
+ * @package Thapp\JitImage
  * @version $Id$
  * @author iwyg <mail@thomas-appel.com>
  */
-class Colorize extends AbstractGdFilter
+class Colorize extends AbstractGmagickFilter
 {
     use ColorizeFilterTrait;
 
@@ -32,6 +32,6 @@ class Colorize extends AbstractGdFilter
      */
     protected function newFilter(ColorInterface $color)
     {
-        return new GdColorize($color);
+        return new GmagickColorize($color);
     }
 }

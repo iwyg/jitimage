@@ -9,27 +9,22 @@
  * that was distributed with this package.
  */
 
-namespace Thapp\JitImage\Image\Filter;
+namespace Thapp\JitImage\Image\Filter\Imagick;
 
-use Thapp\Image\Driver\ImageInterface;
 use Thapp\JitImage\ProcessorInterface;
-use Thapp\JitImage\Filter\AbstractFilter as BaseFilter;
+use Thapp\Image\Filter\Gmagick\Grayscale as GmageGrayscale;
 
 /**
- * @class AbstractFilter
+ * @class Grayscale
  *
  * @package Thapp\JitImage
  * @version $Id$
  * @author iwyg <mail@thomas-appel.com>
  */
-abstract class AbstractFilter extends BaseFilter
+class Grayscale extends AbstractGmagickFilter
 {
-    /**
-     * {@inheritdoc}
-     */
-    public function supports(ProcessorInterface $proc)
+    public function apply(ProcessorInterface $proc, array $options = [])
     {
-        return $proc->getDriver() instanceof ImageInterface;
+        $proc->getDriver()->filter(new GmageGrayscale);
     }
-
 }

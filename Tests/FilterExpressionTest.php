@@ -32,6 +32,98 @@ class FilterExpressionTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('circle;o=1;n=2:gscale:lucid;c=1.4', $expr->compile());
     }
 
+    /** @test */
+    public function toStringShouldCallCompile()
+    {
+        $params = ['circle' => ['o' => 1, 'n' => 2], 'gscale', 'lucid' => ['c' => 1.4]];
+        $expr = new FilterExpression($params);
+        $this->assertEquals('circle;o=1;n=2:gscale:lucid;c=1.4', (string)$expr);
+    }
+
+    /** @test */
+    public function itShouldStripPrefix()
+    {
+        $str = 'prefix:lucid;g=2';
+        $expr = new FilterExpression($str, 'prefix');
+        $this->assertEquals('lucid;g=2', (string)$expr);
+    }
+
+    /** @test */
+    public function itShouldAddFilter()
+    {
+        $str = 'lucid;g=2';
+        $expr = new FilterExpression($str);
+        $expr->addFilter('foo', ['bar' => 100]);
+        $this->assertEquals('lucid;g=2:foo;bar=100', (string)$expr);
+    }
+
+    /** @test */
+    public function itShouldIgnoreEmptyFilterName()
+    {
+        $str = 'lucid;g=2';
+        $expr = new FilterExpression($str);
+        $expr->addFilter('', ['bar' => 100]);
+        $this->assertEquals($str, (string)$expr);
+    }
+
+    /** @test */
+    public function itShouldReturnCompiledStingIfCompiled()
+    {
+        $str = 'lucid;g=2';
+        $expr = new FilterExpression($str);
+        $this->assertEquals($str, $expr->compile());
+        $this->assertEquals($str, (string)$expr);
+    }
+
+    /** @test */
+    public function itShouldReturnEmptyArray()
+    {
+        $expr = new FilterExpression('');
+        $this->assertEquals([], $expr->all());
+    }
+
+    /** @test */
+    public function itShouldNullEmptyOptionValues()
+    {
+        $str = 'lucid;g=';
+        $expr = new FilterExpression($str);
+        $this->assertEquals(['lucid' => ['g' => null]], $expr->all());
+    }
+
+    /** @test */
+    public function itShouldFloatValFloats()
+    {
+        $str = 'lucid;g=1.1';
+        $expr = new FilterExpression($str);
+        $this->assertEquals(['lucid' => ['g' => 1.1]], $expr->all());
+    }
+
+    /** @test */
+    public function itShouldIntHex()
+    {
+        $str = 'lucid;g=0xff';
+        $expr = new FilterExpression($str);
+        $this->assertEquals(['lucid' => ['g' => 255]], $expr->all());
+    }
+
+    /** @test */
+    public function itShoulPassStringOptVals()
+    {
+        $str = 'lucid;g=string';
+        $expr = new FilterExpression($str);
+        $this->assertEquals(['lucid' => ['g' => 'string']], $expr->all());
+    }
+
+
+    /**
+     * @test
+     * @expectedException \InvalidArgumentException
+     */
+    public function itShouldThrowOnInvalidExpressionArg()
+    {
+        $expr = new FilterExpression(100);
+    }
+
     /**
      * @test
      * @dataProvider paramProvider
@@ -41,6 +133,7 @@ class FilterExpressionTest extends \PHPUnit_Framework_TestCase
         $expr = new FilterExpression($params);
 
         $this->assertEquals($expexted, $expr->toArray());
+        $this->assertEquals($expexted, $expr->all());
     }
 
     /** @test */
@@ -51,9 +144,9 @@ class FilterExpressionTest extends \PHPUnit_Framework_TestCase
 
         $parsed = $expr->toArray();
 
-        $this->assertEquals('ffffff', $parsed['a']['b']);
-        $this->assertEquals('000000', $parsed['a']['c']);
-        $this->assertEquals('00eeff', $parsed['b']['d']);
+        $this->assertEquals(hexdec('ffffff'), $parsed['a']['b']);
+        $this->assertEquals(hexdec('000000'), $parsed['a']['c']);
+        $this->assertEquals(hexdec('00eeff'), $parsed['b']['d']);
     }
 
     public function paramProvider()

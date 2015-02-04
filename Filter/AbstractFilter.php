@@ -23,7 +23,6 @@ use Thapp\JitImage\ProcessorInterface;
 abstract class AbstractFilter implements FilterInterface
 {
     protected $options = [];
-    protected static $shortOpts = [];
 
     /**
      * {@inheritdoc}
@@ -44,14 +43,27 @@ abstract class AbstractFilter implements FilterInterface
     {
         $this->options = [];
         foreach ($options as $option => $value) {
-            if ($option !== static::translateOption($option)) {
+            if (null === ($option = $this->translateOption($option))) {
                 throw new \InvalidArgumentException(
                     sprintf('filter %s has no option "%s"', get_class($this), $option)
                 );
             }
 
-            $this->options[$option] = $value;
+            $this->options[$option] = $this->parseOption($option, $value);
         }
+    }
+
+    /**
+     * parseOption
+     *
+     * @param string $option
+     * @param mixed $value
+     *
+     * @return mixed
+     */
+    protected function parseOption($option, $value)
+    {
+        return $value;
     }
 
     /**
@@ -64,7 +76,7 @@ abstract class AbstractFilter implements FilterInterface
      */
     protected function getOption($option, $default = null)
     {
-        if (!$option = static::translateOption($option)) {
+        if (!$option = $this->translateOption($option)) {
             return;
         }
 
@@ -82,14 +94,20 @@ abstract class AbstractFilter implements FilterInterface
      *
      * @return string
      */
-    protected static function translateOption($option)
+    protected function translateOption($option)
     {
-        if (isset(static::$shortOpts[$option])) {
+        $shortOpts = $this->getShortOpts();
+        if (isset($shortOpts[$option])) {
             return $option;
-        } elseif (in_array($option, static::$shortOpts)) {
-            $opts = array_flip(static::$shortOpts);
+        } elseif (in_array($option, $shortOpts)) {
+            $opts = array_flip($shortOpts);
 
             return $opts[$option];
         }
+    }
+
+    protected function getShortOpts()
+    {
+        return [];
     }
 }

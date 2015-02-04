@@ -24,18 +24,31 @@ use Thapp\Image\Filter\Rotate as ImageRotate;
  */
 class Rotate extends AbstractFilter
 {
-    protected static $shortOpts = ['d' => 'degree', 'c' => 'backgroundcolor'];
-
     /**
      * {@inheritdoc}
      */
     public function apply(ProcessorInterface $proc, array $options = [])
     {
         $this->setOptions($options);
-        $color = ($hex = $this->getOption('c', null)) ? new Hex($hex) : null;
+        $image = $proc->getDriver();
+        $color = ($hex = $this->getOption('c', null)) ?
+            $image->getPalette()->getColor($hex) :
+            null;
 
-        $filter = new ImageRotate($this->getOption('d', 0), $color);
+        $image->filter(new ImageRotate($this->getOption('d', 0), $color));
+    }
 
-        return $filter->apply($proc->getCurrentImage());
+    protected function parseOption($option, $value)
+    {
+        if ('c' === $option) {
+            return hexdec(ltrim((string)$value, '#'));
+        }
+
+        return (float)$value;
+    }
+
+    protected function getShortOpts()
+    {
+        return ['d' => 'degree', 'c' => 'backgroundcolor'];
     }
 }

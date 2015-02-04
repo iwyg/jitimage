@@ -9,27 +9,29 @@
  * that was distributed with this package.
  */
 
-namespace Thapp\JitImage\Image\Filter;
+namespace Thapp\JitImage\Image\Filter\Gd;
 
-use Thapp\Image\Driver\ImageInterface;
 use Thapp\JitImage\ProcessorInterface;
-use Thapp\JitImage\Filter\AbstractFilter as BaseFilter;
+use Thapp\Image\Filter\Gd\Modulate as GdModulate;
+use Thapp\JitImage\Image\Filter\ModulateFilterTrait;
 
 /**
- * @class AbstractFilter
+ * @class Modulate
  *
  * @package Thapp\JitImage
  * @version $Id$
  * @author iwyg <mail@thomas-appel.com>
  */
-abstract class AbstractFilter extends BaseFilter
+class Modulate extends AbstractGdFilter
 {
+    use ModulateFilterTrait;
+
     /**
      * {@inheritdoc}
      */
-    public function supports(ProcessorInterface $proc)
+    protected function newModulate($bri, $sat, $hue)
     {
-        return $proc->getDriver() instanceof ImageInterface;
+        return new GdModulate($bri, $sat, $hue);
     }
-
 }
+

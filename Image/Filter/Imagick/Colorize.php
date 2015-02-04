@@ -11,9 +11,10 @@
 
 namespace Thapp\JitImage\Image\Filter\Imagick;
 
-use Thapp\Image\Color\Hex;
 use Thapp\JitImage\ProcessorInterface;
-use Thapp\Image\Filter\Imagick\Colorize as ImageColorize;
+use Thapp\JitImage\Image\Filter\ColorizeFilterTrait;
+use Thapp\Image\Color\ColorInterface;
+use Thapp\Image\Filter\Imagick\Colorize as ImagickColorize;
 
 /**
  * @class Greyscale
@@ -24,18 +25,13 @@ use Thapp\Image\Filter\Imagick\Colorize as ImageColorize;
  */
 class Colorize extends AbstractImagickFilter
 {
-    protected static $shortOpts = ['c' => 'color'];
+    use ColorizeFilterTrait;
 
     /**
      * {@inheritdoc}
      */
-    public function apply(ProcessorInterface $proc, array $options = [])
+    protected function newFilter(ColorInterface $color)
     {
-        $this->setOptions($options);
-        $color = new Hex($this->getOption('c', 'ff00ff'));
-
-        $filter = new ImageColorize($color);
-        $filter->apply($proc->getCurrentImage());
+        return new ImagickColorize($color);
     }
-
 }
