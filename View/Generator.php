@@ -15,6 +15,7 @@ use Thapp\JitImage\Parameters;
 use Thapp\JitImage\FilterExpression;
 use Thapp\JitImage\ProcessorInterface;
 use Thapp\JitImage\Resource\CachedResource;
+use Thapp\Image\Geometry\GravityInterface;
 
 /**
  * @class Generator
@@ -159,7 +160,7 @@ class Generator
      *
      * @return string
      */
-    public function cropAndResize($width, $height, $gravity = 5)
+    public function cropAndResize($width, $height, $gravity = GravityInterface::GRAVITY_CENTER)
     {
         $this->parameters->setMode(ProcessorInterface::IM_SCALECROP);
         $this->parameters->setTargetSize($width, $height);
@@ -178,7 +179,7 @@ class Generator
      *
      * @return string
      */
-    public function crop($width, $height, $gravity = 5, $background = null)
+    public function crop($width, $height, $gravity = GravityInterface::GRAVITY_CENTER, $background = null)
     {
         $this->parameters->setMode(ProcessorInterface::IM_CROP);
         $this->parameters->setTargetSize($width, $height);
@@ -205,11 +206,10 @@ class Generator
      *
      * @param mixed $width
      * @param mixed $height
-     * @param int $gravity
      *
      * @return string
      */
-    public function resize($width, $height, $gravity = 5)
+    public function resize($width, $height)
     {
         $this->parameters->setMode(ProcessorInterface::IM_RESIZE);
         $this->parameters->setTargetSize($width, $height);

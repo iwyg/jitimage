@@ -114,7 +114,6 @@ class FilterExpressionTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(['lucid' => ['g' => 'string']], $expr->all());
     }
 
-
     /**
      * @test
      * @expectedException \InvalidArgumentException
