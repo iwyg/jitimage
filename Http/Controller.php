@@ -42,7 +42,7 @@ class Controller
      */
     public function getImageAction(Request $request, $path, $params, $source, $filter = null)
     {
-        $this->request = $request;
+        $this->setRequest($request);
 
         $this->getImage($path, $params, $source, $filter);
     }
@@ -58,7 +58,7 @@ class Controller
      */
     public function getResource(Request $request, $recipe, $source)
     {
-        $this->request = $request;
+        $this->setRequest($request);
 
         $this->getResource($recipe, $source);
     }
@@ -74,20 +74,8 @@ class Controller
      */
     public function getCachedAction(Request $request, $path, $id)
     {
-        $this->request = $request;
+        $this->setRequest($request);
 
         $this->getCached($path, $id);
-    }
-
-    /**
-     * notFournd
-     *
-     * @throws NotFoundHttpException always
-     *
-     * @return void
-     */
-    private function notFound($source)
-    {
-        throw new NotFoundHttpException(sprintf('resource "%s" not found', $source));
     }
 }

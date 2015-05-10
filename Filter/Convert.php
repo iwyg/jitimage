@@ -22,8 +22,6 @@ use Thapp\JitImage\ProcessorInterface;
  */
 class Convert extends AbstractFilter
 {
-    protected $shorOpts = ['f' => 'format'];
-
     /**
      * apply
      *
@@ -40,5 +38,10 @@ class Convert extends AbstractFilter
         }
 
         $proc->setFileFormat($format);
+    }
+
+    protected function getShortOpts()
+    {
+        return ['f' => 'format'];
     }
 }

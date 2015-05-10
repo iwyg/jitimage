@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This File is part of the Thapp\JitImage\Image\Filter package
+ * This File is part of the Thapp\JitImage package
  *
  * (c) iwyg <mail@thomas-appel.com>
  *
@@ -12,16 +12,16 @@
 namespace Thapp\JitImage\Image\Filter;
 
 use Thapp\JitImage\ProcessorInterface;
-use Thapp\Image\Filter\Rotate as ImageRotate;
+use Thapp\Image\Filter\Palette as PaletteFilter;
 
 /**
  * @class Rotate
  *
- * @package Thapp\JitImage\Image\Filter
+ * @package Thapp\JitImage
  * @version $Id$
  * @author iwyg <mail@thomas-appel.com>
  */
-class Rotate extends AbstractFilter
+class Palette extends AbstractFilter
 {
     /**
      * {@inheritdoc}
@@ -29,25 +29,18 @@ class Rotate extends AbstractFilter
     public function apply(ProcessorInterface $proc, array $options = [])
     {
         $this->setOptions($options);
-        $image = $proc->getDriver();
-        $color = ($hex = $this->getOption('c', null)) ?
-            $image->getPalette()->getColor($hex) :
-            null;
 
-        $image->filter(new ImageRotate($this->getOption('d', 0), $color));
+        $image = $proc->getDriver();
+        $image->filter(new PaletteFilter($this->getOption('p', PaletteFilter::PALETTE_RGB)));
     }
 
     protected function parseOption($option, $value)
     {
-        if ('c' === $option) {
-            return hexdec(ltrim((string)$value, '#'));
-        }
-
-        return (float)$value;
+        return min(2, max(0, (int)$value));
     }
 
     protected function getShortOpts()
     {
-        return ['d' => 'degree', 'c' => 'backgroundcolor'];
+        return ['p' => 'palette'];
     }
 }

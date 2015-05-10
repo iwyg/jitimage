@@ -11,6 +11,9 @@
 
 namespace Thapp\JitImage\Resolver;
 
+use Thapp\JitImage\Parameters;
+use Thapp\JitImage\FilterExpression;
+
 /**
  * @class RecipeResolver
  *
@@ -46,14 +49,36 @@ class RecipeResolver implements RecipeResolverInterface
      *
      * @return void
      */
-    public function set(array $recipes) {
+    public function set(array $recipes)
+    {
         foreach ($recipes as $recipe => $params) {
-            if (2 !== count($params)) {
+            if (2 > $count = count($params)) {
                 continue;
             }
 
-            $this->recipes[trim($recipe, '/')] = $params;
+            if (!$args = $this->getRecipeArgs($params)) {
+                continue;
+            }
+
+            list ($path, $parameters, $filters) = $args;
+
+            $this->add($recipe, $path, $parameters, $filters);
         }
+    }
+
+    /**
+     * add
+     *
+     * @param mixed $recipe
+     * @param mixed $path
+     * @param Parameters $params
+     * @param FilterExpression $filters
+     *
+     * @return void
+     */
+    public function add($recipe, $path, Parameters $params, FilterExpression $filters = null)
+    {
+        $this->recipes[trim($recipe, '/')] = [$path, $params, $filters];
     }
 
     /**
@@ -70,11 +95,27 @@ class RecipeResolver implements RecipeResolverInterface
             return;
         }
 
-        list($path, $parameter) = $this->recipes[$recipe];
-        list($parameters, $filter) = array_pad(explode(',', str_replace(' ', null, $parameter)), 2, null);
+        return $this->recipes[$recipe];
 
-        $filter = 0 === strpos($filter, 'filter:') ? substr($filter, 7) : $filter;
+        //list($path, $parameter) = $this->recipes[$recipe];
+        //list($parameters, $filter) = array_pad(explode(',', str_replace(' ', null, $parameter)), 2, null);
 
-        return [$path, $parameters, $filter];
+        //$filter = 0 === strpos($filter, 'filter:') ? substr($filter, 7) : $filter;
+
+        //return [$path, $parameters, $filter];
+    }
+
+    private function getRecipeArgs(array $params)
+    {
+        if (is_string($params[1])) {
+            list($parameters, $filter) = array_pad(explode(',', str_replace(' ', null, $params[1])), 2, null);
+            return [$params[0], Parameters::fromString($parameters), $filter ? new FilterExpression($filter) : null];
+        }
+
+        if ($params[1] instanceof Parameters) {
+            return [$params[0], $params[1], isset($params[2]) ? $params[2] : null];
+        }
+
+        return false;
     }
 }

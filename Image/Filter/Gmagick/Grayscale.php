@@ -9,7 +9,7 @@
  * that was distributed with this package.
  */
 
-namespace Thapp\JitImage\Image\Filter\Imagick;
+namespace Thapp\JitImage\Image\Filter\Gmagick;
 
 use Thapp\JitImage\ProcessorInterface;
 use Thapp\Image\Filter\Gmagick\Grayscale as GmageGrayscale;

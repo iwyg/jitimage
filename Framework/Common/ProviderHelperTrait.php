@@ -50,8 +50,10 @@ trait ProviderHelperTrait
                 return '\Thapp\Image\Driver\Gd\Source';
             case 'imagick':
                 return '\Thapp\Image\Driver\Imagick\Source';
-            case 'gmagick':
-                return '\Thapp\Image\Driver\Gmagick\Source';
+            //case 'gmagick':
+                //return '\Thapp\Image\Driver\Gmagick\Source';
+            case 'im':
+                return '\Thapp\Image\Driver\Im\Source';
             default:
                 break;
         }

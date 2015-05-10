@@ -25,88 +25,6 @@ use Thapp\JitImage\Loader\LoaderInterface;
  */
 trait ImageResolverHelper
 {
-    /**
-     * getPath
-     *
-     * @return string
-     */
-    private function getPath($path, $source)
-    {
-        if (null === $path || null !== parse_url($source, PHP_URL_SCHEME)) {
-            return $source;
-        };
-
-        if (null !== parse_url($path, PHP_URL_PATH)) {
-            $slash = DIRECTORY_SEPARATOR;
-
-            return rtrim($path, '\\\/') . $slash . strtr($source, ['/' => $slash]);
-        }
-
-        return $path . '/' . $source;
-    }
-
-    /**
-     * @param ProcessorInterface $processor
-     * @param string $source
-     * @param array $params
-     * @param \Thapp\Image\Cache\CacheInterface $cache
-     * @param string $key
-     *
-     * @access private
-     * @return ResourceInterface
-     */
-    private function applyProcessor(
-        ProcessorInterface $processor,
-        LoaderInterface $loader,
-        $source,
-        Parameters $params,
-        FilterExpression $filters = null,
-        CacheInterface $cache = null,
-        $key = null
-    ) {
-        if (!$loader->supports($source)) {
-            throw new \InvalidArgumentException(
-                sprintf('Loader "%s" does not support file "%s"', get_class($loader), $source)
-            );
-        }
-
-        $this->processor->load($loader->load($source));
-        $this->processor->process($params, $filters);
-
-        if (null === $cache) {
-            return $this->createResource($this->processor);
-        }
-
-        $cache->set($key, $this->processor);
-
-        return $cache->get($key);
-    }
-
-    /**
-     * createResource
-     *
-     * @param ProcessorInterface $processor
-     *
-     * @return ResourceInterface
-     */
-    private function createResource(ProcessorInterface $processor)
-    {
-        list ($w, $h) = $processor->getTargetSize();
-
-        $resource = new ImageResource(null, $w, $h);
-
-        $resource->setContents($processor->getContents());
-        $resource->setFresh(!$processor->isProcessed());
-        $resource->setLastModified($processor->getLastModTime());
-        $resource->setMimeType($processor->getMimeType());
-
-        // if the image was passed through, we can set a source path
-        if (!$processor->isProcessed()) {
-            $resource->setPath($processor->getSource());
-        }
-
-        return $resource;
-    }
 
     /**
      * extractParams
@@ -164,22 +82,4 @@ trait ImageResolverHelper
         return new FilterExpression;
     }
 
-    /**
-     * Return the cache key derived from the url parameters.
-     *
-     * @param string $path the image source
-     * @param string $parameters the parameters as string
-     * @param string $filters the filters as string
-     *
-     * @return string
-     */
-    private function makeCacheKey(CacheInterface $cache, $name, $src, $paramStr, $filterStr)
-    {
-        return $cache->createKey(
-            $src,
-            $name,
-            $paramStr.'/'.$filterStr,
-            pathinfo($src, PATHINFO_EXTENSION)
-        );
-    }
 }

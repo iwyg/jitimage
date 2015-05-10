@@ -16,7 +16,7 @@ use Thapp\JitImage\FilterExpression;
 use Thapp\JitImage\Cache\CacheInterface;
 use Thapp\JitImage\Http\UrlResolverInterace;
 use Thapp\JitImage\Resolver\ImageResolverHelper;
-use Thapp\JitImage\Resolver\ImageResolverInterface;
+use Thapp\JitImage\Resolver\ImageResolverInterface as ImageResolver;
 use Thapp\JitImage\Resolver\RecipeResolverInterface as Recipes;
 use Thapp\JitImage\Http\UrlBuilder;
 use Thapp\JitImage\Http\UrlBuilderInterface as Url;
@@ -48,11 +48,12 @@ class Jmg
     /**
      * Constructor.
      *
-     * @param ImageResolverInterface $imageResolver
+     * @param ImageResolver $imageResolver
      * @param RecipeResolverInterface $recipes
      * @param UrlBuilderInterface $url
      */
-    public function __construct(ImageResolverInterface $imageResolver, Recipes $recipes, Url $url = null, $cachePrefix = 'cached') {
+    public function __construct(ImageResolver $imageResolver, Recipes $recipes, Url $url = null, $cPrefix = 'cached')
+    {
         $this->imageResolver = $imageResolver;
         $this->recipes = $recipes;
         $this->url = $url ?: new UrlBuilder;
@@ -60,13 +61,13 @@ class Jmg
         $this->asTag = false;
 
         $this->start = microtime(true);
-        $this->cachePrefix = $cachePrefix;
+        $this->cachePrefix = $cPrefix;
     }
 
     /**
      * Get the ImageResolver
      *
-     * @return ImageResolverInterface
+     * @return ImageResolver
      */
     public function getImageResolver()
     {
@@ -122,13 +123,7 @@ class Jmg
 
         list ($prefix, $params, $filter) = $res;
 
-        return $this->apply(
-            $prefix,
-            $source,
-            Parameters::fromString($params),
-            $filter ? $this->filter($filter) : null,
-            $recipe
-        );
+        return $this->apply($prefix, $source, $params, $filter ?: null, $recipe);
     }
 
     /**

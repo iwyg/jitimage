@@ -49,6 +49,7 @@ class JitImageServiceProvider extends ServiceProvider
 
         $proc = $this->app['config']->get('jmg.processor', 'image');
 
+
         $procClass = 'imagine' === $proc ?
             'Thapp\JitImage\Imagine\Processor' :
             'Thapp\JitImage\Image\Processor';
@@ -59,9 +60,11 @@ class JitImageServiceProvider extends ServiceProvider
             ->needs('Thapp\Image\Driver\SourceInterface')
             ->give($this->getSourceClass($this->app['config']->get('jmg.driver', 'imagick')));
 
-        $this->app->when('Thapp\JitImage\Imagine\Processor')
-            ->needs('Imagine\Image\ImagineInterface')
-            ->give($this->getImagineClass($this->app['config']->get('jmg.driver', 'imagick')));
+        if ('imagine' === $proc) {
+            $this->app->when('Thapp\JitImage\Imagine\Processor')
+                ->needs('Imagine\Image\ImagineInterface')
+                ->give($this->getImagineClass($this->app['config']->get('jmg.driver', 'imagick')));
+        }
 
         $this->app->singleton(
             'Thapp\JitImage\Resolver\FilterResolverInterface',
@@ -107,8 +110,6 @@ class JitImageServiceProvider extends ServiceProvider
         });
 
         $this->app->resolving($class = $this->getControllerClass(), function ($ctrl, $app) {
-            $ctrl->setRouter($app['router']);
-            $ctrl->setRequest($app['request']);
             $ctrl->setRecieps($app->make('Thapp\JitImage\Resolver\RecipeResolverInterface'));
             if ($app['config']->get('jmg.secure', false)) {
                 $ctrl->setUrlSigner($app->make('Thapp\JitImage\Http\HttpSignerInterface'));
@@ -195,7 +196,7 @@ class JitImageServiceProvider extends ServiceProvider
      */
     private function registerCached($router)
     {
-        $ctrl   = $this->getControllerClass().'@getCached';
+        $ctrl   = $this->getControllerClass().'@getCachedResponse';
         $caches = $this->app['config']['jmg.caches'];
         $prefix = $this->app['config']['jmg.cache_path_prefix'];
 
@@ -218,7 +219,7 @@ class JitImageServiceProvider extends ServiceProvider
     protected function registerRecipes($router)
     {
         $config = $this->app['config']['jmg'];
-        $ctrl = $this->getControllerClass().'@getResource';
+        $ctrl = $this->getControllerClass().'@getResourceResponse';
 
         foreach ($config['recipes'] as $recipe => $data) {
             if (isset($config['paths'][$data[0]])) {
@@ -232,7 +233,7 @@ class JitImageServiceProvider extends ServiceProvider
         list (, $params, $source, $filter) = $this->getPathRegexp();
 
         $pattern = '/{params}/{source}/{filter?}';
-        $controller = $this->getControllerClass().'@getImage';
+        $controller = $this->getControllerClass().'@getImageResponse';
 
         foreach ($this->app['config']['jmg']['paths'] as $path => $filePath) {
             $this->registerDynamicController($router, $controller, $path, $pattern, $params, $source, $filter);
@@ -298,7 +299,9 @@ class JitImageServiceProvider extends ServiceProvider
     private function registerDynamicController(Router $router, $ctrl, $path, $pattern, $params, $source, $filter)
     {
         $router->get('/'.($path = trim($path, '/')) . $pattern, $ctrl)
+            ->defaults('request', null)
             ->defaults('path', $path)
+            ->where('path', $path)
             ->where('params', $params)
             ->where('source', $source)
             ->where('filter', $filter);

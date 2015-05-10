@@ -11,6 +11,7 @@
 
 namespace Thapp\JitImage\Framework\Laravel\Http;
 
+use Illuminate\Http\Request;
 use Illuminate\Routing\Router;
 use Illuminate\Routing\Controller as BaseController;
 use Thapp\JitImage\Http\ImageControllerTrait;
@@ -38,6 +39,56 @@ class Controller extends BaseController
     }
 
     /**
+     * getImageResponse
+     *
+     * @param Request $request
+     * @param mixed $prefix
+     * @param mixed $params
+     * @param mixed $src
+     * @param mixed $filters
+     *
+     * @return Thapp\JitImage\Http\ImageResponse
+     */
+    public function getImageResponse(Request $request, $prefix, $params, $src, $filters = null)
+    {
+        $this->setRequest($request);
+
+        return $this->getImage($prefix, $params, $src, $filters);
+    }
+
+    /**
+     * getResourceResponse
+     *
+     * @param Request $request
+     * @param mixed $recipe
+     * @param mixed $source
+     *
+     * @return Thapp\JitImage\Http\ImageResponse
+     */
+    public function getResourceResponse(Request $request, $recipe, $source)
+    {
+        $this->setRequest($request);
+
+        return $this->getResource($recipe, $source);
+    }
+
+    /**
+     * getCachedResponse
+     *
+     * @param Request $request
+     * @param mixed $path
+     * @param mixed $id
+     *
+     * @return Thapp\JitImage\Http\ImageResponse
+     */
+    public function getCachedResponse(Request $request, $path, $id)
+    {
+        $this->setRequest($request);
+
+        return $this->getCached($path, $id);
+    }
+
+    /**
      * callAction
      *
      * @param mixed $method
@@ -49,7 +100,9 @@ class Controller extends BaseController
     public function callAction($method, $parameters)
     {
         if (!isset($parameters['path'])) {
-            $parameters = ['prefix' => $this->getCurrentPath()]+$parameters;
+            $request = array_shift($parameters);
+            $parameters = ['path' => $this->getCurrentPath()]+$parameters;
+            array_unshift($parameters, $request);
         }
 
         return parent::callAction($method, $parameters);

@@ -136,13 +136,7 @@ trait ImageControllerTrait
     {
         list ($parameters, $filterExpr) = $this->getParamsAndFilters($params, $filters);
 
-        $this->validateRequest($req = $this->getRequest(), $parameters, $filterExpr);
-
-        if (!$resource = $this->imageResolver->resolve($source, $parameters, $filterExpr, $path)) {
-            $this->notFound($source);
-        }
-
-        return $this->processResource($resource, $req);
+        return $this->resolveImage($path, $source, $parameters, $filterExpr);
     }
 
     /**
@@ -153,7 +147,7 @@ trait ImageControllerTrait
      * @param string $source
      *
      * @throws NotFoundHttpException if image was not found
-     * @return Response
+     * @return ImageResponse
      */
     public function getResource($recipe, $source)
     {
@@ -163,7 +157,7 @@ trait ImageControllerTrait
 
         list($path, $params, $filter) = $this->recipes->resolve($recipe);
 
-        return $this->getImage($path, $params, $source, $filter);
+        return $this->resolveImage($path, $source, $params, $filter);
     }
 
     /**
@@ -173,7 +167,7 @@ trait ImageControllerTrait
      * @param string $id
      *
      * @throws NotFoundHttpException if image was not found
-     * @return Response
+     * @return ImageResponse
      */
     public function getCached($path, $id)
     {
@@ -185,7 +179,36 @@ trait ImageControllerTrait
     }
 
     /**
-     * {@inheritdoc}
+     * resolveImage
+     *
+     * @param mixed $path
+     * @param mixed $source
+     * @param Parameters $params
+     * @param FilterExpression $filter
+     *
+     * @throws NotFoundHttpException if image was not found
+     * @return ImageResponse
+     */
+    protected function resolveImage($path, $source, Parameters $params, FilterExpression $filter = null)
+    {
+        $this->validateRequest($req = $this->getRequest(), $params, $filter);
+
+        if (!$resource = $this->imageResolver->resolve($source, $params, $filter, $path)) {
+            $this->notFound($source);
+        }
+
+        return $this->processResource($resource, $req);
+    }
+
+    /**
+     * Validates current Request
+     *
+     * @param Request $request
+     * @param Parameters $params
+     * @param FilterExpression $filters
+     *
+     * @throws BadRequestHttpException if validation fails
+     * @return boolean
      */
     private function validateRequest(Request $request, Parameters $params, FilterExpression $filters = null)
     {
@@ -198,6 +221,8 @@ trait ImageControllerTrait
         } catch (InvalidSignatureException $e) {
             throw new BadRequestHttpException($e->getMessage());
         }
+
+        return true;
     }
 
     /**
@@ -214,7 +239,9 @@ trait ImageControllerTrait
     }
 
     /**
-     * {@inheritdoc}
+     * Get the current Request object.
+     *
+     * @return Request
      */
     protected function getRequest()
     {
@@ -224,10 +251,10 @@ trait ImageControllerTrait
     /**
      * processResource
      *
-     * @param mixed $resource
+     * @param ResourceInterface $resource
+     * @param Request $request
      *
-     * @access private
-     * @return Response
+     * @return ImageResponse
      */
     private function processResource(ResourceInterface $resource, Request $request)
     {

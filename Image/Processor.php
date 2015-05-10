@@ -132,18 +132,10 @@ class Processor extends AbstractProcessor
 
         list ($w, $h) = $this->targetSize;
 
-        $ratio = $this->getRatio();
-
-        if (0 === max($h, $w)) {
-            throw new \InvalidArgumentException();
-        }
-
-        if (0 === $w) {
-            $size = $this->image->getSize()->increaseByHeight($h);
-        } elseif (0 === $h) {
-            $size = $this->image->getSize()->increaseByWidth($w);
-        } else {
+        if (0 !== min($h, $w)) {
             $size = new Size($w, $h);
+        } else {
+            $size = $this->image->getSize()->getSizeFromRatio($w, $h);
         }
 
         $this->doResize($size);
