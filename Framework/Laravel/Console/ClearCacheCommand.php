@@ -24,12 +24,20 @@ class ClearCacheCommand extends Command
 
     protected $description = 'Clear JitImage cache.';
 
+    /**
+     * Constructor
+     *
+     * @param CacheClearer $clearer
+     */
     public function __construct(CacheClearer $clearer)
     {
         parent::__construct();
         $this->clearer = $clearer;
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function fire()
     {
         $alias = $this->input->getOption('cache');

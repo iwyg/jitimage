@@ -11,14 +11,21 @@
 
 return [
     /* ====================================================================
-     * Processing driver paths
+     * Processing driver
      * --------------------------------------------------------------------
      * Specify the processing driver, defaults to gd:
      *  - imagick: The imagick driver (http://php.net/manual/en/book.imagick.php).
      *  - gd:      The GD driver (http://php.net/manual/en/book.image.php).
      *  - gmagick: The gmagick driver (http://php.net/manual/en/book.gmagick.php).
+     *  - im:      The imagemagick binary.
      ====================================================================== */
     'driver' => 'imagick',
+
+    /* ====================================================================
+     * System paths for ImageMagick convert and identify binaries.
+     ====================================================================== */
+    //'convert_path' => '/usr/bin/convert',
+    //'identify_path' => '/usr/bin/identify',
 
     /* ====================================================================
      * Experimetal use of Imagine as image processor

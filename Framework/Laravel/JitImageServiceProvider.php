@@ -64,7 +64,24 @@ class JitImageServiceProvider extends ServiceProvider
             $this->app->when('Thapp\JitImage\Imagine\Processor')
                 ->needs('Imagine\Image\ImagineInterface')
                 ->give($this->getImagineClass($this->app['config']->get('jmg.driver', 'imagick')));
+        } elseif ('im' === $this->app['config']->get('jmg.driver')) {
+
+            $this->app->singleton('Thapp\Image\Driver\Im\Identify', function () {
+                return new \Thapp\Image\Driver\Im\Identify(
+                    new \Thapp\Image\Driver\Im\Shell\Command,
+                    $this->app['config']->get('jmg.identify_path', 'identify')
+                );
+            });
+            $this->app->singleton('Thapp\Image\Driver\Im\Convert', function () {
+                return new \Thapp\Image\Driver\Im\Convert(
+                    new \Thapp\Image\Driver\Im\Shell\Command,
+                    $this->app['config']->get('jmg.convert_path', 'convert'),
+                    $this->app->make('Illuminate\Log\Writer')
+                );
+            });
         }
+
+
 
         $this->app->singleton(
             'Thapp\JitImage\Resolver\FilterResolverInterface',
