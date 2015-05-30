@@ -77,7 +77,7 @@ class ProcessorTest extends AbstractProcessorTest
 
         try {
             $proc->process(Parameters::fromString($params));
-        } catch (\InvalidArgumentException $e) {
+        } catch (\LogicException $e) {
             $this->assertTrue(0 === $tw &&  0 === $th);
             return;
         }
