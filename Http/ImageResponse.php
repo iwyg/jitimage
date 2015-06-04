@@ -43,6 +43,13 @@ class ImageResponse extends Response
     protected $resource;
 
     /**
+     * prepared
+     *
+     * @var mixed
+     */
+    private $prepared;
+
+    /**
      * trustXSendFileHeader
      *
      * @var boolean
@@ -59,6 +66,7 @@ class ImageResponse extends Response
         $this->status   = $status;
         $this->resource = $resource;
         $this->headers  = new ResponseHeaderBag($headers);
+        $this->prepared = false;
     }
 
     /**
@@ -102,6 +110,23 @@ class ImageResponse extends Response
      */
     public function prepare(Request $request)
     {
+        if (false === $this->prepared) {
+            $this->prepareResponse($request);
+            $this->prepared = true;
+        }
+
+        return $this;
+    }
+
+    /**
+     * prepareResponse
+     *
+     * @param Request $request
+     *
+     * @return void
+     */
+    private function prepareResponse(Request $request)
+    {
         $this->headers->set('Content-Transfer-Encoding', 'binary');
 
         $this->useXsend = static::$trustXSendFileHeader && $request->headers->has('X-Sendfile-Type');
@@ -124,7 +149,7 @@ class ImageResponse extends Response
      * @access protected
      * @return mixed
      */
-    protected function setHeadersIfNotProcessed($lastMod)
+    private function setHeadersIfNotProcessed($lastMod)
     {
         $this->setNotModified();
         $this->setLastModified($lastMod);
@@ -136,13 +161,12 @@ class ImageResponse extends Response
      * @param ResourceInterface $resouce
      * @param mixed $lastMod
      *
-     * @access protected
      * @return void
      */
-    protected function setProcessedHeaders(ResourceInterface $resource, $lastMod)
+    private function setProcessedHeaders(ResourceInterface $resource, $lastMod)
     {
-        $this->headers->set('Content-type', $mime = $resource->getMimeType());
         $this->setLastModified($lastMod);
+        $this->headers->set('Content-Type', $resource->getMimeType());
         $this->headers->set('Accept-ranges', 'bytes');
         $this->headers->set('Keep-Alive', 'timeout=15, max=200');
         $this->headers->set('Connection', 'Keep-Alive', true);
@@ -154,6 +178,8 @@ class ImageResponse extends Response
         }
 
         $this->setContent($content = $resource->getContents());
+        $this->headers->set('Content-Length', $len = mb_strlen($content, '8bit'));
+
         $this->setEtag(hash('sha1', $content));
     }
 
@@ -163,10 +189,9 @@ class ImageResponse extends Response
      * @param ResourceInterface $resource
      * @param mixed $lastMod
      *
-     * @access protected
      * @return void
      */
-    protected function setXsendFileHeaders($file, $lastMod)
+    private function setXsendFileHeaders($file, $lastMod)
     {
         $this->setEtag(sha1_file($file));
 

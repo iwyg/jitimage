@@ -258,12 +258,7 @@ trait ImageControllerTrait
      */
     private function processResource(ResourceInterface $resource, Request $request)
     {
-        $response = new ImageResponse($resource);
-
-        $response->prepare($request);
-        $response->send();
-
-        return $response;
+        return (new ImageResponse($resource))->prepare($request);
     }
 
     /**
