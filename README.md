@@ -109,14 +109,18 @@ class AWSLoader extends AbstractLoader
 ```
 
 
-### Resolving an image with parameters
+### Resolving images with parameters
+
+Using the `ImageResolver` class, it is easy to resolve images from parameter strings.
+
 ```php
 <?php
 
-use Thapp\Image\Image\Source;
+
 use Thapp\JitImage\Image\Processor;
 use Thapp\JitImage\Resolver\PathResolver;
 use Thapp\JitImage\Resolver\LoaderReslover;
+use Thapp\Image\Driver\Imagick\Source;
 
 
 $res = new ImageResolver(new Processor(new Source), $pathResolver, $loaderResolver);
@@ -132,5 +136,86 @@ if ($resource = $res->resolve('images/source.jpg', $params)) {
 
 ## Framework integration
 
+JitImage comes prebundled with support for Laravel 5.* and Silex. 
+
 ### Laravel 5.*
+
+In `config/app.php`, add:
+
+```php
+<?php
+
+$providers => [
+    // …
+    'Thapp\JitImage\Framework\Laravel\JitImageServiceProvider'
+];
+
+$aliases => [
+    // …
+    'JitImage'      => 'Thapp\JitImage\Framework\Laravel\Facade\Jmg'
+]
+
+```
+Then run
+
+```bash
+$ php artisan vendor:publish
+```
+
+from the command line.
+
+`config/jmg.php`
+
+**processor**  
+The processor, default is `image`. `imagine` is experimental and likely to be removed from future releases. 
+   
+**driver**:  
+The image driver. Available drivers are `imagick`, `im` (imagemagick binary), and `gd`.
+  
+**convert_path**  
+If `im` is set for the driver, specify the path to the convert binary here.
+  
+**identify_path**  
+If `im` is set for the driver, specify the path to the identify binary here.
+  
+**paths**  
+Source paths aliases, e.g. 
+
+```php
+'images' => public_path().'/images', // will be available at `/images/<params>/image.jpg`
+'remote' => 'http://images.example.com' // may be empty if you use absolute urls
+``` 
+
+**loaders**  
+
+```php
+'loaders' => [
+    'images' => 'file',
+    'remote' => 'http',
+]
+``` 
+
+**disable\_dynamic\_processing**  
+Disables image processing via dynamic urls.
+
+**mode\_constraints**
+Set mode constraints on scaling values. This will only affect dynamic processing via URL. 
+
+**recipes**
+Predefined image formats, e.g.
+
+```php
+'thumbs' => [
+    'images', '1/0/400,filter:palette;p=rgb:clrz;c=#0ff' // will be available at `/thumbs/image.jpg`
+], 
+```
+
+**default\_cache**
+
+The default caching type. Shipped types are `file`
+
+**default\_cache\_path**
+Directory path for local caches.
+
+
 ### Silex
