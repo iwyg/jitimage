@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This File is part of the Thapp\JitImage\Loader package
+ * This File is part of the Thapp\JitImage package
  *
  * (c) iwyg <mail@thomas-appel.com>
  *
@@ -18,7 +18,7 @@ use Thapp\JitImage\Exception\SourceLoaderException;
 /**
  * @class DropboxLoader
  *
- * @package Thapp\JitImage\Loader
+ * @package Thapp\JitImage
  * @version $Id$
  * @author iwyg <mail@thomas-appel.com>
  */

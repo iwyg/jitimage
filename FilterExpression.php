@@ -1,7 +1,7 @@
 <?php
 
 /**
- * This File is part of the Thapp\Image\Filter package
+ * This File is part of the Thapp\JitImage package
  *
  * (c) Thomas Appel <mail@thomas-appel.com>
  *
@@ -15,8 +15,10 @@ use Thapp\Image\Color\Parser;
 
 /**
  * @class FilterExpression
- * @package Thapp\Image\Filter
+ *
+ * @package Thapp\JitImage
  * @version $Id$
+ * @author iwyg <mail@thomas-appel.com>
  */
 class FilterExpression
 {
@@ -226,8 +228,11 @@ class FilterExpression
                 } elseif (0 === strpos($val, '0x') || strlen((string)(int)$val) === strlen($val)) {
                     return $this->getNumVal($val);
                 }
-            case Parser::isHex($val):
-                return hexdec(ltrim(Parser::normalizeHex($val), '#'));
+
+                return $val;
+            //case Parser::isHex($val):
+                //var_dump($val);
+                //return hexdec(ltrim(Parser::normalizeHex($val), '#'));
             case in_array($val, ['true', 'false']):
                 return 'true' === $val ? true : false;
             default:

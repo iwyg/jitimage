@@ -1,7 +1,7 @@
 <?php
 
 /**
- * This File is part of the Thapp\JitImage\Resolver package
+ * This File is part of the Thapp\JitImage package
  *
  * (c) Thomas Appel <mail@thomas-appel.com>
  *
@@ -15,10 +15,9 @@ namespace Thapp\JitImage\Resolver;
  * @class PathResolver implements ResolverInterface PathResolver
  * @see ResolverInterface
  *
- * @package Thapp\JitImage\Resolver
+ * @package Thapp\JitImage
  * @version $Id$
  * @author Thomas Appel <mail@thomas-appel.com>
- * @license MIT
  */
 class PathResolver implements PathResolverInterface
 {

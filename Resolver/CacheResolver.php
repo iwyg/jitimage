@@ -18,8 +18,10 @@ use Thapp\JitImage\Resource\ImageResource;
 
 /**
  * @class CacheResolver
+ *
  * @package Thapp\JitImage
  * @version $Id$
+ * @author Thomas Appel <mail@thomas-appel.com>
  */
 class CacheResolver implements CacheResolverInterface, IteratorAggregate
 {

@@ -1,7 +1,7 @@
 <?php
 
 /**
- * This File is part of the Thapp\Image\Traits package
+ * This File is part of the Thapp\JitImage package
  *
  * (c) Thomas Appel <mail@thomas-appel.com>
  *
@@ -13,8 +13,10 @@ namespace Thapp\JitImage\Cache;
 
 /**
  * @class FileHelper
- * @package Thapp\Image\Traits
+ *
+ * @package Thapp\JitImage
  * @version $Id$
+ * @author Thomas Appel <mail@thomas-appel.com>
  */
 trait FileHelper
 {

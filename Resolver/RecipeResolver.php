@@ -20,7 +20,6 @@ use Thapp\JitImage\FilterExpression;
  * @package Thapp\JitImage
  * @version $Id$
  * @author Thomas Appel <mail@thomas-appel.com>
- * @license MIT
  */
 class RecipeResolver implements RecipeResolverInterface
 {

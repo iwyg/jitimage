@@ -8,12 +8,11 @@
 [![Total Downloads](https://img.shields.io/packagist/dt/thapp/jitimage.svg?style=flat-square)](https://packagist.org/packages/thapp/jitimage)
 
 
-Just In Time Image manipulation: Library for HTTP based image manipulation. 
+## Just In Time Image manipulation: Library for HTTP based image manipulation. 
 
-By default JitImage uses the `thapp/image` library to manipulate images, but it
-also works with the fantastic `Imagine` lib. 
+By default JitImage uses the [`Thapp/Image`](https://packagist.org/packages/thapp/image) php package to process images, but will also
+work with the fantastic [`Imagine`](https://packagist.org/packages/imagine/imagine) library. 
 
-JitImage currently supports `Imagick`, `Imagemagick`, and `GD` drivers.
 
 
 ## Installation:
@@ -198,7 +197,7 @@ Source paths aliases, e.g.
 **disable\_dynamic\_processing**  
 Disables image processing via dynamic urls.
 
-**mode\_constraints**
+**mode\_constraints**  
 Set mode constraints on scaling values. This will only affect dynamic processing via URL. 
 
 **recipes**
@@ -210,11 +209,10 @@ Predefined image formats, e.g.
 ], 
 ```
 
-**default\_cache**
-
+**default\_cache**  
 The default caching type. Shipped types are `file`
 
-**default\_cache\_path**
+**default\_cache\_path**  
 Directory path for local caches.
 
 

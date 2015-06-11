@@ -37,6 +37,16 @@ class Palette extends AbstractFilter
 
     protected function parseOption($option, $value)
     {
+        switch ($value) {
+        case 'rgb':
+            return 0;
+        case 'cmyk':
+            return 1;
+        case 'gray':
+        case 'grayscale':
+            return 2;
+        }
+
         return min(2, max(0, (int)$value));
     }
 

@@ -1,7 +1,7 @@
 <?php
 
 /**
- * This File is part of the \Users\malcolm\www\image\src\Thapp\JitImage\Resource package
+ * This File is part of the Thapp\JitImage package
  *
  * (c) Thomas Appel <mail@thomas-appel.com>
  *
@@ -15,7 +15,7 @@ namespace Thapp\JitImage\Resource;
  * @class ImageResource extends AbstractResource
  * @see AbstractResource
  *
- * @package \Users\malcolm\www\image\src\Thapp\JitImage\Resource
+ * @package Thapp\JitImage
  * @version $Id$
  * @author Thomas Appel <mail@thomas-appel.com>
  * @license MIT

@@ -1,7 +1,7 @@
 <?php
 
 /**
- * This File is part of the Thapp\Image package
+ * This File is part of the Thapp\JitImage package
  *
  * (c) Thomas Appel <mail@thomas-appel.com>
  *
@@ -17,7 +17,7 @@ use Thapp\JitImage\ProcessorInterface;
  * @class CachedResource extends AbstractResource
  * @see AbstractResource
  *
- * @package Thapp\Image
+ * @package Thapp\JitImage
  * @version $Id$
  * @author Thomas Appel <mail@thomas-appel.com>
  */

@@ -1,7 +1,7 @@
 <?php
 
 /**
- * This File is part of the Thapp\JitImage\Resolver package
+ * This File is part of the Thapp\JitImage package
  *
  * (c) Thomas Appel <mail@thomas-appel.com>
  *
@@ -16,8 +16,10 @@ use Thapp\JitImage\Resource\ImageResource;
 
 /**
  * @class CacheResolver
+ *
  * @package Thapp\JitImage
  * @version $Id$
+ * @author Thomas Appel <mail@thomas-appel.com>
  */
 interface CacheResolverInterface extends ResolverInterface
 {

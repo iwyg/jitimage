@@ -14,7 +14,7 @@ namespace Thapp\Image\Resource;
 /**
  * @abstract class AbstractResource
  *
- * @package Image\Resource
+ * @package Thapp\JitImage
  * @version $Id$
  * @author Thomas Appel <mail@thomas-appel.com>
  */

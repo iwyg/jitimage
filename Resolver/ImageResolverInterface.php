@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This File is part of the Thapp\JitImage\Resolver package
+ * This File is part of the Thapp\JitImage package
  *
  * (c) iwyg <mail@thomas-appel.com>
  *
@@ -17,7 +17,7 @@ use Thapp\JitImage\FilterExpression;
 /**
  * @interface ImageResolverInterface
  *
- * @package Thapp\JitImage\Resolver
+ * @package Thapp\JitImage
  * @version $Id$
  * @author iwyg <mail@thomas-appel.com>
  */

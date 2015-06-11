@@ -1,7 +1,7 @@
 <?php
 
 /**
- * This File is part of the Thapp\Image\Exception package
+ * This File is part of the Thapp\JitImage package
  *
  * (c) Thomas Appel <mail@thomas-appel.com>
  *
@@ -13,7 +13,7 @@ namespace Thapp\JitImage\Exception;
 
 /**
  * @class SourceLoaderException
- * @package Thapp\Image\Exception
+ * @package Thapp\JitImage
  * @version $Id$
  */
 class SourceLoaderException extends \DomainException

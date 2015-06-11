@@ -1,7 +1,7 @@
 <?php
 
 /**
- * This File is part of the Image\Cache package
+ * This File is part of the Thapp\JitImage package
  *
  * (c) Thomas Appel <mail@thomas-appel.com>
  *
@@ -17,8 +17,10 @@ use Thapp\JitImage\Cache\Client\ClientInterface;
 
 /**
  * @class MemcachedCache
- * @package \Users\malcolm\www\image\src\Thapp\Image\Cache
+ *
+ * @package Thapp\JitImage
  * @version $Id$
+ * @author Thomas Appel <mail@thomas-appel.com>
  */
 class ClientCache extends AbstractCache
 {

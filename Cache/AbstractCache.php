@@ -1,7 +1,7 @@
 <?php
 
 /**
- * This File is part of the Thapp\Image package
+ * This File is part of the Thapp\JitImage package
  *
  * (c) Thomas Appel <mail@thomas-appel.com>
  *
@@ -16,7 +16,7 @@ namespace Thapp\JitImage\Cache;
  * @see CacheInterface
  * @abstract
  *
- * @package Thapp\Image
+ * @package Thapp\JitImage
  * @version $Id$
  * @author Thomas Appel <mail@thomas-appel.com>
  */
@@ -80,6 +80,14 @@ abstract class AbstractCache implements CacheInterface
     public function getSuffix()
     {
         return $this->suffix;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function setExpiry($minutes)
+    {
+        $this->setExpires($minutes);
     }
 
     /**

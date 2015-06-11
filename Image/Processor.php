@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This File is part of the Thapp\JitImage\Image package
+ * This File is part of the Thapp\JitImage package
  *
  * (c) iwyg <mail@thomas-appel.com>
  *
@@ -27,7 +27,7 @@ use Thapp\JitImage\Resource\FileResourceInterface;
 /**
  * @class Processor
  *
- * @package Thapp\JitImage\Image
+ * @package Thapp\JitImage
  * @version $Id$
  * @author iwyg <mail@thomas-appel.com>
  */

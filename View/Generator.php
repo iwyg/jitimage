@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This File is part of the Thapp\JitImage\View package
+ * This File is part of the Thapp\JitImage package
  *
  * (c) iwyg <mail@thomas-appel.com>
  *
@@ -20,7 +20,7 @@ use Thapp\Image\Geometry\GravityInterface;
 /**
  * @class Generator
  *
- * @package Thapp\JitImage\View
+ * @package Thapp\JitImage
  * @version $Id$
  * @author iwyg <mail@thomas-appel.com>
  */

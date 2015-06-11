@@ -13,6 +13,7 @@ namespace Thapp\JitImage\Resolver;
 
 /**
  * @class Parameters
+ *
  * @package Thapp\JitImage
  * @version $Id$
  * @author Thomas Appel <mail@thomas-appel.com>

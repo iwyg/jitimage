@@ -1,7 +1,7 @@
 <?php
 
 /**
- * This File is part of the Thapp\Image package
+ * This File is part of the Thapp\JitImage package
  *
  * (c) Thomas Appel <mail@thomas-appel.com>
  *
@@ -15,8 +15,10 @@ use Thapp\JitImage\Cache\CacheInterface;
 
 /**
  * @class ClientInterface
- * @package Thapp\Image
+ *
+ * @package Thapp\JitImage
  * @version $Id$
+ * @author iwyg <mail@thomas-appel.com>
  */
 interface ClientInterface
 {

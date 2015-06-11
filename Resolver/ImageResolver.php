@@ -1,7 +1,7 @@
 <?php
 
 /**
- * This File is part of the \Users\malcolm\www\image\src\Thapp\JitImage\Resolver package
+ * This File is part of the Thapp\JitImage package
  *
  * (c) Thomas Appel <mail@thomas-appel.com>
  *
@@ -23,7 +23,7 @@ use Thapp\JitImage\Loader\LoaderInterface;
  * @class ImageResolver implements ResolverInterface
  * @see ResolverInterface
  *
- * @package \Users\malcolm\www\image\src\Thapp\JitImage\Resolver
+ * @package Thapp\JitImage
  * @version $Id$
  * @author Thomas Appel <mail@thomas-appel.com>
  */

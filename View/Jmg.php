@@ -26,7 +26,7 @@ use Thapp\JitImage\Resource\CachedResourceInterface;
 /**
  * @class Jmg
  *
- * @package Thapp\JitImage\Template
+ * @package Thapp\JitImage
  * @version $Id$
  * @author iwyg <mail@thomas-appel.com>
  */

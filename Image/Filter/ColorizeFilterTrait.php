@@ -30,7 +30,7 @@ trait ColorizeFilterTrait
     {
         $this->setOptions($options);
         $image = $proc->getDriver();
-        $color = $image->getPalette()->getColor($this->getOption('c', hexdec('ffffff')));
+        $color = $image->getPalette()->getColor((string)$this->getOption('c', hexdec('ffffff')));
         $image->filter($this->newFilter($color));
     }
 

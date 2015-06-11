@@ -1,7 +1,7 @@
 <?php
 
 /**
- * This File is part of the Thapp\Image\Cache package
+ * This File is part of the Thapp\JitImage package
  *
  * (c) Thomas Appel <mail@thomas-appel.com>
  *
@@ -15,8 +15,10 @@ use Thapp\JitImage\ProcessorInterface;
 
 /**
  * @interface CacheInterface
- * @package Thapp\Image\Cache
+ *
+ * @package Thapp\JitImage
  * @version $Id$
+ * @author Thomas Appel <mail@thomas-appel.com>
  */
 interface CacheInterface
 {
@@ -86,6 +88,13 @@ interface CacheInterface
      * @return string
      */
     public function getPrefix();
+
+    /**
+     * Sets the cache lifetime
+     *
+     * @return void
+     */
+    public function setExpiry($expires);
 
     /**
      * createKey

@@ -20,8 +20,10 @@ use Thapp\JitImage\Loader\LoaderInterface;
 
 /**
  * @trait ImageResolverHelper
+ *
  * @package Thapp\JitImage
  * @version $Id$
+ * @author Thomas Appel <mail@thomas-appel.com>
  */
 trait ImageResolverHelper
 {
