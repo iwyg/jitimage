@@ -25,7 +25,7 @@ trait ColorizeFilterTrait
      */
     protected function parseOption($option, $value)
     {
-        return str_pad(dechex($value), 6, STR_PAD_LEFT);
+        return str_pad(dechex($value), 6, '0', STR_PAD_LEFT);
     }
 
     protected function getShortOpts()
