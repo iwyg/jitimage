@@ -222,17 +222,14 @@ class FilterExpression
         switch (true) {
             case 0 === strlen($val) || 'null' === $val:
                 return null;
+            case Parser::isHex($val):
+                return hexdec(ltrim(Parser::normalizeHex($val), '#'));
             case is_numeric($val):
                 if (0 !== substr_count($val, '.')) {
                     return (float)$val;
                 } elseif (0 === strpos($val, '0x') || strlen((string)(int)$val) === strlen($val)) {
                     return $this->getNumVal($val);
                 }
-
-                return $val;
-            //case Parser::isHex($val):
-                //var_dump($val);
-                //return hexdec(ltrim(Parser::normalizeHex($val), '#'));
             case in_array($val, ['true', 'false']):
                 return 'true' === $val ? true : false;
             default:
