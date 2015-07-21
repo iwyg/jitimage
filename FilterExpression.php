@@ -260,30 +260,37 @@ class FilterExpression
     {
         $filters = [];
 
-        foreach ($this->params as $fname => $options) {
+        if(!empty($this->params))
+        {
+            foreach ($this->params as $fname => $options)
+            {
 
-            if (is_int($fname)) {
-                $fname   = $options;
-                $options = [];
+                if (is_int($fname))
+                {
+                    $fname = $options;
+                    $options = [];
+                }
+
+                array_push($filters, ':', $fname);
+
+                $opts = [];
+
+                if (empty($options))
+                {
+                    continue;
+                }
+
+                foreach ((array) $options as $key => $value)
+                {
+                    $opts[] = sprintf('%s=%s', $key, $value);
+                }
+
+                $filters[] = ';' . implode(';', $opts);
             }
 
-            array_push($filters, ':', $fname);
-
-            $opts = [];
-
-            if (empty($options)) {
-                continue;
-            }
-
-            foreach ((array)$options as $key => $value) {
-                $opts[] = sprintf('%s=%s', $key, $value);
-            }
-
-            $filters[] = ';' . implode(';', $opts);
+            array_shift($filters);
         }
-
-        array_shift($filters);
-
+        
         return implode('', $filters);
     }
 }
